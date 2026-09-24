@@ -1,17 +1,85 @@
-import { useState, useEffect } from 'react'
-import { Fish, Terminal, Menu, X, Waves, Anchor } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Fish, Menu, X, Anchor, Activity } from 'lucide-react'
+
+// Live "network stats" ticker — purely decorative random values
+function PacketTicker() {
+  const [pkts, setPkts] = useState(1247)
+  const [lat, setLat] = useState(1.2)
+  const [active, setActive] = useState(true)
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setPkts((p) => p + Math.floor(Math.random() * 18 + 2))
+      setLat(+(Math.random() * 2.8 + 0.4).toFixed(1))
+      setActive((a) => !a || Math.random() > 0.15)
+    }, 900)
+    return () => clearInterval(id)
+  }, [])
+
+  return (
+    <div
+      className="hidden md:flex items-center gap-3 px-3 py-1.5 rounded-lg font-mono text-xs backdrop-blur-sm select-none"
+      style={{
+        background: 'rgba(4,10,25,0.7)',
+        border: '1px solid rgba(6,182,212,0.18)',
+        color: 'rgba(6,182,212,0.65)',
+      }}
+    >
+      {/* Sonar pulse icon */}
+      <span className="relative flex items-center justify-center w-4 h-4">
+        <span
+          className="absolute inset-0 rounded-full"
+          style={{
+            background: 'rgba(6,182,212,0.15)',
+            animation: 'depth-ping 2.2s ease-out infinite',
+          }}
+        />
+        <Activity size={10} style={{ color: '#06b6d4', position: 'relative' }} />
+      </span>
+
+      {/* Packet count */}
+      <span>
+        <span style={{ color: 'rgba(167,139,250,0.7)' }}>pkt</span>
+        <span className="ml-1" style={{ color: '#e4e4f0' }}>
+          {pkts.toLocaleString()}
+        </span>
+      </span>
+
+      <span style={{ color: 'rgba(99,102,241,0.3)' }}>|</span>
+
+      {/* Latency */}
+      <span>
+        <span style={{ color: 'rgba(167,139,250,0.7)' }}>lat</span>
+        <span
+          className="ml-1"
+          style={{ color: lat < 1.5 ? '#34d399' : lat < 2.2 ? '#fbbf24' : '#f87171' }}
+        >
+          {lat}ms
+        </span>
+      </span>
+
+      <span style={{ color: 'rgba(99,102,241,0.3)' }}>|</span>
+
+      {/* Status */}
+      <span className="flex items-center gap-1">
+        <span
+          className="inline-block w-1.5 h-1.5 rounded-full blink"
+          style={{ background: active ? '#34d399' : '#f87171' }}
+        />
+        <span style={{ color: active ? 'rgba(52,211,153,0.7)' : 'rgba(248,113,113,0.7)' }}>
+          {active ? 'LIVE' : 'WAIT'}
+        </span>
+      </span>
+    </div>
+  )
+}
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [depth, setDepth] = useState(0)
 
   useEffect(() => {
-    const onScroll = () => {
-      setScrolled(window.scrollY > 30)
-      const pct = Math.min(100, Math.round((window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100))
-      setDepth(pct)
-    }
+    const onScroll = () => setScrolled(window.scrollY > 30)
     window.addEventListener('scroll', onScroll)
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
@@ -26,29 +94,14 @@ export default function Navbar() {
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? 'backdrop-blur-xl border-b'
-          : 'bg-transparent'
+        scrolled ? 'backdrop-blur-xl border-b' : 'bg-transparent'
       }`}
       style={
         scrolled
-          ? {
-              background: 'rgba(4,6,15,0.85)',
-              borderColor: 'rgba(99,102,241,0.15)',
-            }
+          ? { background: 'rgba(4,6,15,0.85)', borderColor: 'rgba(99,102,241,0.15)' }
           : {}
       }
     >
-      {/* Depth progress bar */}
-      <div
-        className="absolute bottom-0 left-0 h-px transition-all duration-300"
-        style={{
-          width: `${depth}%`,
-          background: 'linear-gradient(90deg, #7c3aed, #06b6d4)',
-          boxShadow: '0 0 6px rgba(6,182,212,0.6)',
-        }}
-      />
-
       <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
         {/* Logo */}
         <a href="#" className="flex items-center gap-2.5 group">
@@ -60,7 +113,6 @@ export default function Navbar() {
             }}
           >
             <Fish size={17} className="text-violet-400 group-hover:text-cyan-400 transition-colors" />
-            {/* bubble deco */}
             <span
               className="absolute -top-1 -right-1 w-2 h-2 rounded-full blink"
               style={{ background: 'rgba(6,182,212,0.6)' }}
@@ -75,34 +127,17 @@ export default function Navbar() {
               Tank
             </span>
           </span>
-          <span className="hidden sm:flex items-center gap-1 ml-0.5 font-mono text-xs" style={{ color: 'rgba(6,182,212,0.5)' }}>
+          <span
+            className="hidden sm:flex items-center gap-1 ml-0.5 font-mono text-xs"
+            style={{ color: 'rgba(6,182,212,0.5)' }}
+          >
             <Anchor size={9} />
             <span>v2.0</span>
           </span>
         </a>
 
-        {/* Status Badge */}
-        <div
-          className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-sm"
-          style={{
-            background: 'rgba(8,12,28,0.7)',
-            border: '1px solid rgba(99,102,241,0.18)',
-          }}
-        >
-          <span className="relative flex h-2 w-2">
-            <span
-              className="blink absolute inline-flex h-full w-full rounded-full opacity-75"
-              style={{ background: '#06b6d4' }}
-            />
-            <span
-              className="relative inline-flex rounded-full h-2 w-2"
-              style={{ background: '#0891b2' }}
-            />
-          </span>
-          <span className="text-xs font-mono" style={{ color: 'rgba(167,139,250,0.8)' }}>
-            🫧 Swimming in Packets&nbsp;·&nbsp;Open to Work
-          </span>
-        </div>
+        {/* Live Packet Ticker — replaces progress bar */}
+        <PacketTicker />
 
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-6">
@@ -116,10 +151,7 @@ export default function Navbar() {
         {/* Mobile Toggle */}
         <button
           className="md:hidden w-9 h-9 flex items-center justify-center rounded-lg transition-all"
-          style={{
-            border: '1px solid rgba(99,102,241,0.25)',
-            color: '#a1a1aa',
-          }}
+          style={{ border: '1px solid rgba(99,102,241,0.25)', color: '#a1a1aa' }}
           onClick={() => setMobileOpen(!mobileOpen)}
         >
           {mobileOpen ? <X size={18} /> : <Menu size={18} />}
@@ -130,15 +162,18 @@ export default function Navbar() {
       {mobileOpen && (
         <div
           className="md:hidden absolute top-full left-0 right-0 backdrop-blur-xl border-b py-4 px-6 flex flex-col gap-4"
-          style={{
-            background: 'rgba(4,6,15,0.95)',
-            borderColor: 'rgba(99,102,241,0.15)',
-          }}
+          style={{ background: 'rgba(4,6,15,0.95)', borderColor: 'rgba(99,102,241,0.15)' }}
         >
           <div className="flex items-center gap-2 py-1">
             <span className="relative flex h-2 w-2">
-              <span className="blink absolute inline-flex h-full w-full rounded-full opacity-75" style={{ background: '#06b6d4' }} />
-              <span className="relative inline-flex rounded-full h-2 w-2" style={{ background: '#0891b2' }} />
+              <span
+                className="blink absolute inline-flex h-full w-full rounded-full opacity-75"
+                style={{ background: '#06b6d4' }}
+              />
+              <span
+                className="relative inline-flex rounded-full h-2 w-2"
+                style={{ background: '#0891b2' }}
+              />
             </span>
             <span className="text-xs font-mono" style={{ color: 'rgba(167,139,250,0.8)' }}>
               🫧 Swimming in Packets · Open to Work

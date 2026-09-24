@@ -106,50 +106,25 @@ body {
 }
 
 /* ── Swimming Fish ── */
-.fish-layer {
+.fish-wrapper {
   position: absolute;
-  inset: 0;
   pointer-events: none;
 }
 
-.fish-wrapper {
-  position: absolute;
-  left: -120px;
-  animation: fish-swim linear infinite;
-}
-
-.fish-flip {
-  animation-name: fish-swim-reverse;
-}
-
 @keyframes fish-swim {
-  0%   { left: -150px; }
-  100% { left: calc(100vw + 150px); }
+  0%   { transform: translateX(-150px); }
+  100% { transform: translateX(calc(100vw + 150px)); }
 }
 
 @keyframes fish-swim-reverse {
-  0%   { left: calc(100vw + 150px); transform: scaleX(-1); }
-  100% { left: -150px; transform: scaleX(-1); }
-}
-
-/* subtle vertical bobbing overlaid on fish */
-.fish-wrapper svg {
-  animation: fish-bob 3s ease-in-out infinite;
-}
-.fish-flip svg {
-  animation: fish-bob-reverse 3.5s ease-in-out infinite;
+  0%   { transform: translateX(150px) scaleX(-1); }
+  100% { transform: translateX(calc(-100vw - 150px)) scaleX(-1); }
 }
 
 @keyframes fish-bob {
   0%, 100% { transform: translateY(0px) rotate(0deg); }
   30%      { transform: translateY(-6px) rotate(-2deg); }
   70%      { transform: translateY(5px) rotate(1.5deg); }
-}
-
-@keyframes fish-bob-reverse {
-  0%, 100% { transform: scaleX(-1) translateY(0px); }
-  40%      { transform: scaleX(-1) translateY(-7px); }
-  70%      { transform: scaleX(-1) translateY(4px); }
 }
 
 /* ── Plankton / floating particles ── */
@@ -206,55 +181,7 @@ body {
   100% { bottom: 100vh; opacity: 0; transform: translateX(-2px); }
 }
 
-/* ── Seaweed / Kelp ── */
-.seaweed-layer {
-  position: absolute;
-  bottom: 0;
-  left: 0; right: 0;
-  height: 140px;
-  pointer-events: none;
-  display: flex;
-  align-items: flex-end;
-}
-
-.kelp {
-  position: absolute;
-  bottom: 0;
-  width: 10px;
-  background: linear-gradient(
-    0deg,
-    #064e3b 0%,
-    #065f46 30%,
-    #047857 60%,
-    #059669 85%,
-    #34d399 100%
-  );
-  border-radius: 5px 5px 2px 2px;
-  transform-origin: bottom center;
-  animation: kelp-sway ease-in-out infinite;
-  filter: blur(0.3px);
-}
-
-.kelp::before {
-  content: '';
-  position: absolute;
-  top: 10px; left: -8px;
-  width: 14px; height: 10px;
-  background: rgba(5, 150, 105, 0.6);
-  border-radius: 50% 0 50% 0;
-  transform: rotate(-20deg);
-}
-
-.kelp::after {
-  content: '';
-  position: absolute;
-  top: 30px; right: -8px;
-  width: 12px; height: 9px;
-  background: rgba(4, 120, 87, 0.5);
-  border-radius: 0 50% 0 50%;
-  transform: rotate(15deg);
-}
-
+/* ── Seaweed / Kelp — fixed to bottom of viewport ── */
 @keyframes kelp-sway {
   0%, 100% { transform: rotate(-12deg); }
   50%       { transform: rotate(12deg); }
