@@ -25,6 +25,79 @@ const socialLinks = [
   },
 ]
 
+// ── Bottom Kelp (anchored strictly to the bottom edge of the page) ──
+const KELP_STALKS = Array.from({ length: 20 }, (_, i) => ({
+  left: `${(i / 20) * 98 + (i % 3) * 0.7}%`,
+  height: 45 + (i % 5) * 12,
+  delay: `${(i * 0.35) % 3}s`,
+  duration: `${2.5 + (i % 4) * 0.5}s`,
+  opacity: 0.28 + (i % 4) * 0.08,
+  swayType: i % 2 === 0 ? 'kelp-sway-left' : 'kelp-sway-right',
+  hue: i % 3 === 0 ? '#059669' : i % 3 === 1 ? '#047857' : '#065f46',
+}))
+
+function BottomKelp() {
+  return (
+    <div
+      className="absolute bottom-0 left-0 right-0 pointer-events-none overflow-hidden"
+      style={{ height: '75px', zIndex: 0 }}
+      aria-hidden="true"
+    >
+      {/* seafloor thin edge */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-2"
+        style={{
+          background: 'linear-gradient(90deg, #021a10 0%, #042f1a 50%, #021a10 100%)',
+        }}
+      />
+      {KELP_STALKS.map((s, i) => (
+        <div
+          key={i}
+          style={{
+            position: 'absolute',
+            bottom: '2px',
+            left: s.left,
+            width: '8px',
+            height: `${s.height}px`,
+            background: `linear-gradient(0deg, ${s.hue} 0%, #059669 60%, #34d399 100%)`,
+            borderRadius: '5px 5px 2px 2px',
+            transformOrigin: 'bottom center',
+            animation: `${s.swayType} ${s.duration} ease-in-out ${s.delay} infinite`,
+            opacity: s.opacity,
+          }}
+        >
+          {/* subtle leaf left */}
+          <div
+            style={{
+              position: 'absolute',
+              top: '8px',
+              left: '-7px',
+              width: '10px',
+              height: '6px',
+              background: 'rgba(5,150,105,0.6)',
+              borderRadius: '50% 0 50% 0',
+              transform: 'rotate(-20deg)',
+            }}
+          />
+          {/* subtle leaf right */}
+          <div
+            style={{
+              position: 'absolute',
+              top: '20px',
+              right: '-7px',
+              width: '9px',
+              height: '5px',
+              background: 'rgba(4,120,87,0.5)',
+              borderRadius: '0 50% 0 50%',
+              transform: 'rotate(16deg)',
+            }}
+          />
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export default function Contact() {
   const [form, setForm] = useState({ name: '', email: '', message: '' })
   const [status, setStatus] = useState(null) // 'success' | 'error'
@@ -42,7 +115,7 @@ export default function Contact() {
   }
 
   return (
-    <section id="contact" className="py-24 pb-12 px-6">
+    <section id="contact" className="relative py-24 pb-8 px-6 overflow-hidden">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-12">
@@ -158,7 +231,7 @@ export default function Contact() {
       </div>
 
       {/* Footer */}
-      <div className="max-w-6xl mx-auto mt-16 pt-8 border-t border-zinc-800/60">
+      <div className="max-w-6xl mx-auto mt-16 pt-8 border-t border-zinc-800/60 relative z-10">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <Fish size={16} className="text-violet-400" />
@@ -173,6 +246,9 @@ export default function Contact() {
           </div>
         </div>
       </div>
+
+      {/* ── Kelp along bottom edge ── */}
+      <BottomKelp />
     </section>
   )
 }
