@@ -37,18 +37,6 @@ const ORBS = [
   { left:'25%', top:'80%', size:200, color:'rgba(124,58,237,0.04)', dur:'22s' },
 ]
 
-// ── Caustic rays ──────────────────────────────────────────────
-const RAYS = [
-  { left:'5%',  w:35,  op:0.045, dur:'5.2s', delay:'0s'   },
-  { left:'14%', w:55,  op:0.030, dur:'6.8s', delay:'0.9s' },
-  { left:'26%', w:28,  op:0.040, dur:'4.9s', delay:'1.8s' },
-  { left:'37%', w:70,  op:0.025, dur:'7.3s', delay:'0.4s' },
-  { left:'50%', w:40,  op:0.035, dur:'5.7s', delay:'2.2s' },
-  { left:'62%', w:50,  op:0.028, dur:'6.1s', delay:'1.1s' },
-  { left:'74%', w:32,  op:0.042, dur:'5.5s', delay:'3.0s' },
-  { left:'83%', w:60,  op:0.030, dur:'7.0s', delay:'0.7s' },
-  { left:'92%', w:25,  op:0.038, dur:'4.6s', delay:'1.5s' },
-]
 
 // ── Bubble streams ────────────────────────────────────────────
 const BUBBLES = [
@@ -66,85 +54,7 @@ const BUBBLES = [
   { left:'95%', delay:1.3, dur:9  },
 ]
 
-// ── Kelp / Seaweed (fixed to bottom) ─────────────────────────
-const KELP_COUNT = 18
-function Kelp() {
-  const stalks = useMemo(() =>
-    Array.from({ length: KELP_COUNT }, (_, i) => ({
-      left: `${(i / KELP_COUNT) * 98 + (i % 3) * 0.8}%`,
-      height: 55 + (i % 5) * 22,
-      delay: `${(i * 0.35) % 3}s`,
-      duration: `${2.4 + (i % 4) * 0.6}s`,
-      opacity: 0.22 + (i % 4) * 0.09,
-      hue: i % 3 === 0 ? '#059669' : i % 3 === 1 ? '#047857' : '#065f46',
-    })),
-  [])
-
-  return (
-    /* Fixed to bottom of viewport — always visible */
-    <div
-      style={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: '140px',
-        pointerEvents: 'none',
-        zIndex: 6,
-        display: 'flex',
-        alignItems: 'flex-end',
-      }}
-      aria-hidden="true"
-    >
-      {/* seafloor strip */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 0, left: 0, right: 0,
-          height: '14px',
-          background: 'linear-gradient(90deg,#042f1a 0%,#062d1e 10%,#0a3d22 20%,#042f1a 30%,#083520 45%,#052a1c 60%,#0a3d22 75%,#042f1a 90%,#062d1e 100%)',
-          filter: 'blur(1px)',
-        }}
-      />
-      {stalks.map((s, i) => (
-        <div
-          key={i}
-          style={{
-            position: 'absolute',
-            bottom: '10px',
-            left: s.left,
-            width: '9px',
-            height: `${s.height}px`,
-            background: `linear-gradient(0deg, ${s.hue} 0%, #059669 55%, #34d399 100%)`,
-            borderRadius: '5px 5px 2px 2px',
-            transformOrigin: 'bottom center',
-            animation: `kelp-sway ${s.duration} ease-in-out ${s.delay} infinite`,
-            opacity: s.opacity,
-          }}
-        >
-          {/* leaf left */}
-          <div style={{
-            position: 'absolute',
-            top: '12px', left: '-9px',
-            width: '13px', height: '9px',
-            background: 'rgba(5,150,105,0.55)',
-            borderRadius: '50% 0 50% 0',
-            transform: 'rotate(-18deg)',
-          }} />
-          {/* leaf right */}
-          <div style={{
-            position: 'absolute',
-            top: '28px', right: '-9px',
-            width: '11px', height: '8px',
-            background: 'rgba(4,120,87,0.45)',
-            borderRadius: '0 50% 0 50%',
-            transform: 'rotate(14deg)',
-          }} />
-        </div>
-      ))}
-    </div>
-  )
-}
+// (Kelp is rendered in Seafloor at the bottom of the page)
 
 // ── Main Component ────────────────────────────────────────────
 export default function AquariumBackground() {
@@ -183,22 +93,6 @@ export default function AquariumBackground() {
           }} />
         ))}
 
-        {/* Caustic rays */}
-        {RAYS.map((r, i) => (
-          <div key={i} style={{
-            position:'absolute',
-            top: 0, left: r.left,
-            width: r.w,
-            height: '55%',
-            background: 'linear-gradient(180deg, rgba(139,92,246,0.9) 0%, rgba(99,102,241,0.3) 40%, transparent 100%)',
-            borderRadius: '0 0 50% 50%',
-            transformOrigin: 'top center',
-            animation: `caustic-sway ${r.dur} ease-in-out ${r.delay} infinite`,
-            filter: 'blur(5px)',
-            opacity: r.op,
-            pointerEvents: 'none',
-          }} />
-        ))}
 
         {/* Top & mid depth fog */}
         <div style={{
@@ -283,9 +177,6 @@ export default function AquariumBackground() {
           pointerEvents:'none',
         }} />
       </div>
-
-      {/* ── Kelp — fixed to bottom of viewport ── */}
-      <Kelp />
     </>
   )
 }

@@ -14,6 +14,37 @@ export default function Hero() {
         aria-hidden="true"
       />
 
+      {/* ── Surface Caustic Light Rays (Surface Zone) ── */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
+        {[
+          { left: '6%',  w: 65,  dur: '5.2s', delay: '0s',   op: 0.18 },
+          { left: '18%', w: 100, dur: '6.8s', delay: '0.9s', op: 0.22 },
+          { left: '32%', w: 60,  dur: '4.9s', delay: '1.8s', op: 0.16 },
+          { left: '46%', w: 120, dur: '7.3s', delay: '0.4s', op: 0.24 },
+          { left: '60%', w: 75,  dur: '5.7s', delay: '2.2s', op: 0.20 },
+          { left: '72%', w: 90,  dur: '6.1s', delay: '1.1s', op: 0.18 },
+          { left: '85%', w: 70,  dur: '7.0s', delay: '0.7s', op: 0.15 },
+        ].map((r, i) => (
+          <div
+            key={i}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: r.left,
+              width: `${r.w}px`,
+              height: '70%',
+              background:
+                'linear-gradient(180deg, rgba(139,92,246,0.7) 0%, rgba(6,182,212,0.25) 45%, transparent 100%)',
+              borderRadius: '0 0 50% 50%',
+              transformOrigin: 'top center',
+              animation: `caustic-sway ${r.dur} ease-in-out ${r.delay} infinite`,
+              filter: 'blur(5px)',
+              opacity: r.op,
+            }}
+          />
+        ))}
+      </div>
+
       <div className="relative z-10 max-w-6xl mx-auto w-full">
         {/* Top badge */}
         <div className="flex justify-center mb-8">

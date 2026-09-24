@@ -181,10 +181,35 @@ body {
   100% { bottom: 100vh; opacity: 0; transform: translateX(-2px); }
 }
 
-/* ── Seaweed / Kelp — fixed to bottom of viewport ── */
+/* ── Seaweed / Kelp Natural Sway & Cable Animations ── */
+@keyframes kelp-sway-left {
+  0%, 100% {
+    transform: rotate(-10deg) skewX(-2deg);
+  }
+  50% {
+    transform: rotate(12deg) skewX(3deg);
+  }
+}
+
+@keyframes kelp-sway-right {
+  0%, 100% {
+    transform: rotate(10deg) skewX(2deg);
+  }
+  50% {
+    transform: rotate(-11deg) skewX(-3deg);
+  }
+}
+
 @keyframes kelp-sway {
   0%, 100% { transform: rotate(-12deg); }
   50%       { transform: rotate(12deg); }
+}
+
+@keyframes cable-packet {
+  0%   { left: -10%; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { left: 110%; opacity: 0; }
 }
 
 /* ── Seafloor ── */
