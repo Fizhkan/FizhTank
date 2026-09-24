@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowUpRight, Network, Eye, Terminal, Shield, Layers, Wifi } from 'lucide-react'
+import { ArrowUpRight, Network, Eye, Terminal, Shield, Layers, Wifi, Fish, Waves } from 'lucide-react'
 import LabModal from './LabModal'
 
 export const labsData = [
@@ -147,14 +147,15 @@ export default function Labs() {
         {/* Header */}
         <div className="mb-12">
           <div className="flex items-center gap-3 mb-3">
-            <div className="h-px w-8 bg-violet-500/50" />
-            <span className="text-violet-400 font-mono text-sm">03. labs</span>
+            <div className="h-px w-8" style={{ background: 'linear-gradient(90deg, #7c3aed, #06b6d4)' }} />
+            <span className="font-mono text-sm" style={{ color: 'rgba(6,182,212,0.7)' }}>03. labs</span>
+            <Fish size={14} style={{ color: 'rgba(167,139,250,0.5)' }} />
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-zinc-100 section-title">
             Featured Labs
           </h2>
-          <p className="text-zinc-400 mt-4 max-w-xl">
-            The Tank Showcase — real-world network & security labs with full write-ups.
+          <p className="text-zinc-500 mt-5 max-w-xl">
+            The Tank Showcase — real-world network & security experiments with full write-ups.
           </p>
         </div>
 
@@ -169,18 +170,21 @@ export default function Labs() {
         <div className="mt-6 bento-card p-6 md:p-8 flex flex-col md:flex-row items-center gap-6">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
-              <Layers size={16} className="text-violet-400" />
-              <span className="text-xs font-mono text-violet-400">Methodology</span>
+              <Waves size={16} style={{ color: '#06b6d4' }} />
+              <span className="text-xs font-mono" style={{ color: 'rgba(6,182,212,0.7)' }}>// Methodology</span>
             </div>
             <h3 className="text-xl font-bold text-zinc-100 mb-2">Lab Write-up Framework</h3>
-            <p className="text-zinc-400 text-sm leading-relaxed">
-              Setiap lab mengikuti format standar: Objective → Architecture/Topology → Key Commands → Verification Result. Pendekatan ini memastikan reproduktivitas dan dokumentasi yang jelas untuk setiap skenario.
+            <p className="text-zinc-500 text-sm leading-relaxed">
+              Setiap lab mengikuti format standar: Objective → Architecture/Topology → Key Commands → Verification Result.
             </p>
           </div>
-          <div className="flex flex-col gap-2 shrink-0">
-            {['📌 Define Objective', '🗺️ Map Topology', '⚙️ Configure & Run', '✅ Verify Results'].map((step) => (
-              <div key={step} className="flex items-center gap-2 text-sm text-zinc-400 font-mono">
-                <div className="w-1.5 h-1.5 rounded-full bg-violet-500" />
+          <div className="flex flex-col gap-2.5 shrink-0">
+            {['📌 Define Objective', '🗺️ Map Topology', '⚙️ Configure & Run', '✅ Verify Results'].map((step, i) => (
+              <div key={step} className="flex items-center gap-2 text-sm text-zinc-500 font-mono">
+                <div
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{ background: i % 2 === 0 ? '#7c3aed' : '#06b6d4' }}
+                />
                 {step}
               </div>
             ))}

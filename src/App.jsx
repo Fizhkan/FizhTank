@@ -1,4 +1,5 @@
 import './index.css'
+import AquariumBackground from './components/AquariumBackground'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import Skills from './components/Skills'
@@ -7,25 +8,20 @@ import Contact from './components/Contact'
 
 function App() {
   return (
-    <div className="relative min-h-screen bg-zinc-950">
-      {/* Scanline ambient effect */}
-      <div className="scan-line" aria-hidden="true" />
+    <div className="relative min-h-screen" style={{ background: '#04060f' }}>
+      {/* ── Full-screen aquarium world ── */}
+      <AquariumBackground />
 
-      {/* Fixed background radial glow */}
-      <div
-        className="fixed inset-0 pointer-events-none z-0"
-        style={{
-          background:
-            'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(139,92,246,0.12), transparent 60%)',
-        }}
-        aria-hidden="true"
-      />
-
+      {/* ── Content layers above ── */}
       <div className="relative z-10">
         <Navbar />
         <Hero />
+        {/* Wave divider */}
+        <div className="wave-divider" aria-hidden="true" />
         <Skills />
+        <div className="wave-divider" aria-hidden="true" />
         <Labs />
+        <div className="wave-divider" aria-hidden="true" />
         <Contact />
       </div>
     </div>

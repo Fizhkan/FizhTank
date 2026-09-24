@@ -47,8 +47,8 @@ export default function Contact() {
         {/* Header */}
         <div className="mb-12">
           <div className="flex items-center gap-3 mb-3">
-            <div className="h-px w-8 bg-violet-500/50" />
-            <span className="text-violet-400 font-mono text-sm">04. contact</span>
+            <div className="h-px w-8" style={{ background: 'linear-gradient(90deg, #7c3aed, #06b6d4)' }} />
+            <span className="font-mono text-sm" style={{ color: 'rgba(6,182,212,0.7)' }}>04. contact</span>
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-zinc-100 section-title">
             Get In Touch

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import {
-  Network, Server, Shield, Terminal, Wifi, Globe,
-  Database, Lock, Eye, Layers, Cpu, HardDrive
+  Network, Terminal, Shield, Wifi, Globe,
+  Database, Lock, Eye, Layers, Cpu, HardDrive, Fish
 } from 'lucide-react'
 
 const skillGroups = [
@@ -9,9 +9,7 @@ const skillGroups = [
     id: 'networking',
     icon: Network,
     label: 'Networking Core',
-    color: 'text-blue-400',
-    bgColor: 'bg-blue-500/10',
-    borderColor: 'border-blue-500/20',
+    accent: { text: '#60a5fa', bg: 'rgba(37,99,235,0.08)', border: 'rgba(59,130,246,0.25)' },
     description: 'Foundation of packet routing and layer 2/3 design',
     skills: [
       { name: 'IPv4 Subnetting & CIDR', level: 90 },
@@ -26,9 +24,7 @@ const skillGroups = [
     id: 'linux',
     icon: Terminal,
     label: 'Linux & Systems',
-    color: 'text-green-400',
-    bgColor: 'bg-green-500/10',
-    borderColor: 'border-green-500/20',
+    accent: { text: '#34d399', bg: 'rgba(5,150,105,0.08)', border: 'rgba(16,185,129,0.25)' },
     description: 'System administration and automation on Arch-based distros',
     skills: [
       { name: 'EndeavourOS / Arch Linux', level: 85 },
@@ -43,9 +39,7 @@ const skillGroups = [
     id: 'security',
     icon: Shield,
     label: 'Security & Analysis',
-    color: 'text-violet-400',
-    bgColor: 'bg-violet-500/10',
-    borderColor: 'border-violet-500/20',
+    accent: { text: '#a78bfa', bg: 'rgba(109,40,217,0.1)', border: 'rgba(139,92,246,0.25)' },
     description: 'Traffic inspection, recon, and access control enforcement',
     skills: [
       { name: 'Wireshark & Packet Analysis', level: 85 },
@@ -77,14 +71,15 @@ export default function Skills() {
         {/* Header */}
         <div className="mb-12">
           <div className="flex items-center gap-3 mb-3">
-            <div className="h-px w-8 bg-violet-500/50" />
-            <span className="text-violet-400 font-mono text-sm">02. skills</span>
+            <div className="h-px w-8" style={{ background: 'linear-gradient(90deg, #7c3aed, #06b6d4)' }} />
+            <span className="font-mono text-sm" style={{ color: 'rgba(6,182,212,0.7)' }}>02. skills</span>
+            <Fish size={14} style={{ color: 'rgba(167,139,250,0.5)' }} />
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-zinc-100 section-title">
             Core Skills Matrix
           </h2>
-          <p className="text-zinc-400 mt-4 max-w-xl">
-            The filter & ecosystem — every tool in the tank serving a specific purpose.
+          <p className="text-zinc-500 mt-5 max-w-xl">
+            The Filter &amp; Ecosystem — every tool in the tank serving a specific purpose in the deep network.
           </p>
         </div>
 
@@ -96,22 +91,25 @@ export default function Skills() {
               <div key={group.id} className="bento-card p-6 flex flex-col gap-5">
                 {/* Card Header */}
                 <div className="flex items-start gap-3">
-                  <div className={`w-10 h-10 rounded-lg ${group.bgColor} border ${group.borderColor} flex items-center justify-center shrink-0`}>
-                    <Icon size={18} className={group.color} />
+                  <div
+                    className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+                    style={{ background: group.accent.bg, border: `1px solid ${group.accent.border}` }}
+                  >
+                    <Icon size={18} style={{ color: group.accent.text }} />
                   </div>
                   <div>
                     <h3 className="font-semibold text-zinc-100">{group.label}</h3>
-                    <p className="text-xs text-zinc-500 mt-0.5">{group.description}</p>
+                    <p className="text-xs text-zinc-600 mt-0.5">{group.description}</p>
                   </div>
                 </div>
 
                 {/* Skill Bars */}
-                <div className="space-y-3">
+                <div className="space-y-3.5">
                   {group.skills.map((skill) => (
                     <div key={skill.name}>
-                      <div className="flex justify-between mb-1">
+                      <div className="flex justify-between mb-1.5">
                         <span className="text-xs text-zinc-400">{skill.name}</span>
-                        <span className="text-xs text-zinc-600 font-mono">{skill.level}%</span>
+                        <span className="text-xs font-mono" style={{ color: 'rgba(167,139,250,0.6)' }}>{skill.level}%</span>
                       </div>
                       <div className="skill-bar-track">
                         <div
@@ -124,7 +122,7 @@ export default function Skills() {
                 </div>
 
                 {/* Tags */}
-                <div className="flex flex-wrap gap-2 pt-2 border-t border-zinc-800/60">
+                <div className="flex flex-wrap gap-2 pt-3 border-t" style={{ borderColor: 'rgba(99,102,241,0.1)' }}>
                   {group.tags.map((tag) => (
                     <span key={tag} className="tech-badge">{tag}</span>
                   ))}
@@ -136,13 +134,15 @@ export default function Skills() {
 
         {/* Tools Row */}
         <div className="mt-6 bento-card p-6">
-          <p className="text-xs text-zinc-500 font-mono mb-4">// Toolchain & Environment</p>
+          <p className="text-xs font-mono mb-4" style={{ color: 'rgba(6,182,212,0.5)' }}>
+            // Toolchain &amp; Ecosystem
+          </p>
           <div className="flex flex-wrap gap-3">
             {[
               { icon: Globe, label: 'Cisco Packet Tracer' },
               { icon: Eye, label: 'Wireshark' },
               { icon: Wifi, label: 'Nmap' },
-              { icon: Server, label: 'Pi-hole' },
+              { icon: Database, label: 'Pi-hole' },
               { icon: Database, label: 'pfSense' },
               { icon: Lock, label: 'UFW / iptables' },
               { icon: Layers, label: 'VirtualBox' },
@@ -151,10 +151,22 @@ export default function Skills() {
             ].map(({ icon: Icon, label }) => (
               <div
                 key={label}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-900/60 border border-zinc-800 hover:border-violet-500/30 transition-colors group"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg transition-all group cursor-default"
+                style={{
+                  background: 'rgba(8,12,28,0.6)',
+                  border: '1px solid rgba(99,102,241,0.1)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(6,182,212,0.3)'
+                  e.currentTarget.style.boxShadow = '0 0 10px rgba(6,182,212,0.08)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(99,102,241,0.1)'
+                  e.currentTarget.style.boxShadow = ''
+                }}
               >
-                <Icon size={14} className="text-zinc-500 group-hover:text-violet-400 transition-colors" />
-                <span className="text-xs text-zinc-400 group-hover:text-zinc-200 transition-colors font-mono">{label}</span>
+                <Icon size={14} className="text-zinc-600 group-hover:text-cyan-400 transition-colors" />
+                <span className="text-xs text-zinc-500 group-hover:text-zinc-200 transition-colors font-mono">{label}</span>
               </div>
             ))}
           </div>
