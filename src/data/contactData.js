@@ -5,7 +5,7 @@ export const contactConfig = {
   // Masukkan endpoint form kamu (misal: 'https://formspree.io/f/xbjnqowz' atau 'https://api.web3forms.com/submit')
   // Bila dibiarkan placeholder atau kosong, form akan otomatis membuka mailto klien email default pengguna.
   formspreeEndpoint: '[ISI DI SINI: Formspree Endpoint / ID]',
-  fallbackEmail: '[ISI DI SINI: email@domain.com]',
+  fallbackEmail: 'hafidzsirajuddin99@gmail.com',
 }
 
 export const socialLinks = [
@@ -25,8 +25,8 @@ export const socialLinks = [
   },
   {
     label: 'Email Langsung',
-    value: '[ISI DI SINI: email@domain.com]',
-    href: 'mailto:[ISI_DI_SINI_EMAIL]',
+    value: 'hafidzsirajuddin99@gmail.com',
+    href: 'mailto:hafidzsirajuddin99@gmail.com',
     color: '#a855f7',
     glowColor: 'rgba(168,85,247,0.15)',
   },

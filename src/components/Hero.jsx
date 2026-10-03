@@ -142,7 +142,7 @@ export default function Hero() {
         responseLogs.push({
           type: 'output',
           text:
-            '=== CONTACT MATRIX ===\nEmail    : [ISI DI SINI: email@domain.com]\nLinkedIn : [ISI DI SINI: linkedin.com/in/username]\nGitHub   : https://github.com/Fizhkan\nForm     : Langsung isi form di section #contact di bawah.',
+            '=== CONTACT MATRIX ===\nEmail    : hafidzsirajuddin99@gmail.com\nLinkedIn : [ISI DI SINI: linkedin.com/in/username]\nGitHub   : https://github.com/Fizhkan\nForm     : Langsung isi form di section #contact di bawah.',
           color: 'text-blue-300',
         })
       } else if (lower === 'cat cv.txt' || lower === 'cv.txt' || lower === 'cv') {
