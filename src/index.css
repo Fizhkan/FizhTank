@@ -1,5 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..700;1,14..32,300..700&family=JetBrains+Mono:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:ital,wght@0,400..800;1,400..800&display=swap');
 @import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
 
 /* ═══════════════════════════════════════════
    AQUARIUM THEME — FizhTank Portfolio
@@ -11,11 +17,25 @@
 html { scroll-behavior: smooth; }
 
 body {
-  background-color: #04060f;
-  color: #e4e4f0;
-  font-family: 'Inter', sans-serif;
+  background-color: #010205;
+  color: #f1f1f8;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   overflow-x: hidden;
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6, .font-display {
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
 }
 
 ::-webkit-scrollbar { width: 6px; }
@@ -36,15 +56,17 @@ body {
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
-  /* Base ocean gradient — deep abyss */
+  /* Depth gradient — bright surface → twilight zone → pitch abyss */
   background: linear-gradient(
     180deg,
-    #04060f 0%,
-    #060b18 15%,
-    #070d1e 35%,
-    #06101c 60%,
-    #040c14 85%,
-    #030810 100%
+    #0b1a35 0%,        /* surface — moonlit shallow water */
+    #081428 10%,       /* photic zone top */
+    #060f20 22%,       /* photic zone */
+    #050d1a 38%,       /* mesopelagic transition */
+    #030a14 55%,       /* bathypelagic start */
+    #02070e 72%,       /* deep ocean */
+    #010508 88%,       /* abyssal plain */
+    #000304 100%       /* hadal zone — absolute darkness */
   );
 }
 
@@ -125,6 +147,122 @@ body {
   0%, 100% { transform: translateY(0px) rotate(0deg); }
   30%      { transform: translateY(-6px) rotate(-2deg); }
   70%      { transform: translateY(5px) rotate(1.5deg); }
+}
+
+/* ── Fish Anatomy & Natural Locomotion Animations ── */
+@keyframes fish-tail-wag {
+  0%, 100% { transform: rotate(-7deg); }
+  50%      { transform: rotate(8deg); }
+}
+.fish-tail {
+  transform-origin: 18px 24px;
+  animation: fish-tail-wag 1.4s ease-in-out infinite;
+}
+
+@keyframes fish-tail-wag-fast {
+  0%, 100% { transform: rotate(-12deg); }
+  50%      { transform: rotate(14deg); }
+}
+.fish-tail-fast {
+  transform-origin: 22px 28px;
+  animation: fish-tail-wag-fast 0.65s ease-in-out infinite;
+}
+
+@keyframes fish-veil-wave {
+  0%, 100% { transform: skewY(-3deg) rotate(-2deg); }
+  50%      { transform: skewY(4deg) rotate(3deg); }
+}
+.fish-veil {
+  transform-origin: 35px 32px;
+  animation: fish-veil-wave 2.2s ease-in-out infinite;
+}
+
+@keyframes fish-fin-flutter {
+  0%, 100% { transform: rotate(-14deg) scaleX(0.9); }
+  50%      { transform: rotate(10deg) scaleX(1.1); }
+}
+.fish-fin {
+  transform-origin: center top;
+  animation: fish-fin-flutter 0.75s ease-in-out infinite;
+}
+
+@keyframes ray-wing-glide {
+  0%, 100% { transform: scaleY(1) rotate(0deg); }
+  25%      { transform: scaleY(0.88) rotate(-1.5deg); }
+  50%      { transform: scaleY(1.08) rotate(0.8deg); }
+  75%      { transform: scaleY(0.92) rotate(-1deg); }
+}
+.ray-wings {
+  transform-origin: 75px 38px;
+  animation: ray-wing-glide 3.6s ease-in-out infinite;
+}
+
+@keyframes jelly-bell-pulse {
+  0%, 100% { transform: scale(1, 1); }
+  35%      { transform: scale(1.1, 0.88); }
+  65%      { transform: scale(0.92, 1.08); }
+}
+.jelly-bell {
+  transform-origin: 40px 30px;
+  animation: jelly-bell-pulse 2.8s ease-in-out infinite;
+}
+
+@keyframes tentacle-wave {
+  0%, 100% { transform: rotate(-4deg) skewX(-2deg); }
+  50%      { transform: rotate(5deg) skewX(3deg); }
+}
+.jelly-tentacles {
+  transform-origin: 40px 44px;
+  animation: tentacle-wave 3.2s ease-in-out infinite;
+}
+
+@keyframes lure-pulse {
+  0%, 100% {
+    opacity: 0.7;
+    filter: drop-shadow(0 0 6px #06b6d4) drop-shadow(0 0 12px #38bdf8);
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 14px #22d3ee) drop-shadow(0 0 24px #06b6d4) drop-shadow(0 0 36px #a855f7);
+  }
+}
+.lure-light {
+  animation: lure-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes bio-optic-pulse {
+  0%   { stroke-dashoffset: 0; opacity: 0.7; }
+  50%  { opacity: 1; }
+  100% { stroke-dashoffset: 18; opacity: 0.7; }
+}
+.bio-optic-line {
+  stroke-dasharray: 6 3;
+  animation: bio-optic-pulse 2s linear infinite;
+}
+
+/* ── Nutrient Flake Fall (Tank Feeding Event) ── */
+@keyframes food-flake-fall {
+  0% {
+    transform: translateY(-20px) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(105vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+.food-flake {
+  position: absolute;
+  top: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: food-flake-fall linear forwards;
 }
 
 /* ── Plankton / floating particles ── */
@@ -287,18 +425,22 @@ body {
 .section-title {
   position: relative;
   display: inline-block;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -0.03em;
+  font-weight: 800;
+  color: #f8fafc;
 }
 .section-title::after {
   content: '';
   position: absolute;
   bottom: -8px; left: 0;
-  width: 48px; height: 2px;
+  width: 48px; height: 2.5px;
   background: linear-gradient(90deg, #7c3aed, #06b6d4, transparent);
-  border-radius: 1px;
+  border-radius: 2px;
   animation: underline-pulse 3s ease-in-out infinite;
 }
 @keyframes underline-pulse {
-  0%, 100% { width: 48px; opacity: 0.8; }
+  0%, 100% { width: 48px; opacity: 0.85; }
   50%       { width: 72px; opacity: 1; }
 }
 
@@ -307,9 +449,11 @@ body {
 ═══════════════════════════════════════ */
 .nav-link {
   position: relative;
-  color: #a1a1aa;
-  font-size: 0.875rem;
+  color: #cbd5e1;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.925rem;
   font-weight: 500;
+  letter-spacing: -0.01em;
   transition: color 0.2s;
   padding: 4px 0;
 }
@@ -317,11 +461,11 @@ body {
   content: '';
   position: absolute;
   bottom: 0; left: 0;
-  width: 0; height: 1px;
+  width: 0; height: 1.5px;
   background: linear-gradient(90deg, #8b5cf6, #06b6d4);
   transition: width 0.3s ease;
 }
-.nav-link:hover { color: #e4e4f0; }
+.nav-link:hover { color: #ffffff; }
 .nav-link:hover::after { width: 100%; }
 
 /* ═══════════════════════════════════════
@@ -330,20 +474,23 @@ body {
 .tech-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 3px 10px;
-  background: rgba(109, 40, 217, 0.12);
-  border: 1px solid rgba(139, 92, 246, 0.25);
+  gap: 5px;
+  padding: 4px 11px;
+  background: rgba(109, 40, 217, 0.16);
+  border: 1px solid rgba(139, 92, 246, 0.3);
   border-radius: 9999px;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.7rem;
-  color: #a78bfa;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: #c4b5fd;
   transition: all 0.2s;
 }
 .tech-badge:hover {
-  background: rgba(109, 40, 217, 0.22);
-  border-color: rgba(139, 92, 246, 0.55);
-  box-shadow: 0 0 8px rgba(139, 92, 246, 0.2);
+  background: rgba(109, 40, 217, 0.28);
+  border-color: rgba(167, 139, 250, 0.6);
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.25);
 }
 
 /* ═══════════════════════════════════════
@@ -359,10 +506,10 @@ body {
    SKILL BAR
 ═══════════════════════════════════════ */
 .skill-bar-track {
-  background: rgba(16, 20, 40, 0.8);
-  border: 1px solid rgba(99, 102, 241, 0.1);
+  background: rgba(16, 20, 40, 0.85);
+  border: 1px solid rgba(99, 102, 241, 0.15);
   border-radius: 9999px;
-  height: 5px;
+  height: 6px;
   overflow: hidden;
 }
 .skill-bar-fill {
@@ -386,36 +533,39 @@ body {
 ═══════════════════════════════════════ */
 .form-input {
   background: rgba(8, 12, 28, 0.9);
-  border: 1px solid rgba(99, 102, 241, 0.15);
-  border-radius: 0.5rem;
-  padding: 0.75rem 1rem;
-  color: #e4e4f0;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 0.6rem;
+  padding: 0.85rem 1.1rem;
+  color: #f8fafc;
   font-family: 'Inter', sans-serif;
   width: 100%;
   transition: border-color 0.2s, box-shadow 0.2s;
   outline: none;
-  font-size: 0.875rem;
+  font-size: 0.925rem;
+  line-height: 1.5;
 }
 .form-input:focus {
-  border-color: rgba(139, 92, 246, 0.6);
-  box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.15), inset 0 0 8px rgba(99, 102, 241, 0.05);
+  border-color: rgba(139, 92, 246, 0.65);
+  box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.2), inset 0 0 8px rgba(99, 102, 241, 0.08);
 }
-.form-input::placeholder { color: #3f4060; }
+.form-input::placeholder { color: #64748b; }
 
 /* ═══════════════════════════════════════
    CODE BLOCK (modal)
 ═══════════════════════════════════════ */
 .code-block {
   background: rgba(4, 6, 15, 0.95);
-  border: 1px solid rgba(99, 102, 241, 0.15);
-  border-radius: 0.5rem;
-  padding: 1rem;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 0.65rem;
+  padding: 1.15rem 1.25rem;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.78rem;
-  color: #a78bfa;
+  font-size: 0.84rem;
+  font-weight: 450;
+  letter-spacing: 0.01em;
+  color: #c4b5fd;
   overflow-x: auto;
   white-space: pre;
-  line-height: 1.7;
+  line-height: 1.75;
 }
 
 /* ═══════════════════════════════════════
@@ -477,3 +627,119 @@ body {
   0%   { transform: scale(0); opacity: 0.8; }
   100% { transform: scale(2); opacity: 0; }
 }
+
+/* ═══════════════════════════════════════
+   RADAR & SONAR SWEEP ANIMATIONS
+═══════════════════════════════════════ */
+@keyframes radar-sweep {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.radar-sweep-beam {
+  animation: radar-sweep 4s linear infinite;
+  transform-origin: center center;
+}
+
+@keyframes radar-blip {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50%      { opacity: 1; transform: scale(1.4); filter: drop-shadow(0 0 8px #06b6d4); }
+}
+
+.radar-blip {
+  animation: radar-blip 2.5s ease-in-out infinite;
+}
+
+/* Bioluminescent animated gradient text */
+@keyframes bio-gradient {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.text-bio-shimmer {
+  background-size: 200% 200%;
+  animation: bio-gradient 6s ease infinite;
+}
+
+/* Subtle glowing terminal scrollbar */
+.terminal-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(139, 92, 246, 0.4) transparent;
+  overflow-x: hidden !important;
+}
+.terminal-scroll::-webkit-scrollbar {
+  width: 4px;
+  height: 0px;
+}
+.terminal-scroll::-webkit-scrollbar-track {
+  background: rgba(4, 6, 15, 0.4);
+}
+.terminal-scroll::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.4);
+  border-radius: 2px;
+}
+.terminal-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(6, 182, 212, 0.7);
+}
+
+/* ═══════════════════════════════════════
+   SHIMMER SWEEP (CTA buttons)
+═══════════════════════════════════════ */
+@keyframes shimmer-sweep {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ═══════════════════════════════════════
+   TERMINAL FLOAT (subtle idle bob)
+═══════════════════════════════════════ */
+.terminal-float {
+  animation: terminal-float 6s ease-in-out infinite;
+}
+@keyframes terminal-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+
+/* ═══════════════════════════════════════
+   TOAST POP (celebration notification)
+═══════════════════════════════════════ */
+@keyframes toast-pop {
+  0%   { opacity: 0; transform: translateX(-50%) translateY(10px) scale(0.9); }
+  50%  { transform: translateX(-50%) translateY(-5px) scale(1.02); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+
+/* ═══════════════════════════════════════
+   TERMINAL LINE ENTRANCE
+═══════════════════════════════════════ */
+.animate-terminal-line {
+  animation: terminal-line-in 0.25s ease-out both;
+}
+@keyframes terminal-line-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ═══════════════════════════════════════
+   SPIN (loading spinner)
+═══════════════════════════════════════ */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ═══════════════════════════════════════
+   SMOOTH SCROLL SELECTION
+═══════════════════════════════════════ */
+::selection {
+  background: rgba(139, 92, 246, 0.3);
+  color: #e4e4f0;
+}
+

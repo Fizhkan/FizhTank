@@ -5,6 +5,7 @@ import Hero from './components/Hero'
 import Skills from './components/Skills'
 import Labs from './components/Labs'
 import Contact from './components/Contact'
+import ScrollToTop from './components/ScrollToTop'
 
 function App() {
   return (
@@ -24,6 +25,9 @@ function App() {
         <div className="wave-divider" aria-hidden="true" />
         <Contact />
       </div>
+
+      {/* ── Floating scroll-to-top button ── */}
+      <ScrollToTop />
     </div>
   )
 }
