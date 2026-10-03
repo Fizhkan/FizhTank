@@ -3,8 +3,9 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const templatePath = path.resolve(__dirname, 'dist/index.html')
-const serverEntryPath = path.resolve(__dirname, 'dist-ssr/entry-server.js')
+const projectRoot = path.resolve(__dirname, '..')
+const templatePath = path.resolve(projectRoot, 'dist/index.html')
+const serverEntryPath = path.resolve(projectRoot, 'dist-ssr/entry-server.js')
 
 async function prerender() {
   try {

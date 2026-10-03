@@ -420,8 +420,10 @@ export default function Hero() {
                   transition: 'all 0.7s ease 0.5s',
                 }}
               >
-                <Waves size={16} className="text-cyan-400 bio-glow shrink-0" />
-                <span className="text-[12px] sm:text-xs uppercase tracking-wider font-mono font-semibold text-cyan-300">
+                <span className="font-mono text-xs font-semibold tracking-wide text-cyan-300">01. about</span>
+                <span className="text-zinc-600">·</span>
+                <Waves size={14} className="text-cyan-400 bio-glow shrink-0" />
+                <span className="text-[12px] sm:text-xs uppercase tracking-wider font-mono font-semibold text-cyan-300/80">
                   // Depth 2600m • Abyss Architecture
                 </span>
               </div>
@@ -481,6 +483,7 @@ export default function Hero() {
                 Perancangan infrastruktur jaringan enterprise, segmentasi VLAN, mitigasi ancaman, dan homelab Arch Linux yang tangguh.
               </p>
               <p
+                lang="en"
                 className="font-mono text-[13px] sm:text-[14px] mb-8 text-cyan-300 font-medium flex items-center gap-2"
                 style={{
                   opacity: sectionVisible ? 1 : 0,
