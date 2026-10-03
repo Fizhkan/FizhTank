@@ -38,6 +38,7 @@ function BottomKelp() {
       {KELP_STALKS.map((s, i) => (
         <div
           key={i}
+          className={i % 2 !== 0 ? 'hidden sm:block' : ''}
           style={{
             position: 'absolute',
             bottom: '2px',
