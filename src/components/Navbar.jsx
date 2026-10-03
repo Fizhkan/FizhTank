@@ -268,7 +268,7 @@ export default function Navbar() {
               />
             </span>
             <span className="text-[12.5px] font-mono font-medium text-purple-300">
-              🫧 Swimming in Packets · Open to Work
+              🫧 Swimming in Packets · [ISI DI SINI: Status]
             </span>
           </div>
           {navLinks.map((link, idx) => (

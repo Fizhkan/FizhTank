@@ -4,12 +4,23 @@ import {
   Database, Lock, Eye, Layers, Cpu, HardDrive, Fish
 } from 'lucide-react'
 import { useScrollReveal } from '../hooks/useScrollReveal'
-import { skillGroups } from '../data/skillsData'
+import { skillGroups, toolsData } from '../data/skillsData'
 
 const groupIcons = {
   networking: Network,
   linux: Terminal,
   security: Shield,
+}
+
+const iconComponentMap = {
+  Globe,
+  Eye,
+  Wifi,
+  Database,
+  Lock,
+  Layers,
+  Cpu,
+  HardDrive,
 }
 
 // ── Honest Qualitative Skill Item ────────────────────────────
@@ -189,17 +200,13 @@ export default function Skills() {
   const [gridRef, gridVisible] = useScrollReveal({ threshold: 0.1 })
   const [toolsRef, toolsVisible] = useScrollReveal({ threshold: 0.2 })
 
-  const tools = [
-    { icon: Globe, label: 'Cisco Packet Tracer' },
-    { icon: Eye, label: 'Wireshark' },
-    { icon: Wifi, label: 'Nmap' },
-    { icon: Database, label: 'Pi-hole' },
-    { icon: Database, label: 'pfSense' },
-    { icon: Lock, label: 'UFW / iptables' },
-    { icon: Layers, label: 'VirtualBox' },
-    { icon: Cpu, label: 'Arch Linux' },
-    { icon: HardDrive, label: 'Proxmox' },
-  ]
+  // Hanya tampilkan tool dengan used: true
+  const displayedTools = toolsData
+    .filter((t) => t.used)
+    .map((t) => ({
+      icon: iconComponentMap[t.iconKey] || Globe,
+      label: t.label,
+    }))
 
   return (
     <section id="skills" className="py-24 px-6">
@@ -260,10 +267,10 @@ export default function Skills() {
           <p
             className="text-xs sm:text-[13px] font-mono font-semibold mb-4 text-cyan-300 tracking-wider"
           >
-            // Toolchain &amp; Ecosystem
+            // Tools yang sedang dipelajari
           </p>
           <div className="flex flex-wrap gap-3">
-            {tools.map(({ icon, label }, idx) => (
+            {displayedTools.map(({ icon, label }, idx) => (
               <ToolItem key={label} icon={icon} label={label} idx={idx} visible={toolsVisible} />
             ))}
           </div>

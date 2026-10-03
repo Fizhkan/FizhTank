@@ -106,3 +106,17 @@ export const skillGroups = [
     tags: ['Wireshark', 'Nmap', 'iptables', 'UFW', 'ACL', 'TLS'],
   },
 ]
+
+// ── Tools & Ecosystem: Tandai used: false untuk tool yang belum dipakai ──
+// Hanya Cisco Packet Tracer, Wireshark, Nmap, dan UFW / iptables yang diset used: true
+export const toolsData = [
+  { label: 'Cisco Packet Tracer', used: true, iconKey: 'Globe' },
+  { label: 'Wireshark', used: true, iconKey: 'Eye' },
+  { label: 'Nmap', used: true, iconKey: 'Wifi' },
+  { label: 'UFW / iptables', used: true, iconKey: 'Lock' },
+  { label: 'Pi-hole', used: false, iconKey: 'Database' },
+  { label: 'pfSense', used: false, iconKey: 'Database' },
+  { label: 'VirtualBox', used: false, iconKey: 'Layers' },
+  { label: 'Arch Linux', used: false, iconKey: 'Cpu' },
+  { label: 'Proxmox', used: false, iconKey: 'HardDrive' },
+]

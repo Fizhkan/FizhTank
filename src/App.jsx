@@ -6,6 +6,7 @@ import Skills from './components/Skills'
 import Labs from './components/Labs'
 import Certifications from './components/Certifications'
 import Contact from './components/Contact'
+import Footer from './components/Footer'
 import ScrollToTop from './components/ScrollToTop'
 
 function App() {
@@ -34,9 +35,10 @@ function App() {
           <Labs />
           <div className="wave-divider" aria-hidden="true" />
           <Certifications />
+          <div className="wave-divider" aria-hidden="true" />
+          <Contact />
         </main>
-        <div className="wave-divider" aria-hidden="true" />
-        <Contact />
+        <Footer />
       </div>
 
       {/* ── Floating scroll-to-top button ── */}

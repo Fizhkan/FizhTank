@@ -383,7 +383,7 @@ export default function Hero() {
             <span className="text-zinc-500">|</span>
             <span className="text-cyan-300 text-[12px] sm:text-xs font-mono font-medium flex items-center gap-1.5">
               <Radio size={12} className="animate-pulse text-cyan-400" />
-              OSI Layer 1-7
+              Belajar OSI Layer 1-7
             </span>
           </div>
         </div>
@@ -480,7 +480,7 @@ export default function Hero() {
                   transition: 'all 0.7s ease 0.9s',
                 }}
               >
-                Perancangan infrastruktur jaringan enterprise, segmentasi VLAN, mitigasi ancaman, dan homelab Arch Linux yang tangguh.
+                Belajar merancang jaringan, segmentasi VLAN, dan dasar keamanan lewat lab simulasi.
               </p>
               <p
                 lang="en"

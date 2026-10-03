@@ -3,7 +3,7 @@
 
 export const cvDownloadConfig = {
   filePath: '/cv.pdf',
-  fileName: 'CV_Siraj_Network_Engineer.pdf',
+  fileName: 'CV_Siraj.pdf',
   lastUpdated: '[ISI DI SINI: Bulan Tahun, misal: Maret 2026]',
   available: false, // Set to true after putting cv.pdf in /public
 }
