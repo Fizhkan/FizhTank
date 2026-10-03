@@ -38,6 +38,23 @@ p {
   text-wrap: pretty;
 }
 
+/* Accessibility & Performance: Tab Inactive Pause & Reduced Motion */
+.anim-paused, .anim-paused * {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .aquarium-bg, .aquarium-bg * {
+    animation: none !important;
+  }
+}
+
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: #080c18; }
 ::-webkit-scrollbar-thumb {

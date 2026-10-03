@@ -130,7 +130,7 @@ function SocialCard({ icon: Icon, label, value, href, color, glowColor, visible,
       </div>
       <ExternalLink
         size={14}
-        className="text-zinc-500 group-hover:text-current transition-all duration-300"
+        className="text-zinc-400 group-hover:text-current transition-all duration-300"
         style={{
           transform: isHovered ? 'translate(2px, -2px)' : 'translate(0, 0)',
           opacity: isHovered ? 1 : 0,

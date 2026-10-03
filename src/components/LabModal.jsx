@@ -1,28 +1,73 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { X, Target, Map, Terminal, CheckCircle2 } from 'lucide-react'
 
 export default function LabModal({ lab, onClose }) {
   const Icon = lab.icon
   const [isOpen, setIsOpen] = useState(false)
   const [sectionsRevealed, setSectionsRevealed] = useState(false)
+  const triggerRef = useRef(null)
+  const dialogRef = useRef(null)
+  const closeButtonRef = useRef(null)
 
   const handleClose = useCallback(() => {
     setIsOpen(false)
     setTimeout(onClose, 300)
   }, [onClose])
 
-  // Animate in on mount
+  // Save previous focused trigger and restore on unmount
+  useEffect(() => {
+    triggerRef.current = document.activeElement
+    return () => {
+      if (triggerRef.current && typeof triggerRef.current.focus === 'function') {
+        triggerRef.current.focus()
+      }
+    }
+  }, [])
+
+  // Animate in on mount and focus close button
   useEffect(() => {
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => setIsOpen(true))
+      requestAnimationFrame(() => {
+        setIsOpen(true)
+        closeButtonRef.current?.focus()
+      })
     })
     const timer = setTimeout(() => setSectionsRevealed(true), 300)
     return () => clearTimeout(timer)
   }, [])
 
-  // Close on Escape
+  // Close on Escape & Tab Focus Trapping
   useEffect(() => {
-    const handler = (e) => { if (e.key === 'Escape') handleClose() }
+    const handler = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        handleClose()
+        return
+      }
+
+      if (e.key === 'Tab' && dialogRef.current) {
+        const focusable = dialogRef.current.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        )
+        if (focusable.length === 0) return
+
+        const first = focusable[0]
+        const last = focusable[focusable.length - 1]
+
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault()
+            last.focus()
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault()
+            first.focus()
+          }
+        }
+      }
+    }
+
     document.addEventListener('keydown', handler)
     document.body.style.overflow = 'hidden'
     return () => {
@@ -49,6 +94,10 @@ export default function LabModal({ lab, onClose }) {
       }}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="lab-modal-title"
         className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-zinc-950 border border-zinc-800 rounded-2xl"
         style={{
           opacity: isOpen ? 1 : 0,
@@ -81,11 +130,13 @@ export default function LabModal({ lab, onClose }) {
             </div>
             <div>
               <span className="text-[12px] text-cyan-300 font-mono font-semibold tracking-wider block mb-0.5">{lab.category}</span>
-              <h2 className="text-xl sm:text-2xl font-bold font-display text-zinc-50 leading-tight">{lab.title}</h2>
+              <h2 id="lab-modal-title" className="text-xl sm:text-2xl font-bold font-display text-zinc-50 leading-tight">{lab.title}</h2>
             </div>
           </div>
           <button
+            ref={closeButtonRef}
             onClick={handleClose}
+            aria-label="Tutup dialog detail lab"
             className="w-8 h-8 flex items-center justify-center rounded-lg border border-zinc-700 text-zinc-400 hover:border-red-500/50 hover:text-red-400 transition-all ml-4 shrink-0 hover:rotate-90 active:scale-90"
             style={{ transition: 'all 0.3s ease' }}
           >

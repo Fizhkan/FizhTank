@@ -74,6 +74,8 @@ export default function Hero() {
   const [inputVal, setInputVal] = useState('')
   const [tankFed, setTankFed] = useState(false)
   const [isTyping, setIsTyping] = useState(false)
+  const [commandHistory, setCommandHistory] = useState([])
+  const [historyPointer, setHistoryPointer] = useState(-1)
   const inputRef = useRef(null)
   const terminalBodyRef = useRef(null)
 
@@ -102,6 +104,10 @@ export default function Hero() {
     const trimmed = cmdText.trim()
     if (!trimmed) return
 
+    // Save to command history
+    setCommandHistory((prev) => [...prev, trimmed])
+    setHistoryPointer(-1)
+
     // Show typing indicator briefly
     setIsTyping(true)
 
@@ -115,14 +121,36 @@ export default function Hero() {
         responseLogs.push({
           type: 'output',
           text:
-            'Available commands:\n  whoami    - Identity & professional profile\n  skills    - Core competencies & tech stack\n  labs      - Overview of featured lab write-ups\n  ping <ip> - ICMP diagnostic transmission\n  nmap      - Stealth network port reconnaissance\n  feed      - [Easter Egg] Feed bioluminescent tank\n  cat <file>- Read configuration file\n  clear     - Wipe terminal history',
+            'Available commands:\n  whoami     - Identity & professional background\n  skills     - Core competencies & tech stack\n  projects   - Featured enterprise networking & security labs\n  labs       - Overview of featured lab write-ups\n  contact    - Communication matrix & channels\n  cat cv.txt - Quick terminal summary of CV\n  ping <ip>  - ICMP diagnostic transmission\n  nmap       - Stealth network port reconnaissance\n  feed       - [Easter Egg] Feed bioluminescent tank\n  clear      - Wipe terminal history',
           color: 'text-zinc-300',
         })
       } else if (lower === 'whoami') {
         responseLogs.push({
           type: 'output',
-          text: 'fizhtank // Siraj\nSpecializing in Enterprise Network Architecture, Deep Packet Inspection, and Linux Homelab hardening.',
+          text:
+            'fizhtank // Siraj\nSpecializing in Enterprise Network Architecture, Deep Packet Inspection, and Linux Homelab hardening.\nFocus    : L2/L3 Routing, Security Segmentation, Arch Linux\nDomisili : [ISI DI SINI: Kota / Domisili]\nStatus   : Open for network engineering roles & collaborations',
           color: 'text-cyan-300',
+        })
+      } else if (lower === 'projects') {
+        responseLogs.push({
+          type: 'output',
+          text:
+            '=== FEATURED PROJECTS & LABS ===\n1. Enterprise Multi-VLAN Segmentation (L3 Switch, ACL, OSPF)\n2. Wireshark Deep Packet Inspection & Incident Response\n3. Linux Homelab Gateway & Hardened DNS Resolver\nKetik "labs" atau scroll ke section #labs untuk eksplorasi write-up lengkap.',
+          color: 'text-emerald-300',
+        })
+      } else if (lower === 'contact') {
+        responseLogs.push({
+          type: 'output',
+          text:
+            '=== CONTACT MATRIX ===\nEmail    : [ISI DI SINI: email@domain.com]\nLinkedIn : [ISI DI SINI: linkedin.com/in/username]\nGitHub   : https://github.com/Fizhkan\nForm     : Langsung isi form di section #contact di bawah.',
+          color: 'text-blue-300',
+        })
+      } else if (lower === 'cat cv.txt' || lower === 'cv.txt' || lower === 'cv') {
+        responseLogs.push({
+          type: 'output',
+          text:
+            '================================================\nCURRICULUM VITAE - SIRAJ (FIZHTANK)\n================================================\nProfile        : Network & Security Engineer\nPendidikan     : [ISI DI SINI: Jurusan & Nama Kampus / Sekolah]\nSertifikasi    : [ISI DI SINI: Sertifikasi Industri e.g. CCNA, MTCNA]\nKeahlian Utama : Cisco IOS, OSPF, VLAN, STP, Wireshark, Arch Linux, Nmap\nHomelab        : [ISI DI SINI: Ringkasan Homelab Router & Server]\nDownload CV    : Klik tombol "Download CV (PDF)" di section Sertifikasi.\n================================================',
+          color: 'text-violet-300',
         })
       } else if (lower === 'skills') {
         responseLogs.push({
@@ -197,6 +225,31 @@ export default function Hero() {
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       executeCommand(inputVal)
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      if (commandHistory.length === 0) return
+      const nextPointer = historyPointer === -1 ? commandHistory.length - 1 : Math.max(0, historyPointer - 1)
+      setHistoryPointer(nextPointer)
+      setInputVal(commandHistory[nextPointer] || '')
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      if (historyPointer === -1) return
+      const nextPointer = historyPointer + 1
+      if (nextPointer >= commandHistory.length) {
+        setHistoryPointer(-1)
+        setInputVal('')
+      } else {
+        setHistoryPointer(nextPointer)
+        setInputVal(commandHistory[nextPointer] || '')
+      }
+    } else if (e.key === 'Tab') {
+      e.preventDefault()
+      const match = ['help', 'whoami', 'skills', 'projects', 'labs', 'contact', 'cat cv.txt', 'ping 8.8.8.8', 'nmap', 'feed', 'clear'].find(
+        (c) => c.startsWith(inputVal.trim().toLowerCase()) && c !== inputVal.trim().toLowerCase()
+      )
+      if (match) {
+        setInputVal(match)
+      }
     }
   }
 
@@ -206,7 +259,7 @@ export default function Hero() {
     }
   }
 
-  const quickCommands = ['help', 'skills', 'ping 8.8.8.8', 'nmap', 'feed', 'clear']
+  const quickCommands = ['help', 'whoami', 'skills', 'projects', 'cat cv.txt', 'contact', 'ping 8.8.8.8', 'feed', 'clear']
 
   // Stats data with animated counters
   const stats = [
@@ -564,6 +617,7 @@ export default function Hero() {
                         setTerminalHistory([])
                       }}
                       title="Clear terminal"
+                      aria-label="Bersihkan riwayat terminal"
                       className="text-zinc-400 hover:text-zinc-200 p-1 rounded hover:bg-zinc-800/60 transition-colors"
                     >
                       <RotateCcw size={12} />
@@ -574,6 +628,10 @@ export default function Hero() {
                 {/* Terminal Body Logs */}
                 <div
                   ref={terminalBodyRef}
+                  role="log"
+                  aria-live="polite"
+                  aria-relevant="additions text"
+                  aria-label="Riwayat output terminal fizhtank"
                   className="p-4 sm:p-5 font-mono text-[13px] sm:text-[13.5px] space-y-2.5 h-[270px] sm:h-[290px] overflow-y-auto overflow-x-hidden terminal-scroll"
                 >
                   {terminalHistory.map((item, idx) => (
@@ -615,7 +673,8 @@ export default function Hero() {
                       onChange={(e) => setInputVal(e.target.value)}
                       onKeyDown={handleKeyDown}
                       placeholder="type 'help' or click commands below..."
-                      className="bg-transparent text-cyan-300 outline-none w-full placeholder:text-zinc-500 font-mono text-[13px] sm:text-[13.5px]"
+                      aria-label="Input baris perintah terminal"
+                      className="bg-transparent text-cyan-300 outline-none w-full placeholder:text-zinc-400 font-mono text-[13px] sm:text-[13.5px]"
                       autoComplete="off"
                       spellCheck="false"
                     />

@@ -178,19 +178,68 @@ const BUBBLES = [
 export default function AquariumBackground() {
   const [isFed, setIsFed] = useState(false)
   const [foodFlakes, setFoodFlakes] = useState([])
-
-  // Random plankton generation
-  const plankton = useMemo(
-    () =>
-      Array.from({ length: 32 }, (_, i) => ({
-        left: `${Math.sin(i * 47.3) * 50 + 50}%`,
-        top: `${Math.sin(i * 31.7) * 50 + 50}%`,
-        delay: `${(i * 0.41) % 8}s`,
-        dur: `${4 + (i % 5)}s`,
-        size: 1 + (i % 3),
-      })),
-    []
+  const [isTabActive, setIsTabActive] = useState(true)
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.matchMedia('(max-width: 768px)').matches : false
   )
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() =>
+    typeof window !== 'undefined' ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false
+  )
+
+  // Listen for tab visibility, viewport resize, and reduced-motion preference
+  useEffect(() => {
+    const handleVisibility = () => {
+      setIsTabActive(!document.hidden)
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+
+    const mobileQuery = window.matchMedia('(max-width: 768px)')
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+
+    const handleMobileChange = (e) => setIsMobile(e.matches)
+    const handleMotionChange = (e) => setPrefersReducedMotion(e.matches)
+
+    mobileQuery.addEventListener('change', handleMobileChange)
+    motionQuery.addEventListener('change', handleMotionChange)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility)
+      mobileQuery.removeEventListener('change', handleMobileChange)
+      motionQuery.removeEventListener('change', handleMotionChange)
+    }
+  }, [])
+
+  // Filter fish ecosystem based on device mode
+  const activeFishList = useMemo(() => {
+    if (isMobile) {
+      // Pick 5 distinct species across water depths on mobile to minimize GPU load
+      return [
+        FISH_ECOSYSTEM[0], // tetra (surface)
+        FISH_ECOSYSTEM[1], // betta (surface)
+        FISH_ECOSYSTEM[4], // ray (midwater)
+        FISH_ECOSYSTEM[8], // angler (abyssal)
+        FISH_ECOSYSTEM[9], // jelly (abyssal)
+      ]
+    }
+    return FISH_ECOSYSTEM
+  }, [isMobile])
+
+  // Reduced bubble streams on mobile
+  const activeBubbles = useMemo(() => {
+    return isMobile ? BUBBLES.slice(0, 4) : BUBBLES
+  }, [isMobile])
+
+  // Random plankton generation (12 on mobile, 32 on desktop)
+  const plankton = useMemo(() => {
+    const count = isMobile ? 12 : 32
+    return Array.from({ length: count }, (_, i) => ({
+      left: `${Math.sin(i * 47.3) * 50 + 50}%`,
+      top: `${Math.sin(i * 31.7) * 50 + 50}%`,
+      delay: `${(i * 0.41) % 8}s`,
+      dur: `${4 + (i % 5)}s`,
+      size: 1 + (i % 3),
+    }))
+  }, [isMobile])
 
   // Trigger nutrient flakes drop
   const triggerFeeding = useCallback((originX = null) => {
@@ -251,7 +300,7 @@ export default function AquariumBackground() {
 
       {/* ── Fixed full-screen ocean ── */}
       <div
-        className="aquarium-bg select-none"
+        className={`aquarium-bg select-none ${!isTabActive || prefersReducedMotion ? 'anim-paused' : ''}`}
         aria-hidden="true"
         onClick={(e) => {
           const xPercent = (e.clientX / window.innerWidth) * 100
@@ -349,9 +398,12 @@ export default function AquariumBackground() {
         ))}
 
         {/* ── High-Fidelity Bioluminescent Fish Organisms ── */}
-        {FISH_ECOSYSTEM.map((f) => {
+        {activeFishList.map((f, idx) => {
           const currentOpacity = isFed ? Math.min(1, f.baseOp + 0.25) : f.baseOp
           const animSpeed = isFed ? f.dur * 0.75 : f.dur
+
+          // Static ambient positioning for prefers-reduced-motion
+          const staticLeft = `${(idx * 20 + 8) % 82}%`
 
           return (
             <div
@@ -359,10 +411,12 @@ export default function AquariumBackground() {
               style={{
                 position: 'absolute',
                 top: `${f.y}%`,
-                left: f.flip ? undefined : '-180px',
-                right: f.flip ? '-180px' : undefined,
+                left: prefersReducedMotion ? staticLeft : (f.flip ? undefined : '-180px'),
+                right: prefersReducedMotion ? undefined : (f.flip ? '-180px' : undefined),
                 opacity: currentOpacity,
-                animation: `${f.flip ? 'fish-swim-reverse' : 'fish-swim'} ${animSpeed}s linear ${f.delay}s infinite`,
+                animation: prefersReducedMotion
+                  ? 'none'
+                  : `${f.flip ? 'fish-swim-reverse' : 'fish-swim'} ${animSpeed}s linear ${f.delay}s infinite`,
                 pointerEvents: 'none',
                 transition: 'opacity 0.6s ease',
                 zIndex: 2,
@@ -370,7 +424,7 @@ export default function AquariumBackground() {
             >
               <div
                 style={{
-                  animation: `fish-bob ${f.bobDur}s ease-in-out infinite`,
+                  animation: prefersReducedMotion ? 'none' : `fish-bob ${f.bobDur}s ease-in-out infinite`,
                   transition: 'transform 0.3s ease',
                 }}
               >
@@ -381,35 +435,37 @@ export default function AquariumBackground() {
         })}
 
         {/* ── Plankton ── */}
-        {plankton.map((p, i) => (
-          <div
-            key={i}
-            style={{
-              position: 'absolute',
-              left: p.left,
-              top: p.top,
-              width: p.size,
-              height: p.size,
-              background: 'rgba(167,139,250,0.6)',
-              borderRadius: '50%',
-              filter: 'blur(0.4px)',
-              animation: `plankton-drift ${p.dur} ease-in-out ${p.delay} infinite`,
-              pointerEvents: 'none',
-            }}
-          />
-        ))}
+        {!prefersReducedMotion &&
+          plankton.map((p, i) => (
+            <div
+              key={i}
+              style={{
+                position: 'absolute',
+                left: p.left,
+                top: p.top,
+                width: p.size,
+                height: p.size,
+                background: 'rgba(167,139,250,0.6)',
+                borderRadius: '50%',
+                filter: 'blur(0.4px)',
+                animation: `plankton-drift ${p.dur} ease-in-out ${p.delay} infinite`,
+                pointerEvents: 'none',
+              }}
+            />
+          ))}
 
         {/* ── Bubbles ── */}
-        {BUBBLES.map((b, i) => (
-          <div
-            key={i}
-            style={{
-              position: 'absolute',
-              bottom: 0,
-              left: b.left,
-              pointerEvents: 'none',
-            }}
-          >
+        {!prefersReducedMotion &&
+          activeBubbles.map((b, i) => (
+            <div
+              key={i}
+              style={{
+                position: 'absolute',
+                bottom: 0,
+                left: b.left,
+                pointerEvents: 'none',
+              }}
+            >
             {[0, 1, 2].map((j) => (
               <div
                 key={j}

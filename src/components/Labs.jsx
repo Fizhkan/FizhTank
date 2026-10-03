@@ -1,7 +1,8 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, lazy, Suspense } from 'react'
 import { ArrowUpRight, Network, Eye, Terminal, Fish, Waves } from 'lucide-react'
-import LabModal from './LabModal'
 import { useScrollReveal } from '../hooks/useScrollReveal'
+
+const LabModal = lazy(() => import('./LabModal'))
 
 export const labsData = [
   {
@@ -353,7 +354,9 @@ export default function Labs() {
 
       {/* Modal */}
       {selectedLab && (
-        <LabModal lab={selectedLab} onClose={() => setSelectedLab(null)} />
+        <Suspense fallback={null}>
+          <LabModal lab={selectedLab} onClose={() => setSelectedLab(null)} />
+        </Suspense>
       )}
     </section>
   )
