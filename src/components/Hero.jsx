@@ -420,7 +420,7 @@ export default function Hero() {
                   transition: 'all 0.7s ease 0.5s',
                 }}
               >
-                <span className="font-mono text-xs font-semibold tracking-wide text-cyan-300">01. about</span>
+                <span className="font-mono text-xs font-semibold tracking-wide text-cyan-300">about</span>
                 <span className="text-zinc-600">·</span>
                 <Waves size={14} className="text-cyan-400 bio-glow shrink-0" />
                 <span className="text-[12px] sm:text-xs uppercase tracking-wider font-mono font-semibold text-cyan-300/80">

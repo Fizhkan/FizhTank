@@ -172,7 +172,7 @@ export default function Labs() {
                 background: 'linear-gradient(90deg, #7c3aed, #06b6d4)',
               }}
             />
-            <span className="font-mono text-sm font-semibold tracking-wide text-cyan-300">03. labs</span>
+            <span className="font-mono text-sm font-semibold tracking-wide text-cyan-300">labs</span>
             <Fish size={14} style={{ color: 'rgba(167,139,250,0.7)' }} />
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-[40px] font-extrabold text-zinc-50 section-title font-display">

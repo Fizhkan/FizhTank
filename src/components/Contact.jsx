@@ -208,7 +208,7 @@ export default function Contact() {
                 background: 'linear-gradient(90deg, #7c3aed, #06b6d4)',
               }}
             />
-            <span className="font-mono text-sm font-semibold tracking-wide text-cyan-300">05. contact</span>
+            <span className="font-mono text-sm font-semibold tracking-wide text-cyan-300">contact</span>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-[40px] font-extrabold text-zinc-50 section-title font-display">
             Get In Touch

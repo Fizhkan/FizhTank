@@ -229,7 +229,7 @@ export default function Skills() {
                 background: 'linear-gradient(90deg, #7c3aed, #06b6d4)',
               }}
             />
-            <span className="font-mono text-sm font-semibold tracking-wide text-cyan-300">02. skills</span>
+            <span className="font-mono text-sm font-semibold tracking-wide text-cyan-300">skills</span>
             <Fish
               size={14}
               style={{

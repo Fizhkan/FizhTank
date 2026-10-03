@@ -62,7 +62,7 @@ export default function Certifications() {
                 }}
               />
               <span className="font-mono text-sm font-semibold tracking-wide text-cyan-300">
-                04. credentials
+                credentials
               </span>
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-[40px] font-extrabold text-zinc-50 section-title font-display">
