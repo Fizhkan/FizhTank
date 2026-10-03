@@ -101,7 +101,7 @@ export default function Navbar() {
 
   // Active section tracking
   useEffect(() => {
-    const sections = ['about', 'skills', 'labs', 'contact']
+    const sections = ['about', 'skills', 'labs', 'certifications', 'contact']
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -124,6 +124,7 @@ export default function Navbar() {
     { label: 'About', href: '#about' },
     { label: 'Skills', href: '#skills' },
     { label: 'Labs', href: '#labs' },
+    { label: 'Credentials', href: '#certifications' },
     { label: 'Contact', href: '#contact' },
   ]
 

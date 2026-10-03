@@ -4,6 +4,7 @@ import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import Skills from './components/Skills'
 import Labs from './components/Labs'
+import Certifications from './components/Certifications'
 import Contact from './components/Contact'
 import ScrollToTop from './components/ScrollToTop'
 
@@ -22,6 +23,8 @@ function App() {
         <Skills />
         <div className="wave-divider" aria-hidden="true" />
         <Labs />
+        <div className="wave-divider" aria-hidden="true" />
+        <Certifications />
         <div className="wave-divider" aria-hidden="true" />
         <Contact />
       </div>

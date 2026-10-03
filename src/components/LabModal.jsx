@@ -1,8 +1,157 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
-import { X, Target, Map, Terminal, CheckCircle2 } from 'lucide-react'
+import { X, Target, Map, Terminal, CheckCircle2, ExternalLink, ShieldCheck, Network, Cpu } from 'lucide-react'
+
+// ── SVG Topology Visualizers ──────────────────────────────────
+function EnterpriseVlanTopology({ alt }) {
+  return (
+    <div className="w-full overflow-hidden rounded-xl bg-zinc-950/80 border border-zinc-800/80 p-3 sm:p-4 mb-3">
+      <svg
+        viewBox="0 0 600 240"
+        className="w-full h-auto text-zinc-100"
+        role="img"
+        aria-label={alt}
+      >
+        <title>{alt}</title>
+        <defs>
+          <linearGradient id="coreGlow" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.3" />
+            <stop offset="100%" stopColor="#1d4ed8" stopOpacity="0.1" />
+          </linearGradient>
+          <linearGradient id="vlanGlow" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.2" />
+            <stop offset="100%" stopColor="#0e7490" stopOpacity="0.05" />
+          </linearGradient>
+        </defs>
+
+        {/* Connection lines from Core to Access */}
+        <path d="M 300 65 L 100 155" stroke="#3b82f6" strokeWidth="2" strokeDasharray="4 2" />
+        <path d="M 300 65 L 300 155" stroke="#06b6d4" strokeWidth="2" strokeDasharray="4 2" />
+        <path d="M 300 65 L 500 155" stroke="#a855f7" strokeWidth="2" strokeDasharray="4 2" />
+
+        {/* Trunk Labels */}
+        <text x="180" y="105" fill="#93c5fd" fontSize="10" fontFamily="monospace">802.1Q Trunk</text>
+        <text x="310" y="115" fill="#67e8f9" fontSize="10" fontFamily="monospace">802.1Q Trunk</text>
+        <text x="410" y="105" fill="#d8b4fe" fontSize="10" fontFamily="monospace">802.1Q Trunk</text>
+
+        {/* SW-CORE Node */}
+        <rect x="210" y="20" width="180" height="48" rx="8" fill="url(#coreGlow)" stroke="#3b82f6" strokeWidth="1.5" />
+        <text x="300" y="42" fill="#eff6ff" fontSize="12" fontWeight="bold" fontFamily="monospace" textAnchor="middle">SW-CORE (L3 Switch)</text>
+        <text x="300" y="58" fill="#93c5fd" fontSize="10" fontFamily="monospace" textAnchor="middle">SVI Routing Engine</text>
+
+        {/* Access Switch SW-IT */}
+        <rect x="20" y="155" width="160" height="60" rx="8" fill="url(#vlanGlow)" stroke="#3b82f6" strokeWidth="1.2" />
+        <text x="100" y="178" fill="#eff6ff" fontSize="11" fontWeight="bold" fontFamily="monospace" textAnchor="middle">SW-IT (Access)</text>
+        <text x="100" y="194" fill="#60a5fa" fontSize="9.5" fontFamily="monospace" textAnchor="middle">VLAN 10: IT Dept</text>
+        <text x="100" y="207" fill="#93c5fd" fontSize="9" fontFamily="monospace" textAnchor="middle">192.168.10.0/24</text>
+
+        {/* Access Switch SW-HR */}
+        <rect x="220" y="155" width="160" height="60" rx="8" fill="url(#vlanGlow)" stroke="#06b6d4" strokeWidth="1.2" />
+        <text x="300" y="178" fill="#eff6ff" fontSize="11" fontWeight="bold" fontFamily="monospace" textAnchor="middle">SW-HR (Access)</text>
+        <text x="300" y="194" fill="#22d3ee" fontSize="9.5" fontFamily="monospace" textAnchor="middle">VLAN 20: HR Dept</text>
+        <text x="300" y="207" fill="#67e8f9" fontSize="9" fontFamily="monospace" textAnchor="middle">192.168.20.0/24 [ACL]</text>
+
+        {/* Access Switch SW-FIN */}
+        <rect x="420" y="155" width="160" height="60" rx="8" fill="url(#vlanGlow)" stroke="#a855f7" strokeWidth="1.2" />
+        <text x="500" y="178" fill="#eff6ff" fontSize="11" fontWeight="bold" fontFamily="monospace" textAnchor="middle">SW-FIN (Access)</text>
+        <text x="500" y="194" fill="#c084fc" fontSize="9.5" fontFamily="monospace" textAnchor="middle">VLAN 30: Finance</text>
+        <text x="500" y="207" fill="#d8b4fe" fontSize="9" fontFamily="monospace" textAnchor="middle">192.168.30.0/24</text>
+      </svg>
+    </div>
+  )
+}
+
+function PacketInspectionTopology({ alt }) {
+  return (
+    <div className="w-full overflow-hidden rounded-xl bg-zinc-950/80 border border-zinc-800/80 p-3 sm:p-4 mb-3">
+      <svg
+        viewBox="0 0 600 240"
+        className="w-full h-auto text-zinc-100"
+        role="img"
+        aria-label={alt}
+      >
+        <title>{alt}</title>
+        {/* Attacker Tap */}
+        <rect x="200" y="15" width="200" height="48" rx="8" fill="rgba(168,85,247,0.15)" stroke="#a855f7" strokeWidth="1.5" />
+        <text x="300" y="37" fill="#faf5ff" fontSize="12" fontWeight="bold" fontFamily="monospace" textAnchor="middle">Wireshark Tap Workstation</text>
+        <text x="300" y="52" fill="#d8b4fe" fontSize="9.5" fontFamily="monospace" textAnchor="middle">Promiscuous Mode / SPAN</text>
+
+        {/* Tap line */}
+        <path d="M 300 63 L 300 100" stroke="#a855f7" strokeWidth="2" strokeDasharray="3 3" />
+        <text x="305" y="85" fill="#c084fc" fontSize="9.5" fontFamily="monospace">Port Mirror</text>
+
+        {/* Switch */}
+        <rect x="180" y="100" width="240" height="38" rx="6" fill="rgba(6,182,212,0.12)" stroke="#06b6d4" strokeWidth="1.2" />
+        <text x="300" y="124" fill="#ecfeff" fontSize="11" fontWeight="bold" fontFamily="monospace" textAnchor="middle">Managed Switch (Shared L2 Segment)</text>
+
+        {/* Branch Lines */}
+        <path d="M 230 138 L 100 175" stroke="#ef4444" strokeWidth="1.8" />
+        <path d="M 370 138 L 500 175" stroke="#10b981" strokeWidth="1.8" />
+
+        {/* HTTP Target */}
+        <rect x="20" y="175" width="170" height="52" rx="8" fill="rgba(239,68,68,0.1)" stroke="#ef4444" strokeWidth="1.2" />
+        <text x="105" y="196" fill="#fee2e2" fontSize="10.5" fontWeight="bold" fontFamily="monospace" textAnchor="middle">HTTP Client (192.168.1.50)</text>
+        <text x="105" y="213" fill="#fca5a5" fontSize="9" fontFamily="monospace" textAnchor="middle">Cleartext POST / Pass Exposed</text>
+
+        {/* HTTPS Target */}
+        <rect x="410" y="175" width="170" height="52" rx="8" fill="rgba(16,185,129,0.1)" stroke="#10b981" strokeWidth="1.2" />
+        <text x="495" y="196" fill="#ecfdf5" fontSize="10.5" fontWeight="bold" fontFamily="monospace" textAnchor="middle">HTTPS Client (192.168.1.51)</text>
+        <text x="495" y="213" fill="#6ee7b7" fontSize="9" fontFamily="monospace" textAnchor="middle">TLS 1.3 Encrypted Stream</text>
+      </svg>
+    </div>
+  )
+}
+
+function LinuxHomelabTopology({ alt }) {
+  return (
+    <div className="w-full overflow-hidden rounded-xl bg-zinc-950/80 border border-zinc-800/80 p-3 sm:p-4 mb-3">
+      <svg
+        viewBox="0 0 600 240"
+        className="w-full h-auto text-zinc-100"
+        role="img"
+        aria-label={alt}
+      >
+        <title>{alt}</title>
+        {/* WAN Node */}
+        <rect x="220" y="15" width="160" height="42" rx="6" fill="rgba(59,130,246,0.12)" stroke="#3b82f6" strokeWidth="1.2" />
+        <text x="300" y="35" fill="#eff6ff" fontSize="11" fontWeight="bold" fontFamily="monospace" textAnchor="middle">WAN / ISP Gateway</text>
+        <text x="300" y="49" fill="#93c5fd" fontSize="9" fontFamily="monospace" textAnchor="middle">192.168.0.1</text>
+
+        <path d="M 300 57 L 300 90" stroke="#10b981" strokeWidth="2" />
+
+        {/* Arch Gateway */}
+        <rect x="150" y="90" width="300" height="65" rx="8" fill="rgba(16,185,129,0.12)" stroke="#10b981" strokeWidth="1.5" />
+        <text x="300" y="112" fill="#ecfdf5" fontSize="12" fontWeight="bold" fontFamily="monospace" textAnchor="middle">Arch Linux Gateway & DNS (192.168.1.254)</text>
+        <text x="300" y="128" fill="#6ee7b7" fontSize="9.5" fontFamily="monospace" textAnchor="middle">UFW Firewall (Stateful) | Pi-hole FTL (Port 53)</text>
+        <text x="300" y="142" fill="#a7f3d0" fontSize="9" fontFamily="monospace" textAnchor="middle">Hardened SSH (Port 2222, Ed25519 Only)</text>
+
+        <path d="M 300 155 L 300 185" stroke="#10b981" strokeWidth="2" strokeDasharray="3 3" />
+
+        {/* LAN Clients */}
+        <rect x="180" y="185" width="240" height="42" rx="6" fill="rgba(99,102,241,0.1)" stroke="#818cf8" strokeWidth="1.2" />
+        <text x="300" y="204" fill="#e0e7ff" fontSize="10.5" fontWeight="bold" fontFamily="monospace" textAnchor="middle">LAN Clients Subnet (192.168.1.0/24)</text>
+        <text x="300" y="218" fill="#a5b4fc" fontSize="9" fontFamily="monospace" textAnchor="middle">Workstations, IoT, Ad-free DNS Resolvers</text>
+      </svg>
+    </div>
+  )
+}
+
+function TopologySchematic({ lab }) {
+  const type = lab.writeup.topologyDiagramType
+  const alt = lab.writeup.topologyAlt || 'Network topology diagram'
+
+  switch (type) {
+    case 'enterprise-vlan':
+      return <EnterpriseVlanTopology alt={alt} />
+    case 'packet-inspection':
+      return <PacketInspectionTopology alt={alt} />
+    case 'linux-homelab':
+      return <LinuxHomelabTopology alt={alt} />
+    default:
+      return null
+  }
+}
 
 export default function LabModal({ lab, onClose }) {
-  const Icon = lab.icon
   const [isOpen, setIsOpen] = useState(false)
   const [sectionsRevealed, setSectionsRevealed] = useState(false)
   const triggerRef = useRef(null)
@@ -81,7 +230,9 @@ export default function LabModal({ lab, onClose }) {
     violet: 'text-violet-400 bg-violet-500/10 border-violet-500/20',
     green: 'text-green-400 bg-green-500/10 border-green-500/20',
   }
-  const accent = colorMap[lab.accentColor]
+  const accent = colorMap[lab.accentColor] || colorMap.blue
+
+  const modalIcon = lab.id === 1 ? Network : lab.id === 2 ? ShieldCheck : Cpu
 
   return (
     <div
@@ -98,7 +249,7 @@ export default function LabModal({ lab, onClose }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="lab-modal-title"
-        className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-zinc-950 border border-zinc-800 rounded-2xl"
+        className="relative w-full max-w-3xl max-h-[92vh] overflow-y-auto bg-zinc-950 border border-zinc-800 rounded-2xl"
         style={{
           opacity: isOpen ? 1 : 0,
           transform: isOpen ? 'translateY(0) scale(1)' : 'translateY(30px) scale(0.95)',
@@ -126,7 +277,7 @@ export default function LabModal({ lab, onClose }) {
                 transition: 'all 0.5s ease 0.2s',
               }}
             >
-              <Icon size={18} />
+              {modalIcon && <modalIcon size={18} />}
             </div>
             <div>
               <span className="text-[12px] text-cyan-300 font-mono font-semibold tracking-wider block mb-0.5">{lab.category}</span>
@@ -160,22 +311,18 @@ export default function LabModal({ lab, onClose }) {
           {/* Topology */}
           <Section
             icon={Map}
-            title="Architecture / Topology"
+            title="Architecture & Topologi (SVG Schematic)"
             iconClass="text-blue-400"
             visible={sectionsRevealed}
             delay={1}
           >
-            <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-5 relative overflow-hidden group">
-              {/* Decorative grid */}
-              <div
-                className="absolute inset-0 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity duration-500"
-                style={{
-                  backgroundImage: 'repeating-linear-gradient(0deg, #8b5cf6 0, #8b5cf6 1px, transparent 0, transparent 50%), repeating-linear-gradient(90deg, #8b5cf6 0, #8b5cf6 1px, transparent 0, transparent 50%)',
-                  backgroundSize: '24px 24px',
-                }}
-              />
+            {/* Embedded Responsive SVG Topology with Alt Text */}
+            <TopologySchematic lab={lab} />
+
+            {/* Topology Text Spec */}
+            <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4 relative overflow-hidden group">
               <pre className="relative text-[12.5px] sm:text-[13px] text-zinc-200 font-mono leading-relaxed whitespace-pre-wrap">
-                {lab.writeup.topology}
+                {lab.writeup.topologyText || lab.writeup.topology}
               </pre>
             </div>
           </Section>
@@ -183,7 +330,7 @@ export default function LabModal({ lab, onClose }) {
           {/* Key Commands */}
           <Section
             icon={Terminal}
-            title="Key Commands / Config"
+            title="Key Configuration Commands"
             iconClass="text-violet-400"
             visible={sectionsRevealed}
             delay={2}
@@ -196,7 +343,7 @@ export default function LabModal({ lab, onClose }) {
           {/* Verification */}
           <Section
             icon={CheckCircle2}
-            title="Verification Results"
+            title="Hasil Verifikasi & Output Diagnostik"
             iconClass="text-green-400"
             visible={sectionsRevealed}
             delay={3}
@@ -221,21 +368,25 @@ export default function LabModal({ lab, onClose }) {
             </div>
           </Section>
 
-          {/* Tags */}
-          <div className="flex flex-wrap gap-2 pt-4 border-t border-zinc-800">
-            {lab.tags.map((tag, i) => (
-              <span
-                key={tag}
-                className="tech-badge hover:scale-105 transition-all duration-200"
-                style={{
-                  opacity: sectionsRevealed ? 1 : 0,
-                  transform: sectionsRevealed ? 'translateY(0)' : 'translateY(8px)',
-                  transition: `all 0.3s ease ${0.7 + i * 0.06}s`,
-                }}
-              >
-                {tag}
-              </span>
-            ))}
+          {/* Write-up / Repository Link & Tags */}
+          <div className="pt-4 border-t border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+              {lab.tags.map((tag) => (
+                <span key={tag} className="tech-badge">
+                  {tag}
+                </span>
+              ))}
+            </div>
+
+            <a
+              href={lab.repoUrl && lab.repoUrl.startsWith('http') ? lab.repoUrl : 'https://github.com/Fizhkan'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-violet-600/20 border border-violet-500/40 text-violet-200 hover:text-white hover:bg-violet-600/30 text-[13px] font-mono font-medium transition-all"
+            >
+              <ExternalLink size={14} />
+              <span>Buka Write-up / Repo Lab</span>
+            </a>
           </div>
         </div>
       </div>

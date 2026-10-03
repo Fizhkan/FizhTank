@@ -4,109 +4,56 @@ import {
   Database, Lock, Eye, Layers, Cpu, HardDrive, Fish
 } from 'lucide-react'
 import { useScrollReveal } from '../hooks/useScrollReveal'
+import { skillGroups } from '../data/skillsData'
 
-const skillGroups = [
-  {
-    id: 'networking',
-    icon: Network,
-    label: 'Networking Core',
-    accent: { text: '#60a5fa', bg: 'rgba(37,99,235,0.08)', border: 'rgba(59,130,246,0.25)' },
-    description: 'Foundation of packet routing and layer 2/3 design',
-    skills: [
-      { name: 'IPv4 Subnetting & CIDR', level: 90 },
-      { name: 'Routing & Switching (OSPF, RIP)', level: 82 },
-      { name: 'VLAN & Trunking (802.1Q)', level: 85 },
-      { name: 'DHCP / DNS Configuration', level: 88 },
-      { name: 'Cisco Packet Tracer', level: 80 },
-    ],
-    tags: ['IPv4', 'VLAN', 'OSPF', 'STP', 'NAT/PAT'],
-  },
-  {
-    id: 'linux',
-    icon: Terminal,
-    label: 'Linux & Systems',
-    accent: { text: '#34d399', bg: 'rgba(5,150,105,0.08)', border: 'rgba(16,185,129,0.25)' },
-    description: 'System administration and automation on Arch-based distros',
-    skills: [
-      { name: 'EndeavourOS / Arch Linux', level: 85 },
-      { name: 'Bash Scripting', level: 75 },
-      { name: 'System Administration', level: 80 },
-      { name: 'Package Management (pacman/yay)', level: 90 },
-      { name: 'Systemd & Service Management', level: 78 },
-    ],
-    tags: ['Arch', 'Bash', 'systemd', 'pacman', 'cron'],
-  },
-  {
-    id: 'security',
-    icon: Shield,
-    label: 'Security & Analysis',
-    accent: { text: '#a78bfa', bg: 'rgba(109,40,217,0.1)', border: 'rgba(139,92,246,0.25)' },
-    description: 'Traffic inspection, recon, and access control enforcement',
-    skills: [
-      { name: 'Wireshark & Packet Analysis', level: 85 },
-      { name: 'Nmap Network Scanning', level: 80 },
-      { name: 'Firewall & ACL (UFW/iptables)', level: 78 },
-      { name: 'TLS vs Plaintext Analysis', level: 75 },
-      { name: 'Network Threat Assessment', level: 70 },
-    ],
-    tags: ['Wireshark', 'Nmap', 'iptables', 'ACL', 'IDS'],
-  },
-]
+const groupIcons = {
+  networking: Network,
+  linux: Terminal,
+  security: Shield,
+}
 
-// ── Animated Skill Bar ──────────────────────────────────────
-function AnimatedSkillBar({ name, level, visible, delay, accentColor }) {
+// ── Honest Qualitative Skill Item ────────────────────────────
+function SkillItem({ name, level, context, visible, delay, accentColor }) {
   const [hovered, setHovered] = useState(false)
 
   return (
     <div
-      className="group/bar"
+      className="p-3 rounded-xl border border-zinc-800/80 transition-all duration-300 relative overflow-hidden group/item"
+      style={{
+        background: hovered ? 'rgba(15, 23, 42, 0.65)' : 'rgba(8, 12, 28, 0.45)',
+        borderColor: hovered ? accentColor : 'rgba(255, 255, 255, 0.07)',
+        opacity: visible ? 1 : 0,
+        transform: visible ? 'translateY(0)' : 'translateY(12px)',
+        transition: `all 0.5s ease ${delay}ms, border-color 0.25s, background-color 0.25s`,
+      }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <div className="flex justify-between mb-2">
-        <span className="text-[13.5px] font-medium text-zinc-200 group-hover/bar:text-zinc-50 transition-colors duration-300">
+      <div className="flex items-start justify-between gap-2 mb-1.5">
+        <span className="text-[14px] font-semibold text-zinc-100 group-hover/item:text-white transition-colors">
           {name}
         </span>
         <span
-          className="text-[13px] font-mono font-semibold transition-all duration-300"
+          className="text-[11px] font-mono font-medium px-2 py-0.5 rounded-full shrink-0 border"
           style={{
-            color: hovered ? accentColor : 'rgba(196,181,253,0.9)',
-            transform: hovered ? 'scale(1.08)' : 'scale(1)',
+            borderColor: `${accentColor}55`,
+            color: accentColor,
+            background: `${accentColor}15`,
           }}
         >
-          {level}%
+          {level}
         </span>
       </div>
-      <div className="skill-bar-track relative overflow-hidden">
-        <div
-          className="skill-bar-fill"
-          style={{
-            width: visible ? `${level}%` : '0%',
-            transitionDelay: `${delay}ms`,
-          }}
-        />
-        {/* Animated pulse on the fill edge */}
-        {visible && (
-          <div
-            className="absolute top-0 bottom-0 w-3 rounded-full"
-            style={{
-              left: `${level}%`,
-              transform: 'translateX(-100%)',
-              background: 'radial-gradient(circle, rgba(255,255,255,0.6), transparent)',
-              opacity: hovered ? 0.8 : 0,
-              transition: 'opacity 0.3s ease',
-              filter: 'blur(2px)',
-            }}
-          />
-        )}
-      </div>
+      <p className="text-[12.5px] text-zinc-300 leading-relaxed font-normal">
+        {context}
+      </p>
     </div>
   )
 }
 
 // ── Interactive Skill Card ──────────────────────────────────
 function SkillCard({ group, visible, cardIdx }) {
-  const Icon = group.icon
+  const Icon = groupIcons[group.id] || Network
   const cardRef = useRef(null)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const [isHovered, setIsHovered] = useState(false)
@@ -173,15 +120,16 @@ function SkillCard({ group, visible, cardIdx }) {
         </div>
       </div>
 
-      {/* Skill Bars */}
-      <div className="space-y-3.5 relative z-10">
+      {/* Concrete Context Skills */}
+      <div className="space-y-3 relative z-10">
         {group.skills.map((skill, skillIdx) => (
-          <AnimatedSkillBar
+          <SkillItem
             key={skill.name}
             name={skill.name}
             level={skill.level}
+            context={skill.context}
             visible={visible}
-            delay={200 + cardIdx * 150 + skillIdx * 100}
+            delay={150 + cardIdx * 100 + skillIdx * 60}
             accentColor={group.accent.text}
           />
         ))}
@@ -288,7 +236,7 @@ export default function Skills() {
             Core Skills Matrix
           </h2>
           <p className="text-zinc-300 text-base sm:text-[17px] leading-relaxed mt-4 max-w-2xl font-normal">
-            The Filter &amp; Ecosystem — every tool in the tank serving a specific purpose in the deep network.
+            The Filter &amp; Ecosystem — setiap kemampuan dengan konteks implementasi nyata di lingkungan produksi, simulasi enterprise, dan homelab.
           </p>
         </div>
 

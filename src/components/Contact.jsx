@@ -1,33 +1,14 @@
 import { useState } from 'react'
 import { GitBranch, Link2, Mail, Send, Fish, CheckCircle2, AlertCircle, ExternalLink } from 'lucide-react'
 import { useScrollReveal } from '../hooks/useScrollReveal'
+import { socialLinks, contactConfig } from '../data/contactData'
 
-const socialLinks = [
-  {
-    icon: GitBranch,
-    label: 'GitHub',
-    value: 'github.com/Fizhkan',
-    href: 'https://github.com/Fizhkan',
-    color: 'hover:border-zinc-500/50 hover:text-zinc-200',
-    glowColor: 'rgba(161,161,170,0.08)',
-  },
-  {
-    icon: Link2,
-    label: 'LinkedIn',
-    value: 'linkedin.com/in/fizhtank',
-    href: '#',
-    color: 'hover:border-blue-500/50 hover:text-blue-300',
-    glowColor: 'rgba(59,130,246,0.08)',
-  },
-  {
-    icon: Mail,
-    label: 'Email',
-    value: 'fizhtank@engineer.dev',
-    href: 'mailto:fizhtank@engineer.dev',
-    color: 'hover:border-violet-500/50 hover:text-violet-300',
-    glowColor: 'rgba(139,92,246,0.08)',
-  },
-]
+const iconMap = {
+  GitHub: GitBranch,
+  LinkedIn: Link2,
+  'Email Langsung': Mail,
+  Email: Mail,
+}
 
 // ── Bottom Kelp (anchored strictly to the bottom edge of the page) ──
 const KELP_STALKS = Array.from({ length: 20 }, (_, i) => ({
@@ -103,15 +84,16 @@ function BottomKelp() {
 }
 
 // ── Social Link Card ──────────────────────────────────────────
-function SocialCard({ icon: Icon, label, value, href, color, glowColor, visible, idx }) {
+function SocialCard({ label, value, href, color, glowColor, visible, idx }) {
   const [isHovered, setIsHovered] = useState(false)
+  const Icon = iconMap[label] || Link2
 
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className={`bento-card p-5 flex items-center gap-4 group transition-all cursor-pointer ${color}`}
+      className="bento-card p-5 flex items-center gap-4 group transition-all cursor-pointer border border-zinc-800 hover:border-cyan-500/40"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
@@ -121,12 +103,12 @@ function SocialCard({ icon: Icon, label, value, href, color, glowColor, visible,
         boxShadow: isHovered ? `0 8px 25px ${glowColor}` : '',
       }}
     >
-      <div className="w-11 h-11 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center shrink-0 group-hover:border-current transition-all duration-300 group-hover:scale-110">
-        <Icon size={20} className="text-zinc-400 group-hover:text-current transition-colors" />
+      <div className="w-11 h-11 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center shrink-0 group-hover:border-current transition-all duration-300 group-hover:scale-110" style={{ color }}>
+        <Icon size={20} className="transition-colors" />
       </div>
       <div className="flex-1">
         <p className="text-[12px] text-zinc-400 font-mono font-medium">{label}</p>
-        <p className="text-[14.5px] text-zinc-100 font-semibold group-hover:text-current transition-colors">{value}</p>
+        <p className="text-[14.5px] text-zinc-100 font-semibold group-hover:text-cyan-300 transition-colors">{value}</p>
       </div>
       <ExternalLink
         size={14}
@@ -143,30 +125,44 @@ function SocialCard({ icon: Icon, label, value, href, color, glowColor, visible,
 // ── Animated Form Input ──────────────────────────────────────
 function AnimatedInput({ label, type = 'text', placeholder, value, onChange, rows }) {
   const [isFocused, setIsFocused] = useState(false)
-  const Component = rows ? 'textarea' : 'input'
 
   return (
     <div className="relative">
-      <label
-        className="block text-[12.5px] font-mono font-medium mb-1.5 transition-colors duration-300"
-        style={{ color: isFocused ? 'rgba(196,181,253,1)' : 'rgba(161,161,170,1)' }}
-      >
-        // {label}
+      <label className="block text-[12px] font-mono font-medium text-zinc-300 mb-1.5 uppercase tracking-wider">
+        {label}
       </label>
-      <Component
-        type={type}
-        className="form-input"
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        rows={rows}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-        style={rows ? { resize: 'none' } : {}}
-      />
-      {/* Focus indicator line */}
+      {rows ? (
+        <textarea
+          rows={rows}
+          placeholder={placeholder}
+          value={value}
+          onChange={onChange}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          className="w-full px-4 py-3 bg-zinc-900/80 border rounded-xl text-zinc-100 text-[14.5px] placeholder:text-zinc-500 focus:outline-none transition-all duration-300 resize-none font-sans"
+          style={{
+            borderColor: isFocused ? 'rgba(124, 58, 237, 0.8)' : 'rgba(255, 255, 255, 0.08)',
+            boxShadow: isFocused ? '0 0 15px rgba(124, 58, 237, 0.2), inset 0 1px 0 rgba(255,255,255,0.05)' : '',
+          }}
+        />
+      ) : (
+        <input
+          type={type}
+          placeholder={placeholder}
+          value={value}
+          onChange={onChange}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          className="w-full px-4 py-3 bg-zinc-900/80 border rounded-xl text-zinc-100 text-[14.5px] placeholder:text-zinc-500 focus:outline-none transition-all duration-300 font-sans"
+          style={{
+            borderColor: isFocused ? 'rgba(124, 58, 237, 0.8)' : 'rgba(255, 255, 255, 0.08)',
+            boxShadow: isFocused ? '0 0 15px rgba(124, 58, 237, 0.2), inset 0 1px 0 rgba(255,255,255,0.05)' : '',
+          }}
+        />
+      )}
+      {/* Animated accent bottom line */}
       <div
-        className="absolute bottom-0 left-1/2 h-[2px] rounded-full"
+        className="absolute bottom-0 h-0.5 pointer-events-none"
         style={{
           width: isFocused ? '100%' : '0%',
           left: isFocused ? '0' : '50%',
@@ -180,7 +176,8 @@ function AnimatedInput({ label, type = 'text', placeholder, value, onChange, row
 
 export default function Contact() {
   const [form, setForm] = useState({ name: '', email: '', message: '' })
-  const [status, setStatus] = useState(null) // 'success' | 'error'
+  const [status, setStatus] = useState(null) // 'success' | 'error' | 'sent-mailto'
+  const [statusMsg, setStatusMsg] = useState('')
   const [isSending, setIsSending] = useState(false)
 
   const [headerRef, headerVisible] = useScrollReveal({ threshold: 0.2 })
@@ -188,21 +185,70 @@ export default function Contact() {
   const [formRef, formVisible] = useScrollReveal({ threshold: 0.15 })
   const [footerRef, footerVisible] = useScrollReveal({ threshold: 0.3 })
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!form.name || !form.email || !form.message) {
+    if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
       setStatus('error')
+      setStatusMsg('Harap lengkapi semua field formulir sebelum mengirim.')
       return
     }
 
-    // Simulate send with loading animation
     setIsSending(true)
-    setTimeout(() => {
-      setStatus('success')
+
+    // Check if real Formspree endpoint is configured
+    const isEndpointConfigured =
+      contactConfig.formspreeEndpoint &&
+      !contactConfig.formspreeEndpoint.includes('[ISI') &&
+      contactConfig.formspreeEndpoint.startsWith('http')
+
+    if (isEndpointConfigured) {
+      try {
+        const response = await fetch(contactConfig.formspreeEndpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify(form),
+        })
+
+        if (response.ok) {
+          setStatus('success')
+          setStatusMsg('Paket terkirim ke server via Formspree! Saya akan segera merespons.')
+          setForm({ name: '', email: '', message: '' })
+        } else {
+          throw new Error('Gagal mengirim ke endpoint')
+        }
+      } catch {
+        // Fallback to mailto if network error
+        dispatchMailto()
+      } finally {
+        setIsSending(false)
+        setTimeout(() => setStatus(null), 6000)
+      }
+    } else {
+      // Direct mailto dispatch (guaranteed real delivery without secrets)
+      dispatchMailto()
       setIsSending(false)
-      setForm({ name: '', email: '', message: '' })
-      setTimeout(() => setStatus(null), 4000)
-    }, 1200)
+      setTimeout(() => setStatus(null), 6000)
+    }
+  }
+
+  const dispatchMailto = () => {
+    const subject = encodeURIComponent(`[FizhTank] Pesan dari ${form.name}`)
+    const body = encodeURIComponent(
+      `Halo Siraj,\n\nNama: ${form.name}\nEmail: ${form.email}\n\nPesan:\n${form.message}\n\n---\nDikirim melalui formulir kontak FizhTank`
+    )
+    const targetEmail = contactConfig.fallbackEmail.includes('[ISI')
+      ? 'siraj@fizhtank.internal'
+      : contactConfig.fallbackEmail
+
+    const mailtoLink = `mailto:${targetEmail}?subject=${subject}&body=${body}`
+    window.location.href = mailtoLink
+
+    setStatus('success')
+    setStatusMsg('Klien email default Anda dibuka untuk mengirim pesan ini secara langsung!')
+    setForm({ name: '', email: '', message: '' })
   }
 
   return (
@@ -232,17 +278,16 @@ export default function Contact() {
             Get In Touch
           </h2>
           <p className="text-zinc-300 text-base sm:text-[17px] leading-relaxed mt-4 max-w-2xl font-normal">
-            Siap berkolaborasi, berdiskusi teknis, atau sekadar menyapa. Jangan ragu untuk reach out!
+            Siap berkolaborasi, berdiskusi teknis arsitektur jaringan, atau sekadar menyapa. Jangan ragu untuk reach out!
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
           {/* Left: Social Links */}
           <div ref={socialRef} className="flex flex-col gap-4">
-            {socialLinks.map(({ icon, label, value, href, color, glowColor }, idx) => (
+            {socialLinks.map(({ label, value, href, color, glowColor }, idx) => (
               <SocialCard
                 key={label}
-                icon={icon}
                 label={label}
                 value={value}
                 href={href}
@@ -253,20 +298,17 @@ export default function Contact() {
               />
             ))}
 
-            {/* Availability */}
+            {/* Status card */}
             <div
-              className="bento-card p-5"
+              className="bento-card p-5 mt-2"
               style={{
                 opacity: socialVisible ? 1 : 0,
-                transform: socialVisible ? 'translateX(0)' : 'translateX(-25px)',
-                transition: 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.45s',
+                transform: socialVisible ? 'translateY(0)' : 'translateY(20px)',
+                transition: 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.5s',
               }}
             >
               <div className="flex items-center gap-2 mb-2">
-                <span className="relative flex h-2 w-2">
-                  <span className="blink absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
-                </span>
+                <div className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.6)]" />
                 <span className="text-[12.5px] text-green-300 font-mono font-semibold">Available for opportunities</span>
               </div>
               <p className="text-[14px] text-zinc-300 leading-relaxed font-normal">
@@ -291,54 +333,38 @@ export default function Contact() {
             </h3>
 
             {/* Success Toast */}
-            <div
-              style={{
-                maxHeight: status === 'success' ? '60px' : '0',
-                opacity: status === 'success' ? 1 : 0,
-                marginBottom: status === 'success' ? '16px' : '0',
-                transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-                overflow: 'hidden',
-              }}
-            >
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+            {status === 'success' && (
+              <div className="mb-4 p-3 rounded-lg bg-green-500/10 border border-green-500/20 flex items-center gap-3">
                 <CheckCircle2 size={16} className="text-green-400 shrink-0" />
-                <p className="text-sm text-green-300 font-medium">Packet sent! I'll get back to you soon.</p>
+                <p className="text-sm text-green-300 font-medium">{statusMsg}</p>
               </div>
-            </div>
+            )}
 
             {/* Error Toast */}
-            <div
-              style={{
-                maxHeight: status === 'error' ? '60px' : '0',
-                opacity: status === 'error' ? 1 : 0,
-                marginBottom: status === 'error' ? '16px' : '0',
-                transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-                overflow: 'hidden',
-              }}
-            >
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+            {status === 'error' && (
+              <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center gap-3">
                 <AlertCircle size={16} className="text-red-400 shrink-0" />
-                <p className="text-sm text-red-300 font-medium">Please fill in all fields before sending.</p>
+                <p className="text-sm text-red-300 font-medium">{statusMsg}</p>
               </div>
-            </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <AnimatedInput
                 label="name"
-                placeholder="Your name"
+                placeholder="Nama Anda"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
               />
               <AnimatedInput
                 label="email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder="nama@domain.com"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
               />
               <AnimatedInput
                 label="message"
-                placeholder="What's on your mind?"
+                placeholder="Tuliskan pesan atau kebutuhan proyek Anda..."
                 value={form.message}
                 onChange={(e) => setForm({ ...form, message: e.target.value })}
                 rows={4}
@@ -346,7 +372,7 @@ export default function Contact() {
               <button
                 type="submit"
                 disabled={isSending}
-                className="w-full flex items-center justify-center gap-2 py-3.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-semibold text-[15px] transition-all hover:shadow-[0_0_20px_rgba(139,92,246,0.35)] group relative overflow-hidden active:scale-[0.98] disabled:opacity-70 tracking-wide"
+                className="w-full flex items-center justify-center gap-2 py-3.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-semibold text-[15px] transition-all hover:shadow-[0_0_20px_rgba(139,92,246,0.35)] group relative overflow-hidden active:scale-[0.98] disabled:opacity-70 tracking-wide cursor-pointer"
               >
                 {/* Shimmer */}
                 <div
@@ -358,51 +384,47 @@ export default function Contact() {
                   }}
                 />
                 {isSending ? (
-                  <>
-                    <div
-                      className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
-                      style={{ animation: 'spin 0.8s linear infinite' }}
-                    />
-                    <span className="relative z-10">Sending...</span>
-                  </>
+                  <span className="font-mono text-sm">Transmitting Packet...</span>
                 ) : (
                   <>
-                    <Send size={15} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform relative z-10" />
-                    <span className="relative z-10">Send Message</span>
+                    <span>Send Transmission</span>
+                    <Send size={15} className="group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform" />
                   </>
                 )}
               </button>
             </form>
           </div>
         </div>
-      </div>
 
-      {/* Footer */}
-      <div
-        ref={footerRef}
-        className="max-w-6xl mx-auto mt-16 pt-8 border-t border-zinc-800/60 relative z-10"
-        style={{
-          opacity: footerVisible ? 1 : 0,
-          transform: footerVisible ? 'translateY(0)' : 'translateY(15px)',
-          transition: 'all 0.6s ease',
-        }}
-      >
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+        {/* Footer */}
+        <div
+          ref={footerRef}
+          className="mt-20 pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4 text-[13px] text-zinc-400 font-mono relative z-10"
+          style={{
+            borderColor: 'rgba(99,102,241,0.1)',
+            opacity: footerVisible ? 1 : 0,
+            transform: footerVisible ? 'translateY(0)' : 'translateY(15px)',
+            transition: 'all 0.6s ease',
+          }}
+        >
           <div className="flex items-center gap-2">
-            <Fish size={16} className="text-violet-400" />
-            <span className="text-sm text-zinc-400 font-mono font-medium">
-              © 2026 <span className="text-violet-300 font-semibold">FizhTank</span>. All packets reserved.
-            </span>
+            <Fish size={14} className="text-violet-400" />
+            <span className="text-zinc-300">FizhTank &copy; {new Date().getFullYear()}</span>
+            <span className="text-zinc-500">|</span>
+            <span className="text-zinc-400">All systems operational</span>
           </div>
-          <div className="flex items-center gap-4 text-xs sm:text-[13px] text-zinc-400 font-mono font-medium">
-            <span>Built with React + Vite</span>
-            <div className="w-1 h-1 rounded-full bg-zinc-600" />
-            <span>Powered by ☕ & Arch Linux</span>
+
+          <div className="flex items-center gap-4 text-xs">
+            <span>Built with React 19 + Tailwind v4 + Vite</span>
+            <span className="text-zinc-500">|</span>
+            <a href="https://github.com/Fizhkan" target="_blank" rel="noopener noreferrer" className="hover:text-cyan-400 transition-colors">
+              Fizhkan
+            </a>
           </div>
         </div>
       </div>
 
-      {/* ── Kelp along bottom edge ── */}
+      {/* Decorative Kelp at Bottom */}
       <BottomKelp />
     </section>
   )
