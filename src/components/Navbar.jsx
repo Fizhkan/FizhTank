@@ -213,6 +213,9 @@ export default function Navbar() {
           className="md:hidden w-9 h-9 flex items-center justify-center rounded-lg transition-all relative overflow-hidden"
           style={{ border: '1px solid rgba(99,102,241,0.25)', color: '#a1a1aa' }}
           onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label={mobileOpen ? 'Tutup navigasi utama' : 'Buka navigasi utama'}
+          aria-expanded={mobileOpen}
+          aria-controls="mobile-navigation-menu"
         >
           <div
             className="absolute inset-0 flex items-center justify-center transition-all duration-300"
@@ -237,13 +240,19 @@ export default function Navbar() {
 
       {/* Mobile Menu — Animated Slide-down */}
       <div
-        className="md:hidden absolute top-full left-0 right-0 backdrop-blur-xl border-b overflow-hidden"
+        id="mobile-navigation-menu"
+        aria-hidden={!mobileOpen}
+        inert={!mobileOpen ? true : undefined}
+        className={`md:hidden absolute top-full left-0 right-0 backdrop-blur-xl border-b overflow-hidden ${
+          !mobileOpen ? 'pointer-events-none' : ''
+        }`}
         style={{
           background: 'rgba(4,6,15,0.95)',
           borderColor: 'rgba(99,102,241,0.15)',
           maxHeight: mobileOpen ? '300px' : '0',
           opacity: mobileOpen ? 1 : 0,
-          transition: 'max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease',
+          visibility: mobileOpen ? 'visible' : 'hidden',
+          transition: 'max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, visibility 0.4s',
         }}
       >
         <div className="py-4 px-6 flex flex-col gap-4">
@@ -266,6 +275,7 @@ export default function Navbar() {
             <a
               key={link.label}
               href={link.href}
+              tabIndex={mobileOpen ? 0 : -1}
               className="text-zinc-100 hover:text-cyan-300 font-display font-semibold text-base transition-all py-1.5"
               onClick={() => setMobileOpen(false)}
               style={{

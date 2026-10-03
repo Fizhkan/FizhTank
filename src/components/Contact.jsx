@@ -88,11 +88,13 @@ function SocialCard({ label, value, href, color, glowColor, visible, idx }) {
   const [isHovered, setIsHovered] = useState(false)
   const Icon = iconMap[label] || Link2
 
+  const isMailto = href.startsWith('mailto:')
+
   return (
     <a
       href={href}
-      target="_blank"
-      rel="noopener noreferrer"
+      target={isMailto ? undefined : '_blank'}
+      rel={isMailto ? undefined : 'noopener noreferrer'}
       className="bento-card p-5 flex items-center gap-4 group transition-all cursor-pointer border border-zinc-800 hover:border-cyan-500/40"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -123,20 +125,24 @@ function SocialCard({ label, value, href, color, glowColor, visible, idx }) {
 }
 
 // ── Animated Form Input ──────────────────────────────────────
-function AnimatedInput({ label, type = 'text', placeholder, value, onChange, rows }) {
+function AnimatedInput({ id, name, label, type = 'text', placeholder, value, onChange, rows, required = false, autoComplete }) {
   const [isFocused, setIsFocused] = useState(false)
+  const inputId = id || `input-${name || label}`
 
   return (
     <div className="relative">
-      <label className="block text-[12px] font-mono font-medium text-zinc-300 mb-1.5 uppercase tracking-wider">
+      <label htmlFor={inputId} className="block text-[12px] font-mono font-medium text-zinc-300 mb-1.5 uppercase tracking-wider">
         {label}
       </label>
       {rows ? (
         <textarea
+          id={inputId}
+          name={name || inputId}
           rows={rows}
           placeholder={placeholder}
           value={value}
           onChange={onChange}
+          required={required}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           className="w-full px-4 py-3 bg-zinc-900/80 border rounded-xl text-zinc-100 text-[14.5px] placeholder:text-zinc-500 focus:outline-none transition-all duration-300 resize-none font-sans"
@@ -147,10 +153,14 @@ function AnimatedInput({ label, type = 'text', placeholder, value, onChange, row
         />
       ) : (
         <input
+          id={inputId}
+          name={name || inputId}
           type={type}
           placeholder={placeholder}
           value={value}
           onChange={onChange}
+          required={required}
+          autoComplete={autoComplete}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           className="w-full px-4 py-3 bg-zinc-900/80 border rounded-xl text-zinc-100 text-[14.5px] placeholder:text-zinc-500 focus:outline-none transition-all duration-300 font-sans"
@@ -350,22 +360,33 @@ export default function Contact() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <AnimatedInput
+                id="contact-name"
+                name="name"
                 label="name"
                 placeholder="Nama Anda"
                 value={form.name}
+                required
+                autoComplete="name"
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
               />
               <AnimatedInput
+                id="contact-email"
+                name="email"
                 label="email"
                 type="email"
                 placeholder="nama@domain.com"
                 value={form.email}
+                required
+                autoComplete="email"
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
               />
               <AnimatedInput
+                id="contact-message"
+                name="message"
                 label="message"
                 placeholder="Tuliskan pesan atau kebutuhan proyek Anda..."
                 value={form.message}
+                required
                 onChange={(e) => setForm({ ...form, message: e.target.value })}
                 rows={4}
               />
@@ -397,7 +418,7 @@ export default function Contact() {
         </div>
 
         {/* Footer */}
-        <div
+        <footer
           ref={footerRef}
           className="mt-20 pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4 text-[13px] text-zinc-400 font-mono relative z-10"
           style={{
@@ -421,7 +442,7 @@ export default function Contact() {
               Fizhkan
             </a>
           </div>
-        </div>
+        </footer>
       </div>
 
       {/* Decorative Kelp at Bottom */}

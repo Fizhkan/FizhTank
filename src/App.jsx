@@ -14,17 +14,27 @@ function App() {
       {/* ── Full-screen aquarium world ── */}
       <AquariumBackground />
 
+      {/* ── Skip Link for Keyboard Accessibility ── */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-cyan-500 focus:text-slate-950 focus:font-mono focus:font-semibold focus:rounded-lg focus:shadow-lg focus:outline-none"
+      >
+        Lewati ke konten
+      </a>
+
       {/* ── Content layers ── */}
       <div className="relative z-10 flex flex-col justify-between">
         <Navbar />
-        <Hero />
-        {/* Wave divider */}
-        <div className="wave-divider" aria-hidden="true" />
-        <Skills />
-        <div className="wave-divider" aria-hidden="true" />
-        <Labs />
-        <div className="wave-divider" aria-hidden="true" />
-        <Certifications />
+        <main id="main-content" tabIndex={-1} className="outline-none">
+          <Hero />
+          {/* Wave divider */}
+          <div className="wave-divider" aria-hidden="true" />
+          <Skills />
+          <div className="wave-divider" aria-hidden="true" />
+          <Labs />
+          <div className="wave-divider" aria-hidden="true" />
+          <Certifications />
+        </main>
         <div className="wave-divider" aria-hidden="true" />
         <Contact />
       </div>
