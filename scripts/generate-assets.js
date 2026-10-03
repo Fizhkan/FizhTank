@@ -1,0 +1,149 @@
+import fs from 'node:fs'
+import { execSync } from 'node:child_process'
+
+const ogSvg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#050814"/>
+      <stop offset="50%" stop-color="#020308"/>
+      <stop offset="100%" stop-color="#010204"/>
+    </linearGradient>
+
+    <!-- Bioluminescent Glows -->
+    <radialGradient id="glowViolet" cx="200" cy="180" r="450" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowCyan" cx="1000" cy="450" r="500" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#06b6d4" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="textGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#c4b5fd"/>
+      <stop offset="50%" stop-color="#60a5fa"/>
+      <stop offset="100%" stop-color="#22d3ee"/>
+    </linearGradient>
+    <linearGradient id="borderGrad" x1="0" y1="0" x2="1200" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#06b6d4" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#7c3aed" stop-opacity="0.8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGrad)"/>
+  <rect width="1200" height="630" fill="url(#glowViolet)"/>
+  <rect width="1200" height="630" fill="url(#glowCyan)"/>
+
+  <!-- Card Border -->
+  <rect x="30" y="30" width="1140" height="570" rx="24" fill="#040716" fill-opacity="0.75" stroke="url(#borderGrad)" stroke-width="2"/>
+
+  <!-- Decorative Grid Lines -->
+  <g stroke="#6366f1" stroke-opacity="0.08" stroke-width="1">
+    <line x1="80" y1="120" x2="1120" y2="120"/>
+    <line x1="80" y1="240" x2="1120" y2="240"/>
+    <line x1="80" y1="360" x2="1120" y2="360"/>
+    <line x1="80" y1="480" x2="1120" y2="480"/>
+    <line x1="280" y1="60" x2="280" y2="570"/>
+    <line x1="600" y1="60" x2="600" y2="570"/>
+    <line x1="920" y1="60" x2="920" y2="570"/>
+  </g>
+
+  <!-- Header Badge -->
+  <g transform="translate(80, 80)">
+    <rect width="360" height="42" rx="21" fill="#4c1d95" fill-opacity="0.4" stroke="#8b5cf6" stroke-opacity="0.5" stroke-width="1.5"/>
+    <circle cx="24" cy="21" r="5" fill="#22d3ee"/>
+    <text x="38" y="27" font-family="monospace" font-size="15" font-weight="600" fill="#a78bfa">NETWORK &amp; SECURITY ENGINEER</text>
+  </g>
+
+  <!-- Logo Fish Icon -->
+  <g transform="translate(80, 155)">
+    <rect width="90" height="90" rx="22" fill="#581c87" fill-opacity="0.5" stroke="#a78bfa" stroke-opacity="0.6" stroke-width="2"/>
+    <g transform="translate(18, 18) scale(2.25)">
+      <path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-.94 3.46-3.44 6-7 6s-7.56-2.54-8.5-6Z" stroke="#22d3ee" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M18 12v.5" stroke="#22d3ee" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M16 17.93a9.77 9.77 0 0 1 0-11.86" stroke="#22d3ee" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M7 10.67C7 8 5.58 5.97 2.73 5.5c-1 3.98-.23 7.79 1.98 11.23 2.17-1.4 2.29-3.44 2.29-6.06z" stroke="#c4b5fd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M10.46 7.26C10.2 5.88 9.17 4.24 8 3h5.8a2 2 0 0 1 1.98 1.67l.23 1.4" stroke="#c4b5fd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="m16.01 17.93-.23 1.4A2 2 0 0 1 13.8 21H8c1.17-1.25 2.2-2.89 2.46-4.26" stroke="#c4b5fd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </g>
+
+  <!-- Title & Branding -->
+  <text x="190" y="222" font-family="system-ui, -apple-system, sans-serif" font-size="64" font-weight="800" fill="#f8fafc">
+    Fizh<tspan fill="url(#textGrad)">Tank</tspan>
+  </text>
+
+  <!-- Headline -->
+  <text x="80" y="315" font-family="system-ui, -apple-system, sans-serif" font-size="44" font-weight="700" fill="#f1f5f9">
+    Designing Secure Network Ecosystems
+  </text>
+
+  <!-- Tagline / Bio -->
+  <text x="80" y="375" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="400" fill="#cbd5e1">
+    Navigating packets, filtering streams, and securing the deep digital ecosystem.
+  </text>
+  <text x="80" y="415" font-family="monospace" font-size="18" font-weight="500" fill="#38bdf8">
+    &gt;&gt; Enterprise Routing &amp; Switching • Threat Mitigation • Arch Linux Homelab
+  </text>
+
+  <!-- Footer Tags Row -->
+  <g transform="translate(80, 480)">
+    <g transform="translate(0, 0)">
+      <rect width="180" height="42" rx="10" fill="#1e1b4b" fill-opacity="0.8" stroke="#6366f1" stroke-opacity="0.4" stroke-width="1"/>
+      <text x="20" y="27" font-family="monospace" font-size="15" fill="#c4b5fd">Cisco / OSPF / VLAN</text>
+    </g>
+    <g transform="translate(200, 0)">
+      <rect width="200" height="42" rx="10" fill="#1e1b4b" fill-opacity="0.8" stroke="#6366f1" stroke-opacity="0.4" stroke-width="1"/>
+      <text x="20" y="27" font-family="monospace" font-size="15" fill="#c4b5fd">Wireshark &amp; Nmap</text>
+    </g>
+    <g transform="translate(420, 0)">
+      <rect width="190" height="42" rx="10" fill="#1e1b4b" fill-opacity="0.8" stroke="#6366f1" stroke-opacity="0.4" stroke-width="1"/>
+      <text x="20" y="27" font-family="monospace" font-size="15" fill="#c4b5fd">pfSense &amp; iptables</text>
+    </g>
+    <g transform="translate(630, 0)">
+      <rect width="170" height="42" rx="10" fill="#082f49" fill-opacity="0.8" stroke="#0ea5e9" stroke-opacity="0.4" stroke-width="1"/>
+      <text x="20" y="27" font-family="monospace" font-size="15" fill="#38bdf8">Arch &amp; Proxmox</text>
+    </g>
+  </g>
+
+  <!-- Domain watermarked at bottom right -->
+  <text x="1100" y="530" text-anchor="end" font-family="monospace" font-size="20" font-weight="700" fill="#67e8f9">
+    https://fizhtank.vercel.app
+  </text>
+</svg>
+`
+
+const appleTouchSvg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="180" height="180" rx="36" fill="#030712"/>
+  <rect x="4" y="4" width="172" height="172" rx="32" stroke="url(#borderGrad)" stroke-width="3" fill="#050a1c"/>
+  <defs>
+    <linearGradient id="borderGrad" x1="0" y1="0" x2="180" y2="180" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(26, 26) scale(5.33)">
+    <path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-.94 3.46-3.44 6-7 6s-7.56-2.54-8.5-6Z" stroke="#22d3ee" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M18 12v.5" stroke="#22d3ee" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M16 17.93a9.77 9.77 0 0 1 0-11.86" stroke="#22d3ee" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M7 10.67C7 8 5.58 5.97 2.73 5.5c-1 3.98-.23 7.79 1.98 11.23 2.17-1.4 2.29-3.44 2.29-6.06z" stroke="#c4b5fd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M10.46 7.26C10.2 5.88 9.17 4.24 8 3h5.8a2 2 0 0 1 1.98 1.67l.23 1.4" stroke="#c4b5fd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="m16.01 17.93-.23 1.4A2 2 0 0 1 13.8 21H8c1.17-1.25 2.2-2.89 2.46-4.26" stroke="#c4b5fd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
+`
+
+fs.writeFileSync('public/og-image.svg', ogSvg)
+fs.writeFileSync('public/apple-touch-icon.svg', appleTouchSvg)
+
+try {
+  execSync('rsvg-convert -w 1200 -h 630 -f png -o public/og-image.png public/og-image.svg')
+  execSync('rsvg-convert -w 180 -h 180 -f png -o public/apple-touch-icon.png public/apple-touch-icon.svg')
+  console.log('Successfully generated public/og-image.png and public/apple-touch-icon.png')
+} catch (e) {
+  console.error('Failed to convert svg to png:', e)
+}

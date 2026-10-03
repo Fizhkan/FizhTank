@@ -12,7 +12,7 @@
 [![Arch Linux](https://img.shields.io/badge/Arch_Linux-Homelab-1793D1?style=for-the-badge&logo=archlinux)](https://archlinux.org/)
 [![License](https://img.shields.io/badge/License-MIT-emerald?style=for-the-badge)](LICENSE)
 
-[Live Demo](#) • [Explore Labs](#-featured-labs) • [Core Skills](#-core-skills) • [Interactive Terminal](#-interactive-terminal-commands)
+[Live Demo](https://fizhtank.vercel.app/) • [Explore Labs](#-featured-labs) • [Core Skills](#-core-skills) • [Interactive Terminal](#-interactive-terminal-commands)
 
 </div>
 
