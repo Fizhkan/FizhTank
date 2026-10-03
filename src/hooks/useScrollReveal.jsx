@@ -32,7 +32,7 @@ export function useScrollReveal(options = {}) {
  * Animated counter — counts from 0 to `end` when `active` is true.
  */
 export function useAnimatedCounter(end, active, duration = 1800) {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState(end)
   const hasRun = useRef(false)
 
   useEffect(() => {
@@ -41,11 +41,11 @@ export function useAnimatedCounter(end, active, duration = 1800) {
 
     const numericEnd = parseInt(String(end).replace(/\D/g, ''), 10)
     if (isNaN(numericEnd) || numericEnd === 0) {
-      requestAnimationFrame(() => setCount(numericEnd || 0))
       return
     }
 
     let start = 0
+    let rafId
     const startTime = performance.now()
 
     function step(now) {
@@ -55,9 +55,14 @@ export function useAnimatedCounter(end, active, duration = 1800) {
       const eased = 1 - Math.pow(1 - progress, 3)
       start = Math.floor(eased * numericEnd)
       setCount(start)
-      if (progress < 1) requestAnimationFrame(step)
+      if (progress < 1) {
+        rafId = requestAnimationFrame(step)
+      }
     }
-    requestAnimationFrame(step)
+    rafId = requestAnimationFrame(step)
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId)
+    }
   }, [end, active, duration])
 
   return count

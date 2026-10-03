@@ -12,31 +12,34 @@ import {
   Fish,
 } from 'lucide-react'
 import { useScrollReveal, useAnimatedCounter, useCursorGlow } from '../hooks/useScrollReveal'
+import { labsData } from '../data/labsData'
 
-// Initial terminal history
+// Initial terminal history (simulasi demo telemetri)
 const INITIAL_TERMINAL_LOGS = [
   { type: 'cmd', text: 'whoami' },
-  { type: 'output', text: 'fizhtank — network & security engineer', color: 'text-zinc-200' },
+  { type: 'output', text: 'fizhtank — aspiring network & security engineer', color: 'text-zinc-200' },
   { type: 'cmd', text: 'cat /etc/ocean.conf' },
-  { type: 'output', text: '[ecosystem]', color: 'text-cyan-400' },
-  { type: 'output', text: '  depth   = 2600m       # OSI Layer 1-7', color: 'text-violet-400' },
-  { type: 'output', text: '  vlan    = 10,20,30,99 # Segmented architecture', color: 'text-violet-400' },
-  { type: 'output', text: '  defense = iptables + stateful ACL + wireshark', color: 'text-violet-400' },
-  { type: 'cmd', text: 'ping -c1 the-internet.io' },
-  { type: 'output', text: '64 bytes from oceanic.gateway: icmp_seq=1 ttl=64 time=1.2ms', color: 'text-emerald-400' },
+  { type: 'output', text: '# /etc/ocean.conf (simulasi demo)', color: 'text-cyan-400' },
+  { type: 'output', text: '  theme   = cyberpunk-aquarium-demo', color: 'text-violet-400' },
+  { type: 'output', text: '  focus   = learning-network-and-security', color: 'text-violet-400' },
+  { type: 'output', text: '  status  = DEMO_ENVIRONMENT_READY', color: 'text-violet-400' },
+  { type: 'cmd', text: 'ping -c1 demo.gateway' },
+  { type: 'output', text: '64 bytes from demo.gateway: icmp_seq=1 ttl=64 time=1.2ms (simulasi)', color: 'text-emerald-400' },
   { type: 'cmd', text: 'nmap -sS -p 22,80,443 192.168.1.1' },
-  { type: 'output', text: 'PORT   STATE SERVICE\n22/tcp open  ssh\n80/tcp open  http\n443/tcp open  https\nAll filters green. 🐟 12 organisms online.', color: 'text-cyan-300' },
+  { type: 'output', text: 'PORT   STATE SERVICE (simulasi)\n22/tcp open  ssh\n80/tcp open  http\n443/tcp open  https\nScan demo selesai. (simulasi telemetri demo)', color: 'text-cyan-300' },
 ]
 
-// ── Typewriter hook ──────────────────────────────────────────
+// ── Typewriter hook: SSR renders full text immediately for crawlers ────────
 function useTypewriter(text, speed = 50, startDelay = 600) {
-  const [displayed, setDisplayed] = useState('')
+  const [displayed, setDisplayed] = useState(() => (typeof window === 'undefined' ? text : text))
   const [done, setDone] = useState(false)
 
   useEffect(() => {
     let idx = 0
+    let interval
     const timeout = setTimeout(() => {
-      const interval = setInterval(() => {
+      setDisplayed('')
+      interval = setInterval(() => {
         idx++
         setDisplayed(text.slice(0, idx))
         if (idx >= text.length) {
@@ -44,9 +47,12 @@ function useTypewriter(text, speed = 50, startDelay = 600) {
           setDone(true)
         }
       }, speed)
-      return () => clearInterval(interval)
     }, startDelay)
-    return () => clearTimeout(timeout)
+
+    return () => {
+      clearTimeout(timeout)
+      if (interval) clearInterval(interval)
+    }
   }, [text, speed, startDelay])
 
   return { displayed, done }
@@ -128,14 +134,14 @@ export default function Hero() {
         responseLogs.push({
           type: 'output',
           text:
-            'fizhtank // Siraj\nSpecializing in Enterprise Network Architecture, Deep Packet Inspection, and Linux Homelab hardening.\nFocus    : L2/L3 Routing, Security Segmentation, Arch Linux\nDomisili : [ISI DI SINI: Kota / Domisili]\nStatus   : Open for network engineering roles & collaborations',
+            'fizhtank // Siraj\nStatus      : Aspiring Network & Security Engineer\nPendidikan  : Mahasiswa D3 Teknik Informatika · belajar jaringan & keamanan\nFokus Belajar : Cisco IOS, Packet Tracer, Wireshark, Arch Linux\nDomisili    : [ISI DI SINI: Kota / Domisili]',
           color: 'text-cyan-300',
         })
       } else if (lower === 'projects') {
         responseLogs.push({
           type: 'output',
           text:
-            '=== FEATURED PROJECTS & LABS ===\n1. Enterprise Multi-VLAN Segmentation (L3 Switch, ACL, OSPF)\n2. Wireshark Deep Packet Inspection & Incident Response\n3. Linux Homelab Gateway & Hardened DNS Resolver\nKetik "labs" atau scroll ke section #labs untuk eksplorasi write-up lengkap.',
+            '=== LAB ROADMAP & EKSPLORASI ===\n1. Enterprise Multi-VLAN Segmentation (Rencana Lab)\n2. Packet Stream & Credential Inspection (Rencana Lab)\n3. Linux Network Firewall & Homelab Service (Rencana Lab)\nKetik "labs" atau scroll ke section #labs untuk melihat rencana langkah pengerjaan.',
           color: 'text-emerald-300',
         })
       } else if (lower === 'contact') {
@@ -149,21 +155,21 @@ export default function Hero() {
         responseLogs.push({
           type: 'output',
           text:
-            '================================================\nCURRICULUM VITAE - SIRAJ (FIZHTANK)\n================================================\nProfile        : Network & Security Engineer\nPendidikan     : [ISI DI SINI: Jurusan & Nama Kampus / Sekolah]\nSertifikasi    : [ISI DI SINI: Sertifikasi Industri e.g. CCNA, MTCNA]\nKeahlian Utama : Cisco IOS, OSPF, VLAN, STP, Wireshark, Arch Linux, Nmap\nHomelab        : [ISI DI SINI: Ringkasan Homelab Router & Server]\nDownload CV    : Klik tombol "Download CV (PDF)" di section Sertifikasi.\n================================================',
+            '================================================\nCURRICULUM VITAE - SIRAJ (FIZHTANK)\n================================================\nRole           : Aspiring Network & Security Engineer\nPendidikan     : Mahasiswa D3 Teknik Informatika\nFokus Belajar  : Jaringan & Keamanan Komputer\nSertifikasi    : [ISI DI SINI: Sertifikasi Industri e.g. CCNA, MTCNA]\nDownload CV    : Klik tombol "Download CV (PDF)" di section Credentials.\n================================================',
           color: 'text-violet-300',
         })
       } else if (lower === 'skills') {
         responseLogs.push({
           type: 'output',
           text:
-            '[NETWORKING] : IPv4 Subnetting, OSPF, VLAN 802.1Q, Inter-VLAN Routing, Cisco CLI\n[SYSTEMS]    : Arch Linux, EndeavourOS, Bash Scripting, systemd, pacman\n[SECURITY]   : Wireshark, Nmap, UFW/iptables, ACL enforcement, Threat Analysis',
+            '[NETWORKING] : IPv4 Subnetting (Dasar), OSPF, VLAN 802.1Q (Belajar)\n[SYSTEMS]    : Arch Linux, Bash Scripting, systemd (Dasar)\n[SECURITY]   : Wireshark, Nmap, Firewall UFW/iptables (Belajar)',
           color: 'text-violet-300',
         })
       } else if (lower === 'labs') {
         responseLogs.push({
           type: 'output',
           text:
-            '1. [Network Design]   Enterprise Multi-VLAN Segmentation\n2. [Security Analysis] Packet Stream & Credential Inspection (Wireshark)\n3. [Linux Homelab]    Stateful Firewall & Pi-hole DNS Gateway\nScroll down to #labs to view comprehensive write-ups.',
+            '1. [Network Design]   Enterprise Multi-VLAN Segmentation (Status: Planned)\n2. [Security Analysis] Packet Stream & Credential Inspection (Status: Planned)\n3. [Linux Homelab]    Linux Network Firewall & Homelab Service (Status: Planned)\nScroll down ke #labs untuk melihat rencana langkah tiap lab.',
           color: 'text-emerald-300',
         })
       } else if (lower.startsWith('ping')) {
@@ -171,7 +177,7 @@ export default function Hero() {
         responseLogs.push(
           {
             type: 'output',
-            text: `PING ${target} (56 data bytes):\n64 bytes from ${target}: icmp_seq=1 ttl=64 time=0.98ms\n64 bytes from ${target}: icmp_seq=2 ttl=64 time=1.12ms\n64 bytes from ${target}: icmp_seq=3 ttl=64 time=1.04ms\n--- ${target} ping statistics: 0% packet loss, avg rtt 1.04ms ---`,
+            text: `PING ${target} (56 data bytes) (simulasi):\n64 bytes from ${target}: icmp_seq=1 ttl=64 time=0.98ms (simulasi)\n64 bytes from ${target}: icmp_seq=2 ttl=64 time=1.12ms (simulasi)\n--- ${target} ping statistics (simulasi): 0% packet loss ---`,
             color: 'text-emerald-400',
           }
         )
@@ -179,7 +185,7 @@ export default function Hero() {
         responseLogs.push({
           type: 'output',
           text:
-            'Starting Nmap 7.94 ( https://nmap.org ) at 2026-09-29\nNmap scan report for tank-core.lan (192.168.1.1)\nHost is up (0.00042s latency).\nPORT     STATE SERVICE VERSION\n22/tcp   open  ssh     OpenSSH 9.8\n53/tcp   open  domain  Pi-hole FTL\n80/tcp   open  http    nginx 1.26\n443/tcp  open  ssl/http nginx 1.26\nMAC Address: 00:1A:2B:3C:4D:5E (Cisco System)\nNetwork scan completed: 1 host up, 4 open ports mapped.',
+            'Starting Nmap 7.94 ( https://nmap.org ) (simulasi demo)\nNmap scan report for homelab-demo.lan (192.168.1.1)\nHost is up (0.00042s latency).\nPORT     STATE SERVICE (simulasi)\n22/tcp   open  ssh\n53/tcp   open  domain\n80/tcp   open  http\n443/tcp  open  https\nScan demo selesai (simulasi lab).',
           color: 'text-cyan-300',
         })
       } else if (lower === 'feed') {
@@ -201,7 +207,7 @@ export default function Hero() {
         responseLogs.push({
           type: 'output',
           text:
-            '# /etc/ocean.conf\n[ecosystem]\nmode = production\ndefense_profile = strict-stateful\npacket_rate_limit = 10000pps\nbioluminescence = true\nstatus = ONLINE',
+            '# /etc/ocean.conf (simulasi demo)\n[theme]\nprofile = cyberpunk-aquarium-demo\nfocus = learning-network-and-security\nstatus = DEMO_ACTIVE',
           color: 'text-violet-300',
         })
       } else {
@@ -261,37 +267,41 @@ export default function Hero() {
 
   const quickCommands = ['help', 'whoami', 'skills', 'projects', 'cat cv.txt', 'contact', 'ping 8.8.8.8', 'feed', 'clear']
 
-  // Stats data with animated counters
+  // Stats derived honestly from lab roadmap data
+  const plannedCount = labsData.filter((l) => l.status === 'planned').length
+  const inProgressCount = labsData.filter((l) => l.status === 'in-progress').length
+  const completedCount = labsData.filter((l) => l.status === 'complete').length
+
   const stats = [
     {
       icon: Network,
-      label: 'Enterprise Labs & Topologies',
-      val: '10+',
-      numericVal: 10,
-      suffix: '+',
-      desc: 'VLAN, OSPF, ACL, Trunking',
+      label: 'Planned Labs',
+      val: `${plannedCount}`,
+      numericVal: plannedCount,
+      suffix: '',
+      desc: 'Topologi & roadmap belajar',
       color: 'text-violet-400',
       borderGlow: 'rgba(124,58,237,0.25)',
       bg: 'rgba(109,40,217,0.08)',
     },
     {
       icon: Shield,
-      label: 'Security & Packet Audits',
-      val: '5+',
-      numericVal: 5,
-      suffix: '+',
-      desc: 'Wireshark, Nmap, IDS, Hardening',
+      label: 'In-Progress Labs',
+      val: `${inProgressCount}`,
+      numericVal: inProgressCount,
+      suffix: '',
+      desc: 'Eksperimen sedang dikerjakan',
       color: 'text-cyan-400',
       borderGlow: 'rgba(6,182,212,0.25)',
       bg: 'rgba(6,182,212,0.08)',
     },
     {
       icon: TerminalIcon,
-      label: 'Arch & Linux Systems',
-      val: '3+',
-      numericVal: 3,
-      suffix: '+ Years',
-      desc: 'EndeavourOS, Bash, Systemd',
+      label: 'Completed Labs',
+      val: `${completedCount}`,
+      numericVal: completedCount,
+      suffix: '',
+      desc: 'Selesai dengan hasil verifikasi',
       color: 'text-emerald-400',
       borderGlow: 'rgba(16,185,129,0.25)',
       bg: 'rgba(16,185,129,0.08)',
@@ -369,7 +379,7 @@ export default function Hero() {
               <span className="blink absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-400 shadow-[0_0_8px_#06b6d4]" />
             </span>
-            <span className="text-zinc-100 font-semibold tracking-wide text-[13px] sm:text-sm">Network &amp; Security Engineer</span>
+            <span className="text-zinc-100 font-semibold tracking-wide text-[13px] sm:text-sm">Aspiring Network &amp; Security Engineer</span>
             <span className="text-zinc-500">|</span>
             <span className="text-cyan-300 text-[12px] sm:text-xs font-mono font-medium flex items-center gap-1.5">
               <Radio size={12} className="animate-pulse text-cyan-400" />
@@ -403,7 +413,7 @@ export default function Hero() {
             {/* Left: Headline & Bio (6 cols) */}
             <div className="lg:col-span-6 flex flex-col justify-center">
               <div
-                className="flex items-center gap-2 mb-3.5"
+                className="flex items-center gap-2 mb-2"
                 style={{
                   opacity: sectionVisible ? 1 : 0,
                   transform: sectionVisible ? 'translateX(0)' : 'translateX(-20px)',
@@ -414,6 +424,18 @@ export default function Hero() {
                 <span className="text-[12px] sm:text-xs uppercase tracking-wider font-mono font-semibold text-cyan-300">
                   // Depth 2600m • Abyss Architecture
                 </span>
+              </div>
+
+              {/* Subtitle: Mahasiswa D3 Teknik Informatika */}
+              <div
+                className="text-xs sm:text-[13px] font-mono text-violet-300/90 mb-3"
+                style={{
+                  opacity: sectionVisible ? 1 : 0,
+                  transform: sectionVisible ? 'translateX(0)' : 'translateX(-15px)',
+                  transition: 'all 0.7s ease 0.55s',
+                }}
+              >
+                Mahasiswa D3 Teknik Informatika · belajar jaringan &amp; keamanan
               </div>
 
               <h1 className="text-3xl sm:text-4xl lg:text-[42px] xl:text-[46px] font-extrabold leading-[1.18] mb-5 tracking-tight font-display">

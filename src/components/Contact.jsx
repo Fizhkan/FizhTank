@@ -308,11 +308,11 @@ export default function Contact() {
               }}
             >
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.6)]" />
-                <span className="text-[12.5px] text-green-300 font-mono font-semibold">Available for opportunities</span>
+                <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.6)]" />
+                <span className="text-[12.5px] text-cyan-300 font-mono font-semibold">[ISI DI SINI: Status Ketersediaan]</span>
               </div>
               <p className="text-[14px] text-zinc-300 leading-relaxed font-normal">
-                Terbuka untuk posisi Network Engineer, NOC, atau Security Analyst. Full-time maupun freelance.
+                Fokus belajar dan eksplorasi lab jaringan &amp; keamanan. Terbuka untuk diskusi teknis, kolaborasi proyek belajar, atau peluang magang.
               </p>
             </div>
           </div>
@@ -411,7 +411,7 @@ export default function Contact() {
             <Fish size={14} className="text-violet-400" />
             <span className="text-zinc-300">FizhTank &copy; {new Date().getFullYear()}</span>
             <span className="text-zinc-500">|</span>
-            <span className="text-zinc-400">All systems operational</span>
+            <span className="text-zinc-400">Environment ready</span>
           </div>
 
           <div className="flex items-center gap-4 text-xs">

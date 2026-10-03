@@ -1,37 +1,38 @@
-// ── Skills Data with Honest Competency Levels & Real-world Usage Context ──
-// No arbitrary percentages — each skill states its actual application environment.
+// ── Skills Data: Honest Learning & Exploration Status ──
+// Tidak menggunakan persentase semu atau klaim produksi.
+// Level: 'Belajar' | 'Dasar' | 'Rencana Lab'
 
 export const skillGroups = [
   {
     id: 'networking',
     label: 'Networking Core & Protocols',
     accent: { text: '#60a5fa', bg: 'rgba(37,99,235,0.08)', border: 'rgba(59,130,246,0.25)' },
-    description: 'Fondasi arsitektur routing paket, segmentasi VLAN, dan switching Layer 2/3',
+    description: 'Konsep dasar routing paket, segmentasi VLAN, dan switching Layer 2/3',
     skills: [
       {
         name: 'IPv4 Subnetting & CIDR',
-        level: 'Produksi / Mahir',
-        context: 'Perhitungan VLSM presisi, alokasi prefiks /24 hingga /30 untuk inter-switch link & host pools.',
+        level: 'Dasar',
+        context: 'Perhitungan VLSM, pembagian blok subnet /24 hingga /30 untuk kebutuhan alokasi host.',
       },
       {
         name: 'Routing Protocols (OSPF, Static)',
-        level: 'Lab Enterprise',
-        context: 'Implementasi Single-area OSPF, penetapan cost, router ID, dan reditribusi rute pada Cisco IOS.',
+        level: 'Belajar',
+        context: 'Eksplorasi single-area OSPF dan penentuan rute statis pada simulasi Cisco IOS.',
       },
       {
         name: 'VLAN & Trunking (802.1Q)',
-        level: 'Lab Enterprise',
-        context: 'Segmentasi multi-departemen, 802.1Q trunk encapsulation, Native VLAN hardening, dan SVI inter-VLAN.',
+        level: 'Belajar',
+        context: 'Pemisahan segmen jaringan, trunking 802.1Q, dan konfigurasi SVI inter-VLAN.',
       },
       {
         name: 'DHCP & DNS Core Services',
-        level: 'Daily Driver / Homelab',
-        context: 'DHCP relay configuration pada L3 gateway dan authoritative local DNS server via Pi-hole FTL.',
+        level: 'Dasar',
+        context: 'Pengaturan relay DHCP serta pengujian local DNS server pada jaringan lab.',
       },
       {
         name: 'Cisco IOS CLI & Packet Tracer',
-        level: 'Simulasi Enterprise',
-        context: 'Perancangan topologi, verifikasi command show/debug, dan troubleshooting konektivitas end-to-end.',
+        level: 'Belajar',
+        context: 'Latihan perancangan topologi, eksekusi command dasar show/debug di simulator.',
       },
     ],
     tags: ['IPv4', 'VLAN 802.1Q', 'OSPF', 'STP', 'Inter-VLAN', 'NAT/PAT'],
@@ -40,68 +41,68 @@ export const skillGroups = [
     id: 'linux',
     label: 'Linux & Systems Engineering',
     accent: { text: '#34d399', bg: 'rgba(5,150,105,0.08)', border: 'rgba(16,185,129,0.25)' },
-    description: 'Administrasi sistem harian, automasi skrip, dan hardening pada platform berbasis Arch',
+    description: 'Penggunaan harian sistem operasi Linux, eksplorasi shell script, dan manajemen servis',
     skills: [
       {
         name: 'Arch Linux & EndeavourOS',
-        level: 'Daily Driver (Utama)',
-        context: 'Sistem operasi harian untuk workstation & homelab server, manajemen rolling-release.',
+        level: 'Dasar',
+        context: 'Penggunaan sistem operasi berbasis Arch untuk workstation belajar dan eksplorasi terminal.',
       },
       {
         name: 'Bash Scripting & Automation',
-        level: 'Praktik Rutin',
-        context: 'Skrip automasi backup berkala, healthcheck port monitoring, dan parsing log sistem.',
+        level: 'Belajar',
+        context: 'Latihan pembuatan skrip automasi sederhana dan pemrosesan teks via bash.',
       },
       {
-        name: 'Systemd & Service Hardening',
-        level: 'Administrasi Sistem',
-        context: 'Penyusunan unit files kustom, restart timers, journalctl inspection, dan pengelolaan daemon.',
+        name: 'Systemd & Service Management',
+        level: 'Dasar',
+        context: 'Memahami pengelolaan daemon servis, status inspeksi journalctl, dan startup unit.',
       },
       {
-        name: 'Package & Toolchain Management',
-        level: 'Produksi / Mahir',
-        context: 'Manajemen paket pacman/AUR, kompilasi driver kernel jaringan, dan isolasi environment.',
+        name: 'Package Management (pacman)',
+        level: 'Dasar',
+        context: 'Operasi instalasi paket, pemeliharaan dependensi, dan manajemen repositori sistem.',
       },
       {
-        name: 'SSH & Remote Access Hardening',
-        level: 'Produksi',
-        context: 'Autentikasi berbasis Ed25519 key-pair, port knocking, non-root login policy, dan fail2ban.',
+        name: 'SSH & Remote Access',
+        level: 'Dasar',
+        context: 'Konfigurasi koneksi remote berbasis key-pair Ed25519 dan pengaturan port server.',
       },
     ],
-    tags: ['Arch Linux', 'Bash', 'systemd', 'pacman', 'SSH Ed25519', 'cron'],
+    tags: ['Arch Linux', 'Bash', 'systemd', 'pacman', 'SSH', 'cron'],
   },
   {
     id: 'security',
-    label: 'Security & Traffic Forensics',
+    label: 'Security & Traffic Analysis',
     accent: { text: '#a78bfa', bg: 'rgba(109,40,217,0.1)', border: 'rgba(139,92,246,0.25)' },
-    description: 'Inspeksi transmisi paket, reconnaissance jaringan, dan penegakan firewall stateful',
+    description: 'Eksplorasi analisis aliran paket, inspeksi protokol, dan dasar filtering traffic',
     skills: [
       {
         name: 'Wireshark & Packet Inspection',
-        level: 'Investigasi Forensik',
-        context: 'Deep packet inspection (DPI), rekonstruksi TCP stream, analisis 3-way handshake, dan audit SSL/TLS.',
+        level: 'Belajar',
+        context: 'Eksplorasi pembacaan capture paket, analisis TCP stream, dan pengenalan handshake protokol.',
       },
       {
         name: 'Nmap Network Scanning',
-        level: 'Audit & Reconnaissance',
-        context: 'SYN stealth scan (-sS), service banner detection (-sV), vulnerability enumeration via NSE scripts.',
+        level: 'Belajar',
+        context: 'Latihan scanning port dasar (-sT, -sS) untuk identifikasi servis yang berjalan di lab.',
       },
       {
         name: 'Firewall (UFW & iptables)',
-        level: 'Defensif / Homelab',
-        context: 'Penerapan rule stateful packet filtering, blocking unauthorized subnets, dan port forwarding.',
+        level: 'Belajar',
+        context: 'Pengaturan rule penyaringan paket dasar, penutupan port tidak terpakai, dan policy default.',
       },
       {
-        name: 'Plaintext vs TLS Risk Analysis',
-        level: 'Analisis Protokol',
-        context: 'Demonstrasi sniffing credential HTTP/FTP plaintext vs payload verification TLS 1.3.',
+        name: 'Plaintext vs TLS Analysis',
+        level: 'Belajar',
+        context: 'Mempelajari perbedaan visibilitas payload pada protokol HTTP/FTP vs enkripsi TLS.',
       },
       {
         name: 'Network Access Control (ACL)',
-        level: 'Lab Enterprise',
-        context: 'Standard dan Extended ACL pada interface Cisco IOS untuk mengisolasi traffic antar departemen.',
+        level: 'Rencana Lab',
+        context: 'Rencana implementasi Standard dan Extended ACL untuk memfilter traffic antar VLAN.',
       },
     ],
-    tags: ['Wireshark', 'Nmap', 'iptables', 'UFW', 'ACL Extended', 'TLS 1.3'],
+    tags: ['Wireshark', 'Nmap', 'iptables', 'UFW', 'ACL', 'TLS'],
   },
 ]

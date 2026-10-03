@@ -236,7 +236,7 @@ export default function Skills() {
             Core Skills Matrix
           </h2>
           <p className="text-zinc-300 text-base sm:text-[17px] leading-relaxed mt-4 max-w-2xl font-normal">
-            The Filter &amp; Ecosystem — setiap kemampuan dengan konteks implementasi nyata di lingkungan produksi, simulasi enterprise, dan homelab.
+            The Filter &amp; Ecosystem — kumpulan materi jaringan, sistem Linux, dan analisis keamanan yang sedang dipelajari dan dieksplorasi.
           </p>
         </div>
 

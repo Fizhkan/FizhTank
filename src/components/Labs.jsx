@@ -68,15 +68,33 @@ function LabCard({ lab, onClick, visible, cardIdx }) {
           <Icon size={18} />
         </div>
         <div className="flex items-center gap-2">
-          <span
-            className={`text-[11.5px] px-2.5 py-0.5 rounded-full border font-mono font-medium ${colors.badge}`}
-            style={{
-              opacity: visible ? 1 : 0,
-              transition: `opacity 0.5s ease ${0.4 + cardIdx * 0.1}s`,
-            }}
-          >
-            {lab.status}
-          </span>
+          {(() => {
+            const hasProof = Boolean(
+              (lab.repoUrl && !lab.repoUrl.includes('[ISI') && lab.repoUrl.trim() !== '') ||
+              (lab.topologyImage && !lab.topologyImage.includes('[ISI') && lab.topologyImage.trim() !== '') ||
+              (lab.reportUrl && !lab.reportUrl.includes('[ISI') && lab.reportUrl.trim() !== '')
+            )
+            const isComplete = lab.status === 'complete' && hasProof
+            const isInProgress = lab.status === 'in-progress'
+            const badgeText = isComplete ? 'Complete' : isInProgress ? 'In Progress' : 'Planned'
+            const badgeClasses = isComplete
+              ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
+              : isInProgress
+                ? 'bg-cyan-500/10 text-cyan-300 border-cyan-500/30'
+                : 'bg-zinc-800/80 text-zinc-300 border-zinc-700/60'
+
+            return (
+              <span
+                className={`text-[11.5px] px-2.5 py-0.5 rounded-full border font-mono font-medium ${badgeClasses}`}
+                style={{
+                  opacity: visible ? 1 : 0,
+                  transition: `opacity 0.5s ease ${0.4 + cardIdx * 0.1}s`,
+                }}
+              >
+                {badgeText}
+              </span>
+            )
+          })()}
           <ArrowUpRight
             size={16}
             className="text-zinc-400 group-hover:text-violet-300 transition-all duration-300"
@@ -161,7 +179,7 @@ export default function Labs() {
             Featured Labs
           </h2>
           <p className="text-zinc-300 text-base sm:text-[17px] leading-relaxed mt-4 max-w-2xl font-normal">
-            The Tank Showcase — real-world network &amp; security experiments with full write-ups.
+            Lab roadmap: eksperimen yang direncanakan dan sedang dikerjakan.
           </p>
         </div>
 
@@ -193,13 +211,13 @@ export default function Labs() {
               <Waves size={16} style={{ color: '#06b6d4' }} />
               <span className="text-[12px] font-mono font-semibold text-cyan-300 tracking-wider">// Methodology</span>
             </div>
-            <h3 className="text-xl font-bold font-display text-zinc-50 mb-2">Lab Write-up Framework</h3>
+            <h3 className="text-xl font-bold font-display text-zinc-50 mb-2">Lab Roadmap Framework</h3>
             <p className="text-zinc-300 text-[14.5px] leading-relaxed">
-              Setiap lab mengikuti format standar: Objective → Architecture/Topology → Key Commands → Verification Result.
+              Setiap lab dipersiapkan dengan alur terstruktur: Objective → Desain Topologi → Rencana Langkah → Write-up &amp; Verifikasi.
             </p>
           </div>
           <div className="flex flex-col gap-2.5 shrink-0">
-            {['📌 Define Objective', '🗺️ Map Topology', '⚙️ Configure & Run', '✅ Verify Results'].map((step, i) => (
+            {['📌 Define Objective', '🗺️ Map Topology', '📝 Planned Steps', '🔍 Verify & Write-up'].map((step, i) => (
               <div
                 key={step}
                 className="flex items-center gap-2.5 text-[13.5px] text-zinc-200 font-mono font-medium"

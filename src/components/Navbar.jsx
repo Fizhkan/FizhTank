@@ -24,6 +24,8 @@ function PacketTicker() {
         border: '1px solid rgba(6,182,212,0.25)',
         color: 'rgba(6,182,212,0.8)',
       }}
+      title="Simulasi telemetri jaringan"
+      aria-label="Simulasi telemetri jaringan"
     >
       {/* Sonar pulse icon */}
       <span className="relative flex items-center justify-center w-4 h-4">
@@ -81,7 +83,7 @@ function PacketTicker() {
             transition: 'color 0.3s',
           }}
         >
-          {active ? 'LIVE' : 'WAIT'}
+          {active ? 'DEMO' : 'WAIT'}
         </span>
       </span>
     </div>

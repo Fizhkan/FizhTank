@@ -2,7 +2,7 @@
 
 # 🐟 FizhTank
 
-**Personal Portfolio & Interactive Aquarium Experience for a Network & Security Engineer**
+**Personal Portfolio & Interactive Aquarium Experience for an Aspiring Network & Security Engineer**
 
 *Navigating packets, filtering streams, and securing the deep ecosystem.*
 
@@ -20,12 +20,12 @@
 
 ## 🌊 Overview
 
-**FizhTank** is a high-performance personal portfolio built around a **bioluminescent deep-ocean & aquarium cyberpunk aesthetic**. Designed specifically for a **Network & Security Engineer**, it bridges technical homelab experiments, enterprise networking topologies, and cybersecurity packet analysis with an immersive underwater simulation.
+**FizhTank** adalah portfolio personal Siraj, mahasiswa D3 Teknik Informatika yang mendokumentasikan proses belajar di bidang jaringan dan keamanan sistem, dibalut dengan konsep visual **akuarium cyberpunk bioluminescent**.
 
-Every visual element represents a component of the digital ecosystem:
-- **Packets as schooling fish** moving across depth zones.
-- **Firewalls and ACLs** as bio-filtering layers.
-- **Terminal CLI** running simulated network diagnostics and tank controls.
+Portfolio ini dirancang untuk memetakan roadmap belajar teknis:
+- **Eksplorasi Jaringan & Keamanan**: Perencanaan topologi lab, segmentasi VLAN, firewall, dan packet analysis.
+- **Homelab Linux**: Eksplorasi administrasi Linux (Arch/EndeavourOS) dan virtualisasi.
+- **Terminal CLI Demo**: Antarmuka terminal interaktif dengan simulasi perintah diagnostik dan telemetri ekosistem.
 
 ---
 
@@ -43,28 +43,31 @@ Every visual element represents a component of the digital ecosystem:
 - **Interactive Tank Feeding**: Click anywhere or type `feed` in the CLI terminal to drop nutrient flakes that attract marine life.
 
 ### 2. 💻 Arch Linux Interactive Terminal
-- Fully functional embedded terminal (`fizhtank@arch:~$`) with simulated CLI commands:
-  - `help` — Lists all available commands.
-  - `skills` — Displays network & security proficiencies.
-  - `ping [target]` — Simulates ICMP packet telemetry with realistic latency.
-  - `nmap` — Port scanner simulation reporting open enterprise services.
-  - `cat /etc/ocean.conf` — Dumps network ecosystem topology and VLAN assignments.
-  - `feed` — Dispatches event to feed the tank ecosystem (+100 XP celebration toast).
-  - `clear` — Resets the terminal screen buffer.
-- Features zero horizontal scroll, automatic wrapping, command history, and quick-command suggestion chips.
+- Embedded terminal (`fizhtank@arch:~$`) with simulated CLI commands:
+  - `help` — Menampilkan daftar perintah yang tersedia.
+  - `whoami` — Profil dan fokus belajar.
+  - `skills` — Ringkasan kompetensi dasar dan skill yang sedang dipelajari.
+  - `projects` / `labs` — Roadmap dan status lab.
+  - `cat cv.txt` — Ringkasan CV dan kredensial.
+  - `contact` — Informasi kontak dan tautan sosial.
+  - `ping [target]` — Simulasi telemetri paket ICMP.
+  - `nmap` — Simulasi pemindaian port untuk demo lab.
+  - `cat /etc/ocean.conf` — Konfigurasi demo tema ekosistem.
+  - `feed` — Memberi pakan organisme akuarium (+100 XP toast).
+  - `clear` — Membersihkan layar terminal.
+- Fitur auto-wrapping tanpa scroll horizontal, command history, dan chip perintah cepat.
 
-### 3. 🛡️ Core Skills Matrix & Toolchain
-- **Bento Grid Architecture**: Categorized into *Enterprise Routing & Switching*, *Infrastructure & Threat Defense*, and *Systems & Homelab Architecture*.
-- **Interactive Mastery Bars**: Hover-triggered percentages with animated edge pulses.
-- **Ecosystem Toolchain**: Quick badges for Wireshark, Cisco Packet Tracer, Nmap, pfSense, Pi-hole, UFW/iptables, VirtualBox, Proxmox, and Arch Linux.
+### 3. 🛡️ Core Skills Matrix & Roadmap
+- **Bento Grid Architecture**: Terkategori dalam *Routing & Switching*, *Security Fundamentals*, dan *Linux & Systems*.
+- **Level Kemampuan Jujur**: Menggunakan badge status konkret ("Belajar", "Dasar", "Rencana Lab") tanpa klaim produksi berlebihan.
+- **Toolchain**: Wireshark, Cisco Packet Tracer, Nmap, pfSense, Pi-hole, UFW/iptables, VirtualBox, Proxmox, dan Arch Linux.
 
-### 4. 🔬 Featured Labs & Comprehensive Write-ups
-- **Interactive Modal Viewer**: Detailed technical documentation for homelab and enterprise networking projects.
-- **Standardized Methodology**:
-  1. 📌 **Objective**: Business and operational goals.
-  2. 🗺️ **Architecture & Topology**: Multi-tier VLAN/subnet maps.
-  3. ⚙️ **Key Commands & Config**: Syntax-highlighted Cisco IOS and Linux configurations.
-  4. ✅ **Verification Results**: Ping tests, traceroutes, Wireshark packet captures, and state checks.
+### 4. 🔬 Lab Roadmap & Planned Experiments
+- **Rencana Lab Terstruktur**:
+  1. 📌 **Objective**: Sasaran dan konsep jaringan yang dipelajari.
+  2. 🗺️ **Rencana Topologi**: Rencana segmentasi VLAN, subnetting, dan gateway.
+  3. ⚙️ **Rencana Langkah**: Tahapan konfigurasi yang akan dipraktikkan.
+  4. 📝 **Dokumentasi & Write-up**: Catatan hasil nyata dan verifikasi akan ditambahkan setelah lab selesai dipraktikkan.
 
 ### 5. 🔤 Refined Modern Typography
 - **Headings**: **Plus Jakarta Sans** — crisp geometric clarity for high-impact display.
@@ -177,9 +180,9 @@ You can test these commands directly in the hero terminal:
 ## 👤 Author
 
 **Siraj / Fizhkan**
-- **Role**: Network & Security Engineer
+- **Status**: Mahasiswa D3 Teknik Informatika · Aspiring Network & Security Engineer
 - **GitHub**: [@Fizhkan](https://github.com/Fizhkan)
-- **Specializations**: Enterprise Networks, VLAN Segmentation, Firewalls, Threat Mitigation, Arch Linux Homelabs
+- **Fokus Belajar**: Dasar Arsitektur Jaringan, Segmentasi VLAN, Packet Analysis (Wireshark), Firewall/ACL, Homelab Arch Linux
 
 ---
 
