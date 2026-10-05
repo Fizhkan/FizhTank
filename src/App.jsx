@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import './index.css'
 import AquariumBackground from './components/AquariumBackground'
 import Navbar from './components/Navbar'
@@ -8,8 +9,14 @@ import Certifications from './components/Certifications'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
 import ScrollToTop from './components/ScrollToTop'
+import { site } from './data/site'
 
 function App() {
+  useEffect(() => {
+    if (typeof document !== 'undefined' && site.title) {
+      document.title = site.title
+    }
+  }, [])
   return (
     <div className="relative min-h-screen overflow-x-hidden" style={{ background: '#04060f' }}>
       {/* ── Full-screen aquarium world ── */}

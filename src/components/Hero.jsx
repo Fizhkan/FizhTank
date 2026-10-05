@@ -13,11 +13,12 @@ import {
 } from 'lucide-react'
 import { useScrollReveal, useAnimatedCounter, useCursorGlow } from '../hooks/useScrollReveal'
 import { labsData } from '../data/labsData'
+import { site } from '../data/site'
 
 // Initial terminal history (simulasi demo telemetri)
 const INITIAL_TERMINAL_LOGS = [
   { type: 'cmd', text: 'whoami' },
-  { type: 'output', text: 'fizhtank — aspiring network & security engineer', color: 'text-zinc-200' },
+  { type: 'output', text: `fizhtank — ${site.jobTitle.toLowerCase()}`, color: 'text-zinc-200' },
   { type: 'cmd', text: 'cat /etc/ocean.conf' },
   { type: 'output', text: '# /etc/ocean.conf (simulasi demo)', color: 'text-cyan-400' },
   { type: 'output', text: '  theme   = cyberpunk-aquarium-demo', color: 'text-violet-400' },
@@ -133,8 +134,7 @@ export default function Hero() {
       } else if (lower === 'whoami') {
         responseLogs.push({
           type: 'output',
-          text:
-            'fizhtank // Siraj\nStatus      : Aspiring Network & Security Engineer\nPendidikan  : Mahasiswa D3 Teknik Informatika · belajar jaringan & keamanan\nFokus Belajar : Cisco IOS, Packet Tracer, Wireshark, Arch Linux\nDomisili    : [ISI DI SINI: Kota / Domisili]',
+          text: `fizhtank // Siraj\nStatus      : ${site.jobTitle}\nPendidikan  : ${site.subtitle}\nFokus Belajar : Cisco IOS, Packet Tracer, Wireshark, Arch Linux`,
           color: 'text-cyan-300',
         })
       } else if (lower === 'projects') {
@@ -145,17 +145,42 @@ export default function Hero() {
           color: 'text-emerald-300',
         })
       } else if (lower === 'contact') {
+        const contactMatrix = [
+          '=== CONTACT MATRIX ===',
+          `Email    : ${site.email}`,
+          'GitHub   : https://github.com/Fizhkan',
+          ...(site.linkedinUrl && !site.linkedinUrl.includes('[ISI') ? [`LinkedIn : ${site.linkedinUrl}`] : []),
+          'Form     : Langsung isi form di section #contact di bawah.',
+        ].join('\n')
         responseLogs.push({
           type: 'output',
-          text:
-            '=== CONTACT MATRIX ===\nEmail    : hafidzsirajuddin99@gmail.com\nLinkedIn : [ISI DI SINI: linkedin.com/in/username]\nGitHub   : https://github.com/Fizhkan\nForm     : Langsung isi form di section #contact di bawah.',
+          text: contactMatrix,
           color: 'text-blue-300',
         })
       } else if (lower === 'cat cv.txt' || lower === 'cv.txt' || lower === 'cv') {
+        const activeCertNames = (site.certifications || [])
+          .filter((c) => (c.name || c.nama) && !(c.name || c.nama).includes('[ISI'))
+          .map((c) => c.name || c.nama)
+        const certSummary = activeCertNames.length > 0 ? activeCertNames.join(', ') : 'Belum dipublikasikan (studi mandiri & lab)'
+        const cvStatus = site.cvUrl && !site.cvUrl.includes('[ISI')
+          ? 'Tersedia untuk diunduh di section Credentials.'
+          : 'Belum tersedia untuk diunduh (dalam persiapan).'
+
+        const cvSummaryText = [
+          '================================================',
+          'CURRICULUM VITAE - SIRAJ (FIZHTANK)',
+          '================================================',
+          `Role           : ${site.jobTitle}`,
+          `Pendidikan     : ${site.subtitle}`,
+          'Fokus Belajar  : Jaringan & Keamanan Komputer',
+          `Sertifikasi    : ${certSummary}`,
+          `Status CV      : ${cvStatus}`,
+          '================================================',
+        ].join('\n')
+
         responseLogs.push({
           type: 'output',
-          text:
-            '================================================\nCURRICULUM VITAE - SIRAJ (FIZHTANK)\n================================================\nRole           : Aspiring Network & Security Engineer\nPendidikan     : Mahasiswa D3 Teknik Informatika\nFokus Belajar  : Jaringan & Keamanan Komputer\nSertifikasi    : [ISI DI SINI: Sertifikasi Industri e.g. CCNA, MTCNA]\nDownload CV    : Klik tombol "Download CV (PDF)" di section Credentials.\n================================================',
+          text: cvSummaryText,
           color: 'text-violet-300',
         })
       } else if (lower === 'skills') {
@@ -379,7 +404,7 @@ export default function Hero() {
               <span className="blink absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-400 shadow-[0_0_8px_#06b6d4]" />
             </span>
-            <span className="text-zinc-100 font-semibold tracking-wide text-[13px] sm:text-sm">Aspiring Network &amp; Security Engineer</span>
+            <span className="text-zinc-100 font-semibold tracking-wide text-[13px] sm:text-sm">{site.jobTitle}</span>
             <span className="text-zinc-500">|</span>
             <span className="text-cyan-300 text-[12px] sm:text-xs font-mono font-medium flex items-center gap-1.5">
               <Radio size={12} className="animate-pulse text-cyan-400" />
@@ -428,7 +453,7 @@ export default function Hero() {
                 </span>
               </div>
 
-              {/* Subtitle: Mahasiswa D3 Teknik Informatika */}
+              {/* Subtitle */}
               <div
                 className="text-xs sm:text-[13px] font-mono text-violet-300/90 mb-3"
                 style={{
@@ -437,7 +462,7 @@ export default function Hero() {
                   transition: 'all 0.7s ease 0.55s',
                 }}
               >
-                Mahasiswa D3 Teknik Informatika · belajar jaringan &amp; keamanan
+                {site.subtitle}
               </div>
 
               <h1 className="text-3xl sm:text-4xl lg:text-[42px] xl:text-[46px] font-extrabold leading-[1.18] mb-5 tracking-tight font-display">
@@ -492,7 +517,7 @@ export default function Hero() {
                 }}
               >
                 <span className="text-violet-400 font-bold">&gt;&gt;</span>
-                Navigating packets, filtering streams, securing the deep ecosystem.
+                {site.tagline}
               </p>
 
               {/* Action Buttons */}

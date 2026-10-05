@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Fish, Menu, X, Anchor, Activity } from 'lucide-react'
+import { site } from '../data/site'
 
 // Live "network stats" ticker — purely decorative random values
 function PacketTicker() {
@@ -268,7 +269,7 @@ export default function Navbar() {
               />
             </span>
             <span className="text-[12.5px] font-mono font-medium text-purple-300">
-              🫧 Swimming in Packets · [ISI DI SINI: Status]
+              🫧 Swimming in Packets{site.availability && !site.availability.includes('[ISI') ? ` · ${site.availability}` : ''}
             </span>
           </div>
           {navLinks.map((link, idx) => (

@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { GitBranch, Link2, Mail, Send, CheckCircle2, AlertCircle, ExternalLink } from 'lucide-react'
 import { useScrollReveal } from '../hooks/useScrollReveal'
-import { socialLinks, contactConfig } from '../data/contactData'
+import { contactConfig } from '../data/contactData'
+import { site } from '../data/site'
 
 const iconMap = {
   GitHub: GitBranch,
@@ -175,9 +176,9 @@ export default function Contact() {
     const body = encodeURIComponent(
       `Halo Siraj,\n\nNama: ${form.name}\nEmail: ${form.email}\n\nPesan:\n${form.message}\n\n---\nDikirim melalui formulir kontak FizhTank`
     )
-    const targetEmail = contactConfig.fallbackEmail.includes('[ISI')
-      ? 'siraj@fizhtank.internal'
-      : contactConfig.fallbackEmail
+    const targetEmail = site.email && !site.email.includes('[ISI')
+      ? site.email
+      : 'hafidzsirajuddin99@gmail.com'
 
     const mailtoLink = `mailto:${targetEmail}?subject=${subject}&body=${body}`
     window.location.href = mailtoLink
@@ -221,7 +222,33 @@ export default function Contact() {
         <div className="grid md:grid-cols-2 gap-6">
           {/* Left: Social Links */}
           <div ref={socialRef} className="flex flex-col gap-4">
-            {socialLinks.map(({ label, value, href, color, glowColor }, idx) => (
+            {[
+              {
+                label: 'GitHub',
+                value: 'github.com/Fizhkan',
+                href: 'https://github.com/Fizhkan',
+                color: '#06b6d4',
+                glowColor: 'rgba(6,182,212,0.15)',
+              },
+              ...(site.linkedinUrl && !site.linkedinUrl.includes('[ISI')
+                ? [
+                    {
+                      label: 'LinkedIn',
+                      value: site.linkedinUrl.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, '').replace(/\/$/, ''),
+                      href: site.linkedinUrl,
+                      color: '#3b82f6',
+                      glowColor: 'rgba(59,130,246,0.15)',
+                    },
+                  ]
+                : []),
+              {
+                label: 'Email Langsung',
+                value: site.email,
+                href: `mailto:${site.email}`,
+                color: '#a855f7',
+                glowColor: 'rgba(168,85,247,0.15)',
+              },
+            ].map(({ label, value, href, color, glowColor }, idx) => (
               <SocialCard
                 key={label}
                 label={label}
@@ -245,7 +272,11 @@ export default function Contact() {
             >
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.6)]" />
-                <span className="text-[12.5px] text-cyan-300 font-mono font-semibold">[ISI DI SINI: Status Ketersediaan]</span>
+                <span className="text-[12.5px] text-cyan-300 font-mono font-semibold">
+                  {site.availability && !site.availability.includes('[ISI')
+                    ? site.availability
+                    : 'Open to Technical Discussion'}
+                </span>
               </div>
               <p className="text-[14px] text-zinc-300 leading-relaxed font-normal">
                 Fokus belajar dan eksplorasi lab jaringan &amp; keamanan. Terbuka untuk diskusi teknis, kolaborasi proyek belajar, atau peluang magang.
