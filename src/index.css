@@ -72,6 +72,8 @@ p {
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
+  transform: translateZ(0);
+  will-change: transform;
   /* Depth gradient — bright surface → twilight zone → pitch abyss */
   background: linear-gradient(
     180deg,
@@ -388,11 +390,13 @@ p {
 ═══════════════════════════════════════ */
 
 .bento-card {
-  background: rgba(8, 12, 28, 0.65);
+  background: rgba(8, 12, 28, 0.78);
   border: 1px solid rgba(99, 102, 241, 0.15);
   border-radius: 1rem;
-  transition: all 0.35s ease;
-  backdrop-filter: blur(16px);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transform: translateZ(0);
   /* Aquarium glass inner shadow */
   box-shadow:
     inset 0 1px 0 rgba(167, 139, 250, 0.06),
@@ -406,6 +410,14 @@ p {
     0 0 30px rgba(109, 40, 217, 0.18),
     0 4px 20px rgba(0, 0, 0, 0.4);
   transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .bento-card {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(8, 12, 28, 0.92);
+  }
 }
 
 /* Bioluminescent gradient border on special cards */

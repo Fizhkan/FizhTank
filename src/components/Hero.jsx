@@ -351,16 +351,13 @@ export default function Hero() {
         aria-hidden="true"
       />
 
-      {/* ── Surface Caustic Light Rays ── */}
+      {/* ── Surface Caustic Light Rays (Optimized) ── */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
         {[
-          { left: '6%',  w: 70,  dur: '5.2s', delay: '0s',   op: 0.18 },
-          { left: '18%', w: 110, dur: '6.8s', delay: '0.9s', op: 0.22 },
-          { left: '32%', w: 65,  dur: '4.9s', delay: '1.8s', op: 0.16 },
-          { left: '46%', w: 130, dur: '7.3s', delay: '0.4s', op: 0.24 },
-          { left: '60%', w: 80,  dur: '5.7s', delay: '2.2s', op: 0.20 },
-          { left: '72%', w: 95,  dur: '6.1s', delay: '1.1s', op: 0.18 },
-          { left: '85%', w: 75,  dur: '7.0s', delay: '0.7s', op: 0.15 },
+          { left: '12%', w: 90,  dur: '6.2s', delay: '0s',   op: 0.18 },
+          { left: '38%', w: 120, dur: '7.5s', delay: '1.2s', op: 0.22 },
+          { left: '65%', w: 95,  dur: '6.8s', delay: '0.6s', op: 0.18 },
+          { left: '84%', w: 80,  dur: '7.2s', delay: '1.8s', op: 0.15 },
         ].map((r, i) => (
           <div
             key={i}
@@ -375,8 +372,9 @@ export default function Hero() {
               borderRadius: '0 0 50% 50%',
               transformOrigin: 'top center',
               animation: `caustic-sway ${r.dur} ease-in-out ${r.delay} infinite`,
-              filter: 'blur(5px)',
+              filter: 'blur(4px)',
               opacity: r.op,
+              transform: 'translateZ(0)',
             }}
           />
         ))}

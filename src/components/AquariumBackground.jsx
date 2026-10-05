@@ -9,24 +9,24 @@ import {
   CyberPuffer,
 } from './FishAssets'
 
-// ── Fish Ecosystem Data with Depths & Species ──────────────────
+// ── Fish Ecosystem Data with Depths & Species (Optimized for 60 FPS) ──
 const FISH_ECOSYSTEM = [
-  // ── SURFACE / PHOTIC ZONE (Moonlit Shallows: 6% - 25%) ──
+  // ── SURFACE / PHOTIC ZONE (Moonlit Shallows: 8% - 22%) ──
   {
     id: 'tetra-1',
     species: 'tetra',
-    y: 8,
+    y: 9,
     scale: 0.95,
     dur: 26,
     delay: 0,
-    baseOp: 0.75,
+    baseOp: 0.8,
     flip: false,
     bobDur: 2.8,
   },
   {
     id: 'betta-1',
     species: 'betta',
-    y: 15,
+    y: 18,
     scale: 1.05,
     dur: 34,
     delay: -12,
@@ -34,34 +34,23 @@ const FISH_ECOSYSTEM = [
     flip: true,
     bobDur: 3.6,
   },
+
+  // ── MIDWATER / TWILIGHT ZONE (28% - 52%) ──
   {
     id: 'puffer-1',
     species: 'puffer',
-    y: 22,
+    y: 28,
     scale: 0.85,
-    dur: 22,
-    delay: -5,
+    dur: 24,
+    delay: -6,
     baseOp: 0.8,
     flip: false,
-    bobDur: 2.4,
+    bobDur: 2.6,
   },
-  {
-    id: 'tetra-2',
-    species: 'tetra',
-    y: 12,
-    scale: 0.7,
-    dur: 20,
-    delay: -16,
-    baseOp: 0.6,
-    flip: false,
-    bobDur: 2.2,
-  },
-
-  // ── MIDWATER / TWILIGHT ZONE (28% - 55%) ──
   {
     id: 'ray-1',
     species: 'ray',
-    y: 32,
+    y: 40,
     scale: 1.15,
     dur: 42,
     delay: -8,
@@ -72,42 +61,20 @@ const FISH_ECOSYSTEM = [
   {
     id: 'jelly-1',
     species: 'jelly',
-    y: 38,
+    y: 50,
     scale: 1.0,
     dur: 36,
-    delay: -22,
+    delay: -18,
     baseOp: 0.7,
     flip: false,
     bobDur: 4.2,
   },
-  {
-    id: 'tetra-3',
-    species: 'tetra',
-    y: 44,
-    scale: 0.8,
-    dur: 28,
-    delay: -14,
-    baseOp: 0.65,
-    flip: true,
-    bobDur: 2.6,
-  },
-  {
-    id: 'betta-2',
-    species: 'betta',
-    y: 50,
-    scale: 0.9,
-    dur: 38,
-    delay: -27,
-    baseOp: 0.7,
-    flip: false,
-    bobDur: 3.4,
-  },
 
-  // ── ABYSSAL ZONE (Deep Trenches & Bathypelagic: 58% - 86%) ──
+  // ── ABYSSAL ZONE (Deep Trenches & Hadal: 66% - 82%) ──
   {
     id: 'angler-1',
     species: 'angler',
-    y: 62,
+    y: 68,
     scale: 1.1,
     dur: 32,
     delay: -4,
@@ -118,61 +85,32 @@ const FISH_ECOSYSTEM = [
   {
     id: 'ray-2',
     species: 'ray',
-    y: 72,
+    y: 82,
     scale: 0.9,
     dur: 46,
-    delay: -20,
-    baseOp: 0.6,
+    delay: -22,
+    baseOp: 0.65,
     flip: false,
     bobDur: 5.0,
   },
-  {
-    id: 'angler-2',
-    species: 'angler',
-    y: 82,
-    scale: 0.95,
-    dur: 36,
-    delay: -18,
-    baseOp: 0.75,
-    flip: true,
-    bobDur: 3.6,
-  },
-  {
-    id: 'jelly-2',
-    species: 'jelly',
-    y: 68,
-    scale: 0.85,
-    dur: 40,
-    delay: -10,
-    baseOp: 0.65,
-    flip: true,
-    bobDur: 4.5,
-  },
 ]
 
-// ── Ambient glow orbs ─────────────────────────────────────────
+// ── Ambient glow orbs (zero-cost radial gradients without CSS blur filters) ──
 const ORBS = [
-  { left: '15%', top: '20%', size: 180, color: 'rgba(109,40,217,0.05)', dur: '18s' },
-  { left: '75%', top: '35%', size: 220, color: 'rgba(6,182,212,0.04)',  dur: '24s' },
-  { left: '40%', top: '65%', size: 260, color: 'rgba(91,33,182,0.06)',  dur: '20s' },
-  { left: '60%', top: '10%', size: 140, color: 'rgba(6,182,212,0.05)',  dur: '15s' },
-  { left: '25%', top: '80%', size: 200, color: 'rgba(124,58,237,0.05)', dur: '22s' },
+  { left: '15%', top: '20%', size: 180, color: 'rgba(109,40,217,0.12)', dur: '22s' },
+  { left: '75%', top: '35%', size: 220, color: 'rgba(6,182,212,0.10)',  dur: '26s' },
+  { left: '40%', top: '65%', size: 260, color: 'rgba(91,33,182,0.14)',  dur: '24s' },
+  { left: '60%', top: '10%', size: 140, color: 'rgba(6,182,212,0.10)',  dur: '18s' },
 ]
 
-// ── Bubble streams ────────────────────────────────────────────
+// ── Bubble streams (streamlined from 12 to 6 columns) ──
 const BUBBLES = [
-  { left: '4%',  delay: 0,   dur: 9  },
-  { left: '12%', delay: 2.5, dur: 12 },
-  { left: '20%', delay: 1.0, dur: 8  },
-  { left: '29%', delay: 4.0, dur: 11 },
-  { left: '38%', delay: 0.5, dur: 10 },
-  { left: '47%', delay: 3.2, dur: 7  },
-  { left: '56%', delay: 1.8, dur: 13 },
-  { left: '65%', delay: 5.0, dur: 9  },
-  { left: '72%', delay: 2.0, dur: 11 },
-  { left: '80%', delay: 0.8, dur: 8  },
-  { left: '88%', delay: 3.5, dur: 12 },
-  { left: '95%', delay: 1.3, dur: 9  },
+  { left: '8%',  delay: 0,   dur: 9  },
+  { left: '26%', delay: 2.5, dur: 12 },
+  { left: '45%', delay: 1.0, dur: 8  },
+  { left: '64%', delay: 3.5, dur: 11 },
+  { left: '82%', delay: 1.8, dur: 10 },
+  { left: '94%', delay: 4.2, dur: 9  },
 ]
 
 export default function AquariumBackground() {
@@ -212,13 +150,11 @@ export default function AquariumBackground() {
   // Filter fish ecosystem based on device mode
   const activeFishList = useMemo(() => {
     if (isMobile) {
-      // Pick 5 distinct species across water depths on mobile to minimize GPU load
+      // Pick 3 distinct species across water depths on mobile to minimize GPU load
       return [
         FISH_ECOSYSTEM[0], // tetra (surface)
-        FISH_ECOSYSTEM[1], // betta (surface)
-        FISH_ECOSYSTEM[4], // ray (midwater)
-        FISH_ECOSYSTEM[8], // angler (abyssal)
-        FISH_ECOSYSTEM[9], // jelly (abyssal)
+        FISH_ECOSYSTEM[3], // ray (midwater)
+        FISH_ECOSYSTEM[5], // angler (abyssal)
       ]
     }
     return FISH_ECOSYSTEM
@@ -226,12 +162,12 @@ export default function AquariumBackground() {
 
   // Reduced bubble streams on mobile
   const activeBubbles = useMemo(() => {
-    return isMobile ? BUBBLES.slice(0, 4) : BUBBLES
+    return isMobile ? BUBBLES.slice(0, 2) : BUBBLES
   }, [isMobile])
 
-  // Random plankton generation (12 on mobile, 32 on desktop)
+  // Lightweight plankton generation (6 on mobile, 14 on desktop)
   const plankton = useMemo(() => {
-    const count = isMobile ? 12 : 32
+    const count = isMobile ? 6 : 14
     return Array.from({ length: count }, (_, i) => ({
       left: `${Math.sin(i * 47.3) * 50 + 50}%`,
       top: `${Math.sin(i * 31.7) * 50 + 50}%`,
@@ -347,7 +283,7 @@ export default function AquariumBackground() {
           }}
         />
 
-        {/* Ambient glow orbs */}
+        {/* Ambient glow orbs (zero-cost radial gradients) */}
         {ORBS.map((o, i) => (
           <div
             key={i}
@@ -357,11 +293,11 @@ export default function AquariumBackground() {
               top: o.top,
               width: o.size,
               height: o.size,
-              background: o.color,
+              background: `radial-gradient(circle, ${o.color} 0%, transparent 70%)`,
               borderRadius: '50%',
-              filter: 'blur(40px)',
               animation: `plankton-drift ${o.dur} ease-in-out ${i * 2}s infinite`,
               pointerEvents: 'none',
+              transform: 'translateZ(0)',
             }}
           />
         ))}
@@ -420,6 +356,8 @@ export default function AquariumBackground() {
                 pointerEvents: 'none',
                 transition: 'opacity 0.6s ease',
                 zIndex: 2,
+                transform: 'translateZ(0)',
+                willChange: 'transform',
               }}
             >
               <div
@@ -434,7 +372,7 @@ export default function AquariumBackground() {
           )
         })}
 
-        {/* ── Plankton ── */}
+        {/* ── Plankton (Hardware-accelerated) ── */}
         {!prefersReducedMotion &&
           plankton.map((p, i) => (
             <div
@@ -445,11 +383,11 @@ export default function AquariumBackground() {
                 top: p.top,
                 width: p.size,
                 height: p.size,
-                background: 'rgba(167,139,250,0.6)',
+                background: 'rgba(167,139,250,0.5)',
                 borderRadius: '50%',
-                filter: 'blur(0.4px)',
                 animation: `plankton-drift ${p.dur} ease-in-out ${p.delay} infinite`,
                 pointerEvents: 'none',
+                transform: 'translateZ(0)',
               }}
             />
           ))}

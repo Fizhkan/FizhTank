@@ -41,6 +41,8 @@ function BottomKelp() {
             transformOrigin: 'bottom center',
             animation: `${s.swayType} ${s.duration} ease-in-out ${s.delay} infinite`,
             opacity: s.opacity,
+            transform: 'translateZ(0)',
+            willChange: 'transform',
           }}
         >
           {/* subtle leaf left */}

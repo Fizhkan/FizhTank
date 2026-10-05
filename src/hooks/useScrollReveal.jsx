@@ -131,30 +131,43 @@ export function useParallax(speed = 0.15) {
  */
 export function useCursorGlow() {
   const ref = useRef(null)
-  const [pos, setPos] = useState({ x: -200, y: -200 })
 
   useEffect(() => {
     const el = ref.current
     if (!el) return
+    let rafId = null
+
     function handler(e) {
-      const rect = el.getBoundingClientRect()
-      setPos({ x: e.clientX - rect.left, y: e.clientY - rect.top })
+      if (rafId) return
+      rafId = requestAnimationFrame(() => {
+        const rect = el.getBoundingClientRect()
+        const x = e.clientX - rect.left
+        const y = e.clientY - rect.top
+        el.style.setProperty('--glow-x', `${x}px`)
+        el.style.setProperty('--glow-y', `${y}px`)
+        rafId = null
+      })
     }
-    el.addEventListener('mousemove', handler)
-    return () => el.removeEventListener('mousemove', handler)
+
+    el.addEventListener('mousemove', handler, { passive: true })
+    return () => {
+      el.removeEventListener('mousemove', handler)
+      if (rafId) cancelAnimationFrame(rafId)
+    }
   }, [])
 
   const glowStyle = {
     position: 'absolute',
-    left: pos.x - 150,
-    top: pos.y - 150,
-    width: 300,
-    height: 300,
-    background: 'radial-gradient(circle, rgba(139,92,246,0.08) 0%, transparent 70%)',
+    left: 'var(--glow-x, -999px)',
+    top: 'var(--glow-y, -999px)',
+    transform: 'translate(-50%, -50%)',
+    width: 320,
+    height: 320,
+    background: 'radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%)',
     borderRadius: '50%',
     pointerEvents: 'none',
-    transition: 'left 0.15s ease, top 0.15s ease',
     zIndex: 0,
+    willChange: 'left, top',
   }
 
   return { ref, glowStyle }
