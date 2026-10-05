@@ -30,7 +30,7 @@ export const socialLinks = [
   {
     label: 'Email Langsung',
     value: site.email,
-    href: `mailto:${site.email}`,
+    href: `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(site.email)}`,
     color: '#a855f7',
     glowColor: 'rgba(168,85,247,0.15)',
   },
