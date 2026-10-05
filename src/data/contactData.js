@@ -3,9 +3,8 @@
 import { site } from './site'
 
 export const contactConfig = {
-  // Masukkan endpoint form kamu (misal: 'https://formspree.io/f/xbjnqowz' atau 'https://api.web3forms.com/submit')
-  // Bila dibiarkan kosong, form akan otomatis membuka mailto klien email default pengguna.
-  formspreeEndpoint: '',
+  // Endpoint Formspree diambil dari site.js
+  formspreeEndpoint: site.formspreeEndpoint || 'https://formspree.io/f/mrpegvge',
   fallbackEmail: site.email,
 }
 

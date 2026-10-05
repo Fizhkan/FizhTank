@@ -73,6 +73,9 @@ export const site = {
   // Email kontak aktif
   email: 'hafidzsirajuddin99@gmail.com',
 
+  // Endpoint backend formulir kontak (Formspree)
+  formspreeEndpoint: 'https://formspree.io/f/mrpegvge',
+
   // Daftar Sertifikasi (tanpa persentase; kartu hanya tampil jika 'name' terisi)
   certifications: [
     {
