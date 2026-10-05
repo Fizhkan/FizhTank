@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { GitBranch, Link2, Mail, Send, CheckCircle2, AlertCircle, ExternalLink } from 'lucide-react'
 import { useScrollReveal } from '../hooks/useScrollReveal'
 import { contactConfig } from '../data/contactData'
@@ -114,9 +114,20 @@ function AnimatedInput({ id, name, label, type = 'text', placeholder, value, onC
 
 export default function Contact() {
   const [form, setForm] = useState({ name: '', email: '', message: '' })
+  const [botTrap, setBotTrap] = useState('')
+  const [cooldown, setCooldown] = useState(0)
   const [status, setStatus] = useState(null) // 'success' | 'error' | 'sent-mailto'
   const [statusMsg, setStatusMsg] = useState('')
   const [isSending, setIsSending] = useState(false)
+
+  // Cooldown countdown timer
+  useEffect(() => {
+    if (cooldown <= 0) return
+    const timer = setInterval(() => {
+      setCooldown((prev) => Math.max(0, prev - 1))
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [cooldown])
 
   const [headerRef, headerVisible] = useScrollReveal({ threshold: 0.2 })
   const [socialRef, socialVisible] = useScrollReveal({ threshold: 0.15 })
@@ -124,6 +135,27 @@ export default function Contact() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+
+    // 1. Rate-limiting check
+    if (cooldown > 0) {
+      setStatus('error')
+      setStatusMsg(`Harap tunggu ${cooldown} detik sebelum mengirim paket berikutnya.`)
+      return
+    }
+
+    // 2. Anti-spam honeypot trap: if filled by a bot, silently fake success without wasting Formspree quota
+    if (botTrap.trim() !== '') {
+      setIsSending(true)
+      setTimeout(() => {
+        setIsSending(false)
+        setStatus('success')
+        setStatusMsg('Paket terkirim ke server! Saya akan segera merespons.')
+        setForm({ name: '', email: '', message: '' })
+        setCooldown(30)
+      }, 600)
+      return
+    }
+
     if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
       setStatus('error')
       setStatusMsg('Harap lengkapi semua field formulir sebelum mengirim.')
@@ -153,6 +185,7 @@ export default function Contact() {
           setStatus('success')
           setStatusMsg('Paket terkirim ke server via Formspree! Saya akan segera merespons.')
           setForm({ name: '', email: '', message: '' })
+          setCooldown(30)
         } else {
           throw new Error('Gagal mengirim ke endpoint')
         }
@@ -186,6 +219,7 @@ export default function Contact() {
     setStatus('success')
     setStatusMsg('Klien email default Anda dibuka untuk mengirim pesan ini secara langsung!')
     setForm({ name: '', email: '', message: '' })
+    setCooldown(30)
   }
 
   return (
@@ -316,6 +350,20 @@ export default function Contact() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Anti-spam honeypot (hidden from human visitors) */}
+              <div className="sr-only" aria-hidden="true" style={{ display: 'none' }}>
+                <label htmlFor="hp-field">Bot trap</label>
+                <input
+                  id="hp-field"
+                  type="text"
+                  name="_gotcha"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={botTrap}
+                  onChange={(e) => setBotTrap(e.target.value)}
+                />
+              </div>
+
               <AnimatedInput
                 id="contact-name"
                 name="name"
@@ -349,8 +397,8 @@ export default function Contact() {
               />
               <button
                 type="submit"
-                disabled={isSending}
-                className="w-full flex items-center justify-center gap-2 py-3.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-semibold text-[15px] transition-all hover:shadow-[0_0_20px_rgba(139,92,246,0.35)] group relative overflow-hidden active:scale-[0.98] disabled:opacity-70 tracking-wide cursor-pointer"
+                disabled={isSending || cooldown > 0}
+                className="w-full flex items-center justify-center gap-2 py-3.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-semibold text-[15px] transition-all hover:shadow-[0_0_20px_rgba(139,92,246,0.35)] group relative overflow-hidden active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed tracking-wide cursor-pointer"
               >
                 {/* Shimmer */}
                 <div
@@ -361,7 +409,9 @@ export default function Contact() {
                     animation: 'shimmer-sweep 3s ease-in-out infinite',
                   }}
                 />
-                {isSending ? (
+                {cooldown > 0 ? (
+                  <span className="font-mono text-sm">Cooldown: {cooldown}s</span>
+                ) : isSending ? (
                   <span className="font-mono text-sm">Transmitting Packet...</span>
                 ) : (
                   <>

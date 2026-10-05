@@ -9,6 +9,7 @@ import Certifications from './components/Certifications'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
 import ScrollToTop from './components/ScrollToTop'
+import DepthMeter from './components/DepthMeter'
 import { site } from './data/site'
 
 function App() {
@@ -48,7 +49,8 @@ function App() {
         <Footer />
       </div>
 
-      {/* ── Floating scroll-to-top button ── */}
+      {/* ── Interactive Depth Gauge HUD & Scroll-to-top ── */}
+      <DepthMeter />
       <ScrollToTop />
     </div>
   )

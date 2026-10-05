@@ -15,6 +15,68 @@ import { useScrollReveal, useAnimatedCounter, useCursorGlow } from '../hooks/use
 import { labsData } from '../data/labsData'
 import { site } from '../data/site'
 
+// IPv4 VLSM Subnet Calculator Engine
+function calculateSubnet(cidrInput) {
+  const trimmed = cidrInput.trim()
+  const parts = trimmed.split('/')
+  if (parts.length !== 2) {
+    return { error: 'Format salah! Gunakan: subnet <IP>/<CIDR>\nContoh: subnet 192.168.1.0/26' }
+  }
+
+  const ipStr = parts[0].trim()
+  const maskBits = parseInt(parts[1].trim(), 10)
+
+  if (isNaN(maskBits) || maskBits < 1 || maskBits > 32) {
+    return { error: 'Prefix CIDR tidak valid! Masukkan angka antara /1 dan /32.' }
+  }
+
+  const octets = ipStr.split('.').map((o) => parseInt(o, 10))
+  if (octets.length !== 4 || octets.some((o) => isNaN(o) || o < 0 || o > 255)) {
+    return { error: 'Alamat IPv4 tidak valid! Gunakan format dotted-decimal (misal: 192.168.1.0).' }
+  }
+
+  const ipInt = (((octets[0] << 24) >>> 0) | (octets[1] << 16) | (octets[2] << 8) | octets[3]) >>> 0
+  const maskInt = maskBits === 0 ? 0 : ((0xffffffff << (32 - maskBits)) >>> 0)
+  const wildcardInt = (~maskInt) >>> 0
+
+  const networkInt = (ipInt & maskInt) >>> 0
+  const broadcastInt = (networkInt | wildcardInt) >>> 0
+
+  const intToIp = (val) => [
+    (val >>> 24) & 0xff,
+    (val >>> 16) & 0xff,
+    (val >>> 8) & 0xff,
+    val & 0xff,
+  ].join('.')
+
+  let usableCount = 0
+  let hostRange = ''
+
+  if (maskBits === 32) {
+    usableCount = 1
+    hostRange = `${intToIp(networkInt)} (Single Host)`
+  } else if (maskBits === 31) {
+    usableCount = 2
+    hostRange = `${intToIp(networkInt)} — ${intToIp(broadcastInt)} (RFC 3021 Point-to-Point)`
+  } else {
+    usableCount = Math.pow(2, 32 - maskBits) - 2
+    const firstHost = (networkInt + 1) >>> 0
+    const lastHost = (broadcastInt - 1) >>> 0
+    hostRange = `${intToIp(firstHost)} — ${intToIp(lastHost)}`
+  }
+
+  return {
+    ip: ipStr,
+    cidr: `/${maskBits}`,
+    netmask: intToIp(maskInt),
+    wildcard: intToIp(wildcardInt),
+    network: intToIp(networkInt),
+    broadcast: intToIp(broadcastInt),
+    usableRange: hostRange,
+    totalUsable: usableCount.toLocaleString(),
+  }
+}
+
 // Initial terminal history (simulasi demo telemetri)
 const INITIAL_TERMINAL_LOGS = [
   { type: 'cmd', text: 'whoami' },
@@ -128,8 +190,57 @@ export default function Hero() {
         responseLogs.push({
           type: 'output',
           text:
-            'Available commands:\n  whoami     - Identity & professional background\n  skills     - Core competencies & tech stack\n  projects   - Featured enterprise networking & security labs\n  labs       - Overview of featured lab write-ups\n  contact    - Communication matrix & channels\n  cat cv.txt - Quick terminal summary of CV\n  ping <ip>  - ICMP diagnostic transmission\n  nmap       - Stealth network port reconnaissance\n  feed       - [Easter Egg] Feed bioluminescent tank\n  clear      - Wipe terminal history',
+            'Available commands:\n  whoami      - Identity & professional background\n  skills      - Core competencies & tech stack\n  projects    - Featured enterprise networking & security labs\n  labs        - Overview of featured lab write-ups\n  subnet <ip> - IPv4 VLSM calculator (e.g. subnet 192.168.1.0/26)\n  traceroute  - Network packet hop tracer (e.g. traceroute 8.8.8.8)\n  ping <ip>   - ICMP diagnostic transmission\n  nmap        - Stealth network port reconnaissance\n  contact     - Communication matrix & channels\n  cat cv.txt  - Quick terminal summary of CV\n  feed        - [Easter Egg] Feed bioluminescent tank\n  clear       - Wipe terminal history',
           color: 'text-zinc-300',
+        })
+      } else if (lower.startsWith('subnet')) {
+        const cidrArg = trimmed.split(' ')[1]
+        if (!cidrArg) {
+          responseLogs.push({
+            type: 'output',
+            text: 'Usage: subnet <IPv4>/<CIDR>\nContoh: subnet 192.168.1.0/26\n        subnet 10.20.0.0/23',
+            color: 'text-amber-300',
+          })
+        } else {
+          const res = calculateSubnet(cidrArg)
+          if (res.error) {
+            responseLogs.push({
+              type: 'output',
+              text: `[Error] ${res.error}`,
+              color: 'text-red-400',
+            })
+          } else {
+            const table = [
+              '┌─── [IPv4 VLSM SUBNET CALCULATOR] ──────────────────┐',
+              `  Target IP       : ${res.ip} ${res.cidr}`,
+              `  Subnet Mask     : ${res.netmask}`,
+              `  Wildcard Mask   : ${res.wildcard}`,
+              `  Network ID      : ${res.network}`,
+              `  Broadcast IP    : ${res.broadcast}`,
+              `  Usable Host IP  : ${res.usableRange}`,
+              `  Total Usable    : ${res.totalUsable} hosts`,
+              '└────────────────────────────────────────────────────┘',
+            ].join('\n')
+            responseLogs.push({
+              type: 'output',
+              text: table,
+              color: 'text-cyan-300',
+            })
+          }
+        }
+      } else if (lower.startsWith('traceroute') || lower.startsWith('trace')) {
+        const target = trimmed.split(' ')[1] || '8.8.8.8'
+        responseLogs.push({
+          type: 'output',
+          text: [
+            `traceroute to ${target} (${target}), 30 hops max, 60 byte packets (simulasi)`,
+            ` 1  gw.fizhtank.local (192.168.1.1)        0.842 ms  [L3 Core Switch]`,
+            ` 2  pfsense.security.lan (10.10.1.1)       1.314 ms  [Firewall / NAT]`,
+            ` 3  edge-upstream.isp.net (203.0.113.1)    4.652 ms  [ISP Border Router]`,
+            ` 4  target-host (${target})                11.238 ms [Target Resolved]`,
+            `Trace complete. 0% packet loss.`,
+          ].join('\n'),
+          color: 'text-emerald-400',
         })
       } else if (lower === 'whoami') {
         responseLogs.push({
@@ -275,7 +386,21 @@ export default function Hero() {
       }
     } else if (e.key === 'Tab') {
       e.preventDefault()
-      const match = ['help', 'whoami', 'skills', 'projects', 'labs', 'contact', 'cat cv.txt', 'ping 8.8.8.8', 'nmap', 'feed', 'clear'].find(
+      const match = [
+        'help',
+        'whoami',
+        'subnet 192.168.1.0/26',
+        'traceroute 8.8.8.8',
+        'skills',
+        'projects',
+        'labs',
+        'contact',
+        'cat cv.txt',
+        'ping 8.8.8.8',
+        'nmap',
+        'feed',
+        'clear',
+      ].find(
         (c) => c.startsWith(inputVal.trim().toLowerCase()) && c !== inputVal.trim().toLowerCase()
       )
       if (match) {
@@ -290,7 +415,18 @@ export default function Hero() {
     }
   }
 
-  const quickCommands = ['help', 'whoami', 'skills', 'projects', 'cat cv.txt', 'contact', 'ping 8.8.8.8', 'feed', 'clear']
+  const quickCommands = [
+    'help',
+    'whoami',
+    'subnet 192.168.1.0/26',
+    'traceroute 8.8.8.8',
+    'skills',
+    'projects',
+    'cat cv.txt',
+    'contact',
+    'feed',
+    'clear',
+  ]
 
   // Stats derived honestly from lab roadmap data
   const plannedCount = labsData.filter((l) => l.status === 'planned').length
