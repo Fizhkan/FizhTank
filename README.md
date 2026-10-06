@@ -33,6 +33,7 @@ Portfolio ini dirancang untuk memetakan roadmap belajar teknis:
 
 ### 1. 🪸 Dynamic Aquarium Ecosystem
 - **Depth-Layered Water Column**: Seamless gradient transitioning from shallow sunlit water (surface caustics) down through the twilight zone to the hadal abyss (2600m depth).
+- **Oceanic Depth Gauge HUD (`DepthMeter.jsx`)**: Real-time floating depth indicator tracking user scroll depth (0m to 2600m) categorized into ecological zones: *Sunlit Shallows (0–200m)*, *Twilight Zone (200–1000m)*, *Abyssal Plain (1000–2000m)*, and *Hadal Trench (>2000m)* with animated sonar pings.
 - **6 Handcrafted SVG Marine Species**:
   - `Neon Tetra`: High-speed schooling packets.
   - `Betta Veil`: Elegant flowing fins with bioluminescent trailing edges.
@@ -48,6 +49,8 @@ Portfolio ini dirancang untuk memetakan roadmap belajar teknis:
   - `whoami` — Profil dan fokus belajar.
   - `skills` — Ringkasan kompetensi dasar dan skill yang sedang dipelajari.
   - `projects` / `labs` — Roadmap dan status lab.
+  - `subnet <ip/cidr>` — **IPv4 VLSM Calculator** (menghitung Network ID, Broadcast, Subnet Mask, Wildcard Mask, usable host range, dan total host untuk prefix `/1` s.d. `/32`).
+  - `traceroute <target>` — **Network Hop Tracer** simulator dari L3 Switch $\rightarrow$ pfSense $\rightarrow$ Edge ISP $\rightarrow$ Target.
   - `cat cv.txt` — Ringkasan CV dan kredensial.
   - `contact` — Informasi kontak dan tautan sosial.
   - `ping [target]` — Simulasi telemetri paket ICMP.
@@ -55,7 +58,7 @@ Portfolio ini dirancang untuk memetakan roadmap belajar teknis:
   - `cat /etc/ocean.conf` — Konfigurasi demo tema ekosistem.
   - `feed` — Memberi pakan organisme akuarium (+100 XP toast).
   - `clear` — Membersihkan layar terminal.
-- Fitur auto-wrapping tanpa scroll horizontal, command history, dan chip perintah cepat.
+- Fitur auto-wrapping tanpa scroll horizontal, command history, Tab autocomplete, dan chip perintah cepat.
 
 ### 3. 🛡️ Core Skills Matrix & Roadmap
 - **Bento Grid Architecture**: Terkategori dalam *Routing & Switching*, *Security Fundamentals*, dan *Linux & Systems*.
@@ -69,12 +72,16 @@ Portfolio ini dirancang untuk memetakan roadmap belajar teknis:
   3. ⚙️ **Rencana Langkah**: Tahapan konfigurasi yang akan dipraktikkan.
   4. 📝 **Dokumentasi & Write-up**: Catatan hasil nyata dan verifikasi akan ditambahkan setelah lab selesai dipraktikkan.
 
-### 5. 🔤 Refined Modern Typography
+### 5. 🔒 Anti-Spam Security & Quota Guard
+- **Honeypot Trap (`_gotcha`)**: Hidden field yang tak terlihat oleh user manusia namun menjebak bot web scraping untuk melindungi kuota bulanan Formspree.
+- **Rate-Limiting Cooldown**: Timer cooldown 30 detik pada form transmisi pesan untuk mencegah accidental spam atau rapid packet flood.
+
+### 6. 🔤 Refined Modern Typography
 - **Headings**: **Plus Jakarta Sans** — crisp geometric clarity for high-impact display.
 - **Body**: **Inter** — optimized OpenType features (`cv02`, `cv03`, `cv04`, `cv11`) with WCAG-compliant dark-mode contrast.
 - **Telemetry & CLI**: **JetBrains Mono** — high-legibility developer typeface for code blocks and telemetry badges.
 
-### 6. ⚡ Live Packet Ticker & Navigation
+### 7. ⚡ Live Packet Ticker & Navigation
 - Real-time animated ticker showing transmitted packets (`pkt`), round-trip latency (`lat` ms), and connection status.
 - Section observer tracking active scroll positions.
 - Floating circular scroll-to-top button with circular SVG progress indicator.
@@ -111,13 +118,14 @@ Fizhtank/
     │   └── useScrollReveal.jsx  # Custom hooks: ScrollReveal, AnimatedCounter, CursorGlow, etc.
     └── components/
         ├── AquariumBackground.jsx # Multi-depth marine ecosystem & particle engine
+        ├── DepthMeter.jsx         # Real-time oceanic depth HUD (0m - 2600m)
         ├── FishAssets.jsx         # Custom SVG fish definitions & anatomy animations
         ├── Navbar.jsx             # Glassmorphic header with live packet ticker
         ├── Hero.jsx               # Bento hero, typewriter headline & interactive CLI
         ├── Skills.jsx             # Categorized skill matrix & toolchain badges
         ├── Labs.jsx               # Featured lab projects & methodology framework
         ├── LabModal.jsx           # Technical lab write-up reader with code blocks
-        ├── Contact.jsx            # Social link cards, packet dispatch form & footer
+        ├── Contact.jsx            # Social cards, honeypot-protected packet dispatch form
         └── ScrollToTop.jsx        # Floating progress-ring back-to-top button
 ```
 
@@ -168,11 +176,17 @@ You can test these commands directly in the hero terminal:
 | Command | Action |
 |---|---|
 | `help` | Lists all available console commands |
+| `whoami` | Displays identity and academic background |
 | `skills` | Prints technical proficiencies and networking stack |
+| `projects` / `labs` | Lists networking and security lab roadmap |
+| `subnet <ip/cidr>` | **IPv4 VLSM Calculator** (e.g. `subnet 192.168.1.0/26`, `subnet 10.0.0.0/23`) |
+| `traceroute [target]` | **Network hop tracer** simulation through L3 switch & firewall |
 | `ping` / `ping 8.8.8.8` | Sends simulated ICMP packets and measures RTT |
 | `nmap` | Runs port scan across local gateway services |
+| `cat cv.txt` | Displays brief resume/CV overview |
+| `contact` | Communication matrix & social channels |
 | `cat /etc/ocean.conf` | Prints system depth telemetry and VLAN configuration |
-| `feed` | Dispenses nutrient flakes to feed the aquarium |
+| `feed` | Dispenses nutrient flakes to feed the aquarium (+100 XP) |
 | `clear` | Clears the terminal output history |
 
 ---
