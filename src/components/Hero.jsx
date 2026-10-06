@@ -489,7 +489,7 @@ export default function Hero() {
         {/* Main Bento Hero Card */}
         <div
           ref={glowRef}
-          className="bento-card p-5 sm:p-8 md:p-12 mb-6 relative overflow-hidden border border-violet-500/20 shadow-[0_8px_32px_rgba(0,0,0,0.6)] w-full min-w-0"
+          className="bento-card p-4 sm:p-8 md:p-12 mb-6 relative overflow-hidden border border-violet-500/20 shadow-[0_8px_32px_rgba(0,0,0,0.6)] w-full max-w-full min-w-0"
           style={{
             opacity: sectionVisible ? 1 : 0,
             transform: sectionVisible ? 'translateY(0)' : 'translateY(40px)',
@@ -507,28 +507,28 @@ export default function Hero() {
             }}
           />
 
-          <div className="grid lg:grid-cols-12 gap-6 lg:gap-10 items-center relative z-10 w-full min-w-0">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center relative z-10 w-full max-w-full min-w-0">
             {/* Left: Headline & Bio (6 cols) */}
-            <div className="lg:col-span-6 flex flex-col justify-center">
+            <div className="col-span-1 lg:col-span-6 flex flex-col justify-center w-full max-w-full min-w-0">
               <div
-                className="flex items-center gap-2 mb-2"
+                className="flex flex-wrap items-center gap-2 mb-2 w-full min-w-0"
                 style={{
                   opacity: sectionVisible ? 1 : 0,
                   transform: sectionVisible ? 'translateX(0)' : 'translateX(-20px)',
                   transition: 'all 0.7s ease 0.5s',
                 }}
               >
-                <span className="font-mono text-xs font-semibold tracking-wide text-cyan-300">about</span>
-                <span className="text-zinc-600">·</span>
+                <span className="font-mono text-xs font-semibold tracking-wide text-cyan-300 shrink-0">about</span>
+                <span className="text-zinc-600 shrink-0">·</span>
                 <Waves size={14} className="text-cyan-400 bio-glow shrink-0" />
-                <span className="text-[12px] sm:text-xs uppercase tracking-wider font-mono font-semibold text-cyan-300/80">
+                <span className="text-[11px] sm:text-xs uppercase tracking-wider font-mono font-semibold text-cyan-300/80 break-words">
                   // Depth 2600m • Abyss Architecture
                 </span>
               </div>
 
               {/* Subtitle */}
               <div
-                className="text-xs sm:text-[13px] font-mono text-violet-300/90 mb-3"
+                className="text-xs sm:text-[13px] font-mono text-violet-300/90 mb-3 break-words w-full"
                 style={{
                   opacity: sectionVisible ? 1 : 0,
                   transform: sectionVisible ? 'translateX(0)' : 'translateX(-15px)',
@@ -538,7 +538,7 @@ export default function Hero() {
                 {site.subtitle}
               </div>
 
-              <h1 className="text-2xl sm:text-4xl lg:text-[42px] xl:text-[46px] font-extrabold leading-tight sm:leading-[1.18] mb-5 tracking-tight font-display">
+              <h1 className="text-2xl sm:text-4xl lg:text-[42px] xl:text-[46px] font-extrabold leading-tight sm:leading-[1.18] mb-5 tracking-tight font-display break-words w-full">
                 <span
                   className="text-zinc-50 inline-block"
                   style={{
@@ -571,7 +571,7 @@ export default function Hero() {
               </h1>
 
               <p
-                className="text-zinc-200 text-base sm:text-[17px] leading-relaxed mb-3.5 font-normal"
+                className="text-zinc-200 text-sm sm:text-[17px] leading-relaxed mb-3.5 font-normal break-words w-full"
                 style={{
                   opacity: sectionVisible ? 1 : 0,
                   transform: sectionVisible ? 'translateY(0)' : 'translateY(15px)',
@@ -582,15 +582,15 @@ export default function Hero() {
               </p>
               <p
                 lang="en"
-                className="font-mono text-[13px] sm:text-[14px] mb-8 text-cyan-300 font-medium flex items-center gap-2"
+                className="font-mono text-xs sm:text-[14px] mb-8 text-cyan-300 font-medium flex items-center gap-2 break-words w-full"
                 style={{
                   opacity: sectionVisible ? 1 : 0,
                   transform: sectionVisible ? 'translateY(0)' : 'translateY(15px)',
                   transition: 'all 0.7s ease 1s',
                 }}
               >
-                <span className="text-violet-400 font-bold">&gt;&gt;</span>
-                {site.tagline}
+                <span className="text-violet-400 font-bold shrink-0">&gt;&gt;</span>
+                <span className="break-words">{site.tagline}</span>
               </p>
 
               {/* Action Buttons */}
@@ -604,7 +604,7 @@ export default function Hero() {
               >
                 <a
                   href="#labs"
-                  className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-[15px] transition-all group text-white shadow-lg relative overflow-hidden"
+                  className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold text-[14.5px] sm:text-[15px] transition-all group text-white shadow-lg relative overflow-hidden w-full sm:w-auto"
                   style={{
                     background: 'linear-gradient(135deg, #7c3aed, #4f46e5)',
                     boxShadow: '0 0 25px rgba(124,58,237,0.4)',
@@ -633,7 +633,7 @@ export default function Hero() {
                 </a>
                 <a
                   href="#contact"
-                  className="flex items-center justify-center gap-2 px-6 py-3 border rounded-xl font-semibold text-[15px] transition-all text-zinc-100 hover:text-cyan-200 backdrop-blur-sm tracking-wide"
+                  className="flex items-center justify-center gap-2 px-5 py-3 border rounded-xl font-semibold text-[14.5px] sm:text-[15px] transition-all text-zinc-100 hover:text-cyan-200 backdrop-blur-sm tracking-wide w-full sm:w-auto"
                   style={{
                     borderColor: 'rgba(6,182,212,0.3)',
                     background: 'rgba(6,182,212,0.05)',
@@ -659,11 +659,11 @@ export default function Hero() {
 
             {/* Right: Interactive Terminal with Radar Scope Header (6 cols) */}
             <div
-              className="lg:col-span-6 relative"
+              className="col-span-1 lg:col-span-6 relative w-full max-w-full min-w-0"
               style={{
                 opacity: sectionVisible ? 1 : 0,
-                transform: sectionVisible ? 'translateX(0) rotateY(0deg)' : 'translateX(40px) rotateY(-5deg)',
-                transition: 'all 1s cubic-bezier(0.16, 1, 0.3, 1) 0.6s',
+                transform: sectionVisible ? 'translateX(0)' : 'translateX(30px)',
+                transition: 'all 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.6s',
               }}
             >
               {/* ── Glowing Sonar Scope Backdrop Decor ── */}
@@ -703,7 +703,7 @@ export default function Hero() {
               {/* ── Interactive Terminal Frame ── */}
               <div
                 onClick={focusInput}
-                className="relative rounded-2xl overflow-hidden cursor-text transition-all duration-300 terminal-float"
+                className="relative rounded-2xl overflow-hidden cursor-text transition-all duration-300 terminal-float w-full max-w-full min-w-0"
                 style={{
                   background: 'rgba(3, 7, 18, 0.94)',
                   border: '1px solid rgba(139, 92, 246, 0.3)',
@@ -755,22 +755,22 @@ export default function Hero() {
                   aria-live="polite"
                   aria-relevant="additions text"
                   aria-label="Riwayat output terminal fizhtank"
-                  className="p-4 sm:p-5 font-mono text-[13px] sm:text-[13.5px] space-y-2.5 h-[270px] sm:h-[290px] overflow-y-auto overflow-x-hidden terminal-scroll"
+                  className="p-3 sm:p-5 font-mono text-xs sm:text-[13.5px] space-y-2 h-[260px] sm:h-[290px] overflow-y-auto overflow-x-hidden terminal-scroll w-full max-w-full min-w-0"
                 >
                   {terminalHistory.map((item, idx) => (
                     <div
                       key={idx}
-                      className="leading-relaxed animate-terminal-line"
+                      className="leading-relaxed animate-terminal-line w-full min-w-0"
                       style={{ animationDelay: `${idx * 0.02}s` }}
                     >
                       {item.type === 'cmd' ? (
-                        <div className="flex items-center gap-2">
-                          <span className="text-violet-400 shrink-0 font-bold text-[13px] sm:text-[13.5px]">fizhtank@arch:~$</span>
-                          <span className="text-zinc-100 font-medium text-[13px] sm:text-[13.5px]">{item.text}</span>
+                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                          <span className="text-violet-400 shrink-0 font-bold text-xs sm:text-[13.5px]">fizhtank@arch:~$</span>
+                          <span className="text-zinc-100 font-medium text-xs sm:text-[13.5px] break-words">{item.text}</span>
                         </div>
                       ) : (
                         <div
-                          className={`pl-4 border-l border-zinc-700/60 whitespace-pre-wrap break-words leading-relaxed text-[12.5px] sm:text-[13px] ${item.color || 'text-zinc-300'}`}
+                          className={`pl-3 sm:pl-4 border-l border-zinc-700/60 whitespace-pre-wrap break-all sm:break-words leading-relaxed text-[11px] sm:text-[12.5px] ${item.color || 'text-zinc-300'}`}
                         >
                           {item.text}
                         </div>
