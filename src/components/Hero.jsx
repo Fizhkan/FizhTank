@@ -412,7 +412,7 @@ export default function Hero() {
     <section
       id="about"
       ref={sectionRef}
-      className="relative min-h-screen flex items-center justify-center pt-28 pb-16 px-6 overflow-hidden"
+      className="relative min-h-screen flex flex-col justify-start md:justify-center pt-24 sm:pt-28 pb-16 px-4 sm:px-6 w-full max-w-full overflow-hidden"
     >
       {/* Ambient shallow-water radial glow — matches bright surface zone */}
       <div
@@ -456,7 +456,7 @@ export default function Hero() {
       </div>
 
       <div
-        className="relative z-10 max-w-6xl mx-auto w-full"
+        className="relative z-10 max-w-6xl mx-auto w-full min-w-0"
         style={{
           opacity: sectionVisible ? 1 : 0,
           transform: sectionVisible ? 'translateY(0)' : 'translateY(30px)',
@@ -465,7 +465,7 @@ export default function Hero() {
       >
         {/* Top badge with Sonar ping */}
         <div
-          className="flex justify-center mb-8"
+          className="flex justify-center mb-6 sm:mb-8"
           style={{
             opacity: sectionVisible ? 1 : 0,
             transform: sectionVisible ? 'translateY(0) scale(1)' : 'translateY(-15px) scale(0.95)',
@@ -489,7 +489,7 @@ export default function Hero() {
         {/* Main Bento Hero Card */}
         <div
           ref={glowRef}
-          className="bento-card p-5 sm:p-8 md:p-12 mb-6 relative overflow-hidden border border-violet-500/20 shadow-[0_8px_32px_rgba(0,0,0,0.6)]"
+          className="bento-card p-5 sm:p-8 md:p-12 mb-6 relative overflow-hidden border border-violet-500/20 shadow-[0_8px_32px_rgba(0,0,0,0.6)] w-full min-w-0"
           style={{
             opacity: sectionVisible ? 1 : 0,
             transform: sectionVisible ? 'translateY(0)' : 'translateY(40px)',
@@ -507,7 +507,7 @@ export default function Hero() {
             }}
           />
 
-          <div className="grid lg:grid-cols-12 gap-10 items-center relative z-10">
+          <div className="grid lg:grid-cols-12 gap-6 lg:gap-10 items-center relative z-10 w-full min-w-0">
             {/* Left: Headline & Bio (6 cols) */}
             <div className="lg:col-span-6 flex flex-col justify-center">
               <div
@@ -627,13 +627,13 @@ export default function Hero() {
                       animation: 'shimmer-sweep 3s ease-in-out infinite',
                     }}
                   />
-                  <Waves size={16} className="relative z-10" />
-                  <span className="relative z-10 font-semibold tracking-wide">Explore Labs</span>
-                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform relative z-10" />
+                  <Waves size={16} className="relative z-10 text-white shrink-0" />
+                  <span className="relative z-10 font-semibold tracking-wide text-white">Explore Labs</span>
+                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform relative z-10 text-white shrink-0" />
                 </a>
                 <a
                   href="#contact"
-                  className="flex items-center justify-center gap-2 px-6 py-3 border rounded-xl font-semibold text-[15px] transition-all text-zinc-200 hover:text-cyan-200 backdrop-blur-sm tracking-wide"
+                  className="flex items-center justify-center gap-2 px-6 py-3 border rounded-xl font-semibold text-[15px] transition-all text-zinc-100 hover:text-cyan-200 backdrop-blur-sm tracking-wide"
                   style={{
                     borderColor: 'rgba(6,182,212,0.3)',
                     background: 'rgba(6,182,212,0.05)',
@@ -651,8 +651,8 @@ export default function Hero() {
                     e.currentTarget.style.transform = ''
                   }}
                 >
-                  <Mail size={16} />
-                  Get in Touch
+                  <Mail size={16} className="shrink-0 text-cyan-400" />
+                  <span className="font-semibold text-zinc-100">Get in Touch</span>
                 </a>
               </div>
             </div>
@@ -787,17 +787,17 @@ export default function Hero() {
                   )}
 
                   {/* Active Input Line */}
-                  <div className="flex items-center gap-2 pt-1">
-                    <span className="text-violet-400 font-bold shrink-0 text-[13px] sm:text-[13.5px]">fizhtank@arch:~$</span>
+                  <div className="flex items-center gap-2 pt-1 w-full min-w-0">
+                    <span className="text-violet-400 font-bold shrink-0 text-xs sm:text-[13.5px]">fizhtank@arch:~$</span>
                     <input
                       ref={inputRef}
                       type="text"
                       value={inputVal}
                       onChange={(e) => setInputVal(e.target.value)}
                       onKeyDown={handleKeyDown}
-                      placeholder="type 'help' or click commands below..."
+                      placeholder="type 'help'..."
                       aria-label="Input baris perintah terminal"
-                      className="bg-transparent text-cyan-300 outline-none w-full placeholder:text-zinc-400 font-mono text-[13px] sm:text-[13.5px]"
+                      className="bg-transparent text-cyan-300 outline-none w-full min-w-0 placeholder:text-zinc-500 font-mono text-xs sm:text-[13.5px]"
                       autoComplete="off"
                       spellCheck="false"
                     />
