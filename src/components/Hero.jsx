@@ -472,15 +472,15 @@ export default function Hero() {
             transition: 'all 0.6s ease 0.2s',
           }}
         >
-          <div className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-violet-950/60 border border-violet-500/35 text-violet-300 text-sm font-mono backdrop-blur-md shadow-[0_0_20px_rgba(109,40,217,0.25)]">
-            <span className="relative flex h-2 w-2">
+          <div className="flex flex-wrap items-center gap-2 px-3.5 py-2 rounded-2xl sm:rounded-full bg-violet-950/60 border border-violet-500/35 text-violet-300 text-xs sm:text-sm font-mono backdrop-blur-md shadow-[0_0_20px_rgba(109,40,217,0.25)]">
+            <span className="relative flex h-2 w-2 shrink-0">
               <span className="blink absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-400 shadow-[0_0_8px_#06b6d4]" />
             </span>
-            <span className="text-zinc-100 font-semibold tracking-wide text-[13px] sm:text-sm">{site.jobTitle}</span>
-            <span className="text-zinc-500">|</span>
-            <span className="text-cyan-300 text-[12px] sm:text-xs font-mono font-medium flex items-center gap-1.5">
-              <Radio size={12} className="animate-pulse text-cyan-400" />
+            <span className="text-zinc-100 font-semibold tracking-wide text-xs sm:text-sm">{site.jobTitle}</span>
+            <span className="text-zinc-500 hidden sm:inline">|</span>
+            <span className="text-cyan-300 text-[11px] sm:text-xs font-mono font-medium flex items-center gap-1.5 shrink-0">
+              <Radio size={12} className="animate-pulse text-cyan-400 shrink-0" />
               Belajar OSI Layer 1-7
             </span>
           </div>
@@ -489,7 +489,7 @@ export default function Hero() {
         {/* Main Bento Hero Card */}
         <div
           ref={glowRef}
-          className="bento-card p-8 md:p-12 mb-6 relative overflow-hidden border border-violet-500/20 shadow-[0_8px_32px_rgba(0,0,0,0.6)]"
+          className="bento-card p-5 sm:p-8 md:p-12 mb-6 relative overflow-hidden border border-violet-500/20 shadow-[0_8px_32px_rgba(0,0,0,0.6)]"
           style={{
             opacity: sectionVisible ? 1 : 0,
             transform: sectionVisible ? 'translateY(0)' : 'translateY(40px)',
@@ -538,7 +538,7 @@ export default function Hero() {
                 {site.subtitle}
               </div>
 
-              <h1 className="text-3xl sm:text-4xl lg:text-[42px] xl:text-[46px] font-extrabold leading-[1.18] mb-5 tracking-tight font-display">
+              <h1 className="text-2xl sm:text-4xl lg:text-[42px] xl:text-[46px] font-extrabold leading-tight sm:leading-[1.18] mb-5 tracking-tight font-display">
                 <span
                   className="text-zinc-50 inline-block"
                   style={{
@@ -551,7 +551,7 @@ export default function Hero() {
                 </span>
                 <br />
                 <span
-                  className="bg-clip-text text-transparent text-bio-shimmer inline-block whitespace-nowrap"
+                  className="bg-clip-text text-transparent text-bio-shimmer inline-block break-words sm:whitespace-nowrap"
                   style={{
                     backgroundImage:
                       'linear-gradient(135deg, #c4b5fd 0%, #60a5fa 30%, #22d3ee 70%, #c4b5fd 100%)',
@@ -595,7 +595,7 @@ export default function Hero() {
 
               {/* Action Buttons */}
               <div
-                className="flex flex-wrap items-center gap-4"
+                className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full sm:w-auto"
                 style={{
                   opacity: sectionVisible ? 1 : 0,
                   transform: sectionVisible ? 'translateY(0)' : 'translateY(15px)',
@@ -604,7 +604,7 @@ export default function Hero() {
               >
                 <a
                   href="#labs"
-                  className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-[15px] transition-all group text-white shadow-lg relative overflow-hidden"
+                  className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-[15px] transition-all group text-white shadow-lg relative overflow-hidden"
                   style={{
                     background: 'linear-gradient(135deg, #7c3aed, #4f46e5)',
                     boxShadow: '0 0 25px rgba(124,58,237,0.4)',
@@ -633,7 +633,7 @@ export default function Hero() {
                 </a>
                 <a
                   href="#contact"
-                  className="flex items-center gap-2 px-6 py-3 border rounded-xl font-semibold text-[15px] transition-all text-zinc-200 hover:text-cyan-200 backdrop-blur-sm tracking-wide"
+                  className="flex items-center justify-center gap-2 px-6 py-3 border rounded-xl font-semibold text-[15px] transition-all text-zinc-200 hover:text-cyan-200 backdrop-blur-sm tracking-wide"
                   style={{
                     borderColor: 'rgba(6,182,212,0.3)',
                     background: 'rgba(6,182,212,0.05)',
@@ -806,13 +806,13 @@ export default function Hero() {
 
                 {/* Quick-command suggestions toolbar */}
                 <div
-                  className="px-3 sm:px-4 py-2 border-t flex flex-wrap items-center gap-1.5 overflow-hidden select-none"
+                  className="px-3 sm:px-4 py-2 border-t flex items-center gap-1.5 overflow-x-auto no-scrollbar sm:flex-wrap select-none"
                   style={{
                     background: 'rgba(6, 10, 24, 0.95)',
                     borderColor: 'rgba(99, 102, 241, 0.15)',
                   }}
                 >
-                  <span className="text-[11px] text-zinc-400 font-mono uppercase tracking-wider font-semibold mr-1 hidden sm:inline">
+                  <span className="text-[11px] text-zinc-400 font-mono uppercase tracking-wider font-semibold mr-1 hidden sm:inline shrink-0">
                     Commands:
                   </span>
                   {quickCommands.map((cmd) => (
@@ -823,7 +823,7 @@ export default function Hero() {
                         executeCommand(cmd)
                       }}
                       aria-label={`Jalankan perintah ${cmd}`}
-                      className="px-2 py-0.5 rounded text-[11px] sm:text-[11.5px] font-mono font-medium transition-all border border-violet-500/30 text-zinc-200 hover:text-cyan-200 hover:border-cyan-400/50 hover:bg-cyan-500/15 active:scale-95 cursor-pointer"
+                      className="shrink-0 px-2.5 py-1 sm:py-0.5 rounded text-[11px] sm:text-[11.5px] font-mono font-medium transition-all border border-violet-500/30 text-zinc-200 hover:text-cyan-200 hover:border-cyan-400/50 hover:bg-cyan-500/15 active:scale-95 cursor-pointer whitespace-nowrap"
                     >
                       {cmd}
                     </button>

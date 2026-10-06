@@ -42,10 +42,10 @@ export default function DepthMeter() {
   return (
     <aside
       aria-label="Telemetri Kedalaman Ekosistem Akuarium"
-      className="fixed right-3 sm:right-6 bottom-24 z-40 select-none pointer-events-none"
+      className="fixed left-3 sm:left-auto sm:right-6 bottom-5 sm:bottom-24 z-40 select-none pointer-events-none"
     >
       <div
-        className="pointer-events-auto flex items-center gap-3 px-3.5 py-2 rounded-xl backdrop-blur-md transition-all duration-300 group"
+        className="pointer-events-auto flex items-center gap-2 sm:gap-3 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl backdrop-blur-md transition-all duration-300 group"
         style={{
           background: 'rgba(5, 9, 22, 0.85)',
           border: '1px solid rgba(139, 92, 246, 0.25)',
@@ -54,17 +54,17 @@ export default function DepthMeter() {
         title="Indikator Kedalaman Navigasi Akuarium"
       >
         {/* Pulsing Sonar Node */}
-        <div className="relative flex items-center justify-center w-5 h-5 shrink-0">
+        <div className="relative flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 shrink-0">
           <span
             className="absolute inset-0 rounded-full animate-ping opacity-60"
             style={{ backgroundColor: currentZone.color }}
           />
-          <Activity size={14} style={{ color: currentZone.color, position: 'relative' }} />
+          <Activity size={13} style={{ color: currentZone.color, position: 'relative' }} />
         </div>
 
         {/* Telemetry Readout */}
         <div className="flex flex-col">
-          <div className="flex items-center gap-1.5 font-mono text-[11px] font-semibold tracking-wider uppercase">
+          <div className="flex items-center gap-1 sm:gap-1.5 font-mono text-[10px] sm:text-[11px] font-semibold tracking-wider uppercase">
             <span style={{ color: currentZone.color }}>DEPTH:</span>
             <span className="text-zinc-100 tabular-nums font-bold">
               {depth.toLocaleString()} m

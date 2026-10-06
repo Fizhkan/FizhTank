@@ -773,3 +773,15 @@ p {
   color: #e4e4f0;
 }
 
+/* ═══════════════════════════════════════
+   NO SCROLLBAR UTILITY
+═══════════════════════════════════════ */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+
