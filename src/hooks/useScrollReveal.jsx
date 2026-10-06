@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 /**
  * Fade-in / slide-up when element enters viewport.
@@ -66,63 +66,6 @@ export function useAnimatedCounter(end, active, duration = 1800) {
   }, [end, active, duration])
 
   return count
-}
-
-/**
- * 3D tilt effect on hover. Returns { ref, style, handlers }
- */
-export function useTilt(intensity = 8) {
-  const ref = useRef(null)
-  const [transform, setTransform] = useState('')
-
-  const onMouseMove = useCallback(
-    (e) => {
-      const el = ref.current
-      if (!el) return
-      const rect = el.getBoundingClientRect()
-      const x = (e.clientX - rect.left) / rect.width - 0.5
-      const y = (e.clientY - rect.top) / rect.height - 0.5
-      setTransform(
-        `perspective(800px) rotateY(${x * intensity}deg) rotateX(${-y * intensity}deg) scale3d(1.02,1.02,1.02)`
-      )
-    },
-    [intensity]
-  )
-
-  const onMouseLeave = useCallback(() => {
-    setTransform('')
-  }, [])
-
-  return {
-    ref,
-    style: { transform, transition: transform ? 'transform 0.1s ease' : 'transform 0.5s ease' },
-    handlers: { onMouseMove, onMouseLeave },
-  }
-}
-
-/**
- * Parallax offset based on scroll position.
- * Returns a CSS `transform` string.
- */
-export function useParallax(speed = 0.15) {
-  const [offset, setOffset] = useState(0)
-
-  useEffect(() => {
-    let ticking = false
-    function onScroll() {
-      if (!ticking) {
-        ticking = true
-        requestAnimationFrame(() => {
-          setOffset(window.scrollY * speed)
-          ticking = false
-        })
-      }
-    }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [speed])
-
-  return `translateY(${offset}px)`
 }
 
 /**

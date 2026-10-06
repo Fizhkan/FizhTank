@@ -117,6 +117,6 @@ export const toolsData = [
   { label: 'Pi-hole', used: false, iconKey: 'Database' },
   { label: 'pfSense', used: false, iconKey: 'Database' },
   { label: 'VirtualBox', used: false, iconKey: 'Layers' },
-  { label: 'Arch Linux', used: false, iconKey: 'Cpu' },
+  { label: 'Arch Linux', used: true, iconKey: 'Cpu' },
   { label: 'Proxmox', used: false, iconKey: 'HardDrive' },
 ]

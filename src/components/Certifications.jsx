@@ -84,7 +84,7 @@ export default function Certifications() {
             <div className="shrink-0 flex flex-col items-start md:items-end">
               <a
                 href={site.cvUrl}
-                download
+                download="CV_Siraj.pdf"
                 className="inline-flex items-center gap-2.5 px-5 py-3 rounded-xl font-mono text-sm font-semibold transition-all duration-300 shadow-lg group relative overflow-hidden"
                 style={{
                   background: 'linear-gradient(135deg, rgba(124,58,237,0.9), rgba(6,182,212,0.85))',
@@ -100,7 +100,7 @@ export default function Certifications() {
 
         {/* Content: Timeline atau Empty State tanpa placeholder */}
         {activeCertifications.length > 0 ? (
-          <div ref={timelineRef} className="relative pl-6 sm:pl-8 border-l border-violet-500/20 space-y-8 ml-2 sm:ml-4">
+          <ol ref={timelineRef} className="relative pl-6 sm:pl-8 border-l border-violet-500/20 space-y-8 ml-2 sm:ml-4 list-none">
             {activeCertifications.map((item, idx) => {
               const statusConfig = getStatusBadge(item.status)
               const StatusIcon = statusConfig.icon
@@ -109,7 +109,7 @@ export default function Certifications() {
               const certDate = item.date || item.tanggal
 
               return (
-                <div
+                <li
                   key={idx}
                   className="relative group/cert"
                   style={{
@@ -155,10 +155,10 @@ export default function Certifications() {
                       </div>
                     </div>
                   </div>
-                </div>
+                </li>
               )
             })}
-          </div>
+          </ol>
         ) : (
           <div
             ref={timelineRef}

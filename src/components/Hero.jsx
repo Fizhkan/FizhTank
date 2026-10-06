@@ -14,68 +14,7 @@ import {
 import { useScrollReveal, useAnimatedCounter, useCursorGlow } from '../hooks/useScrollReveal'
 import { labsData } from '../data/labsData'
 import { site } from '../data/site'
-
-// IPv4 VLSM Subnet Calculator Engine
-function calculateSubnet(cidrInput) {
-  const trimmed = cidrInput.trim()
-  const parts = trimmed.split('/')
-  if (parts.length !== 2) {
-    return { error: 'Format salah! Gunakan: subnet <IP>/<CIDR>\nContoh: subnet 192.168.1.0/26' }
-  }
-
-  const ipStr = parts[0].trim()
-  const maskBits = parseInt(parts[1].trim(), 10)
-
-  if (isNaN(maskBits) || maskBits < 1 || maskBits > 32) {
-    return { error: 'Prefix CIDR tidak valid! Masukkan angka antara /1 dan /32.' }
-  }
-
-  const octets = ipStr.split('.').map((o) => parseInt(o, 10))
-  if (octets.length !== 4 || octets.some((o) => isNaN(o) || o < 0 || o > 255)) {
-    return { error: 'Alamat IPv4 tidak valid! Gunakan format dotted-decimal (misal: 192.168.1.0).' }
-  }
-
-  const ipInt = (((octets[0] << 24) >>> 0) | (octets[1] << 16) | (octets[2] << 8) | octets[3]) >>> 0
-  const maskInt = maskBits === 0 ? 0 : ((0xffffffff << (32 - maskBits)) >>> 0)
-  const wildcardInt = (~maskInt) >>> 0
-
-  const networkInt = (ipInt & maskInt) >>> 0
-  const broadcastInt = (networkInt | wildcardInt) >>> 0
-
-  const intToIp = (val) => [
-    (val >>> 24) & 0xff,
-    (val >>> 16) & 0xff,
-    (val >>> 8) & 0xff,
-    val & 0xff,
-  ].join('.')
-
-  let usableCount = 0
-  let hostRange = ''
-
-  if (maskBits === 32) {
-    usableCount = 1
-    hostRange = `${intToIp(networkInt)} (Single Host)`
-  } else if (maskBits === 31) {
-    usableCount = 2
-    hostRange = `${intToIp(networkInt)} — ${intToIp(broadcastInt)} (RFC 3021 Point-to-Point)`
-  } else {
-    usableCount = Math.pow(2, 32 - maskBits) - 2
-    const firstHost = (networkInt + 1) >>> 0
-    const lastHost = (broadcastInt - 1) >>> 0
-    hostRange = `${intToIp(firstHost)} — ${intToIp(lastHost)}`
-  }
-
-  return {
-    ip: ipStr,
-    cidr: `/${maskBits}`,
-    netmask: intToIp(maskInt),
-    wildcard: intToIp(wildcardInt),
-    network: intToIp(networkInt),
-    broadcast: intToIp(broadcastInt),
-    usableRange: hostRange,
-    totalUsable: usableCount.toLocaleString(),
-  }
-}
+import { calculateSubnet } from '../utils/subnetCalculator'
 
 // Initial terminal history (simulasi demo telemetri)
 const INITIAL_TERMINAL_LOGS = [
@@ -780,10 +719,10 @@ export default function Hero() {
                     borderColor: 'rgba(99,102,241,0.2)',
                   }}
                 >
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-red-500/80 shadow-[0_0_6px_rgba(239,68,68,0.5)] hover:bg-red-400 transition-colors cursor-pointer" />
-                    <div className="w-3 h-3 rounded-full bg-yellow-500/80 shadow-[0_0_6px_rgba(234,179,8,0.5)] hover:bg-yellow-400 transition-colors cursor-pointer" />
-                    <div className="w-3 h-3 rounded-full bg-green-500/80 shadow-[0_0_6px_rgba(34,197,94,0.5)] hover:bg-green-400 transition-colors cursor-pointer" />
+                  <div className="flex items-center gap-2" aria-hidden="true">
+                    <div className="w-3 h-3 rounded-full bg-red-500/80 shadow-[0_0_6px_rgba(239,68,68,0.5)]" />
+                    <div className="w-3 h-3 rounded-full bg-yellow-500/80 shadow-[0_0_6px_rgba(234,179,8,0.5)]" />
+                    <div className="w-3 h-3 rounded-full bg-green-500/80 shadow-[0_0_6px_rgba(34,197,94,0.5)]" />
                     <span className="ml-2 text-xs sm:text-[13px] text-zinc-300 font-mono font-medium flex items-center gap-1.5">
                       <TerminalIcon size={12} className="text-violet-400" />
                       fizhtank@arch: ~
@@ -802,7 +741,7 @@ export default function Hero() {
                       }}
                       title="Clear terminal"
                       aria-label="Bersihkan riwayat terminal"
-                      className="text-zinc-400 hover:text-zinc-200 p-1 rounded hover:bg-zinc-800/60 transition-colors"
+                      className="text-zinc-400 hover:text-zinc-200 p-1 rounded hover:bg-zinc-800/60 transition-colors cursor-pointer"
                     >
                       <RotateCcw size={12} />
                     </button>
@@ -883,7 +822,8 @@ export default function Hero() {
                         e.stopPropagation()
                         executeCommand(cmd)
                       }}
-                      className="px-2 py-0.5 rounded text-[11px] sm:text-[11.5px] font-mono font-medium transition-all border border-violet-500/30 text-zinc-200 hover:text-cyan-200 hover:border-cyan-400/50 hover:bg-cyan-500/15 active:scale-95"
+                      aria-label={`Jalankan perintah ${cmd}`}
+                      className="px-2 py-0.5 rounded text-[11px] sm:text-[11.5px] font-mono font-medium transition-all border border-violet-500/30 text-zinc-200 hover:text-cyan-200 hover:border-cyan-400/50 hover:bg-cyan-500/15 active:scale-95 cursor-pointer"
                     >
                       {cmd}
                     </button>

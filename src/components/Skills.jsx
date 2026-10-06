@@ -66,16 +66,15 @@ function SkillItem({ name, level, context, visible, delay, accentColor }) {
 function SkillCard({ group, visible, cardIdx }) {
   const Icon = groupIcons[group.id] || Network
   const cardRef = useRef(null)
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const [isHovered, setIsHovered] = useState(false)
 
   const handleMouseMove = useCallback((e) => {
     if (!cardRef.current) return
     const rect = cardRef.current.getBoundingClientRect()
-    setMousePos({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    })
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    cardRef.current.style.setProperty('--mouse-x', `${x}px`)
+    cardRef.current.style.setProperty('--mouse-y', `${y}px`)
   }, [])
 
   return (
@@ -91,12 +90,12 @@ function SkillCard({ group, visible, cardIdx }) {
         transition: `all 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${0.15 + cardIdx * 0.15}s`,
       }}
     >
-      {/* Mouse-following highlight */}
+      {/* Mouse-following highlight (CSS variables, 0 React re-renders) */}
       <div
         className="absolute pointer-events-none transition-opacity duration-300"
         style={{
-          left: mousePos.x - 100,
-          top: mousePos.y - 100,
+          left: 'calc(var(--mouse-x, -999px) - 100px)',
+          top: 'calc(var(--mouse-y, -999px) - 100px)',
           width: 200,
           height: 200,
           background: `radial-gradient(circle, ${group.accent.bg.replace('0.08', '0.15').replace('0.1', '0.18')} 0%, transparent 70%)`,

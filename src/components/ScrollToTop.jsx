@@ -6,11 +6,18 @@ export default function ScrollToTop() {
   const [progress, setProgress] = useState(0)
 
   useEffect(() => {
+    let ticking = false
     function onScroll() {
-      const scrollTop = window.scrollY
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight
-      setShow(scrollTop > 400)
-      setProgress(docHeight > 0 ? (scrollTop / docHeight) * 100 : 0)
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const scrollTop = window.scrollY
+          const docHeight = document.documentElement.scrollHeight - window.innerHeight
+          setShow(scrollTop > 400)
+          setProgress(docHeight > 0 ? (scrollTop / docHeight) * 100 : 0)
+          ticking = false
+        })
+        ticking = true
+      }
     }
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
@@ -43,7 +50,7 @@ export default function ScrollToTop() {
         <circle
           cx="24" cy="24" r="20"
           fill="none"
-          stroke="url(#scroll-gradient)"
+          stroke="url(#scroll-progress-gradient)"
           strokeWidth="2"
           strokeLinecap="round"
           strokeDasharray={`${2 * Math.PI * 20}`}
@@ -51,7 +58,7 @@ export default function ScrollToTop() {
           style={{ transition: 'stroke-dashoffset 0.15s ease' }}
         />
         <defs>
-          <linearGradient id="scroll-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id="scroll-progress-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#7c3aed" />
             <stop offset="100%" stopColor="#06b6d4" />
           </linearGradient>

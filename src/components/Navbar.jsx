@@ -9,12 +9,31 @@ function PacketTicker() {
   const [active, setActive] = useState(true)
 
   useEffect(() => {
-    const id = setInterval(() => {
-      setPkts((p) => p + Math.floor(Math.random() * 18 + 2))
-      setLat(+(Math.random() * 2.8 + 0.4).toFixed(1))
-      setActive((a) => !a || Math.random() > 0.15)
-    }, 900)
-    return () => clearInterval(id)
+    let id = null
+    const startTicker = () => {
+      if (id) clearInterval(id)
+      id = setInterval(() => {
+        if (typeof document !== 'undefined' && document.hidden) return
+        setPkts((p) => p + Math.floor(Math.random() * 18 + 2))
+        setLat(+(Math.random() * 2.8 + 0.4).toFixed(1))
+        setActive((a) => !a || Math.random() > 0.15)
+      }, 900)
+    }
+
+    startTicker()
+    const onVisibilityChange = () => {
+      if (document.hidden) {
+        if (id) clearInterval(id)
+        id = null
+      } else {
+        startTicker()
+      }
+    }
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    return () => {
+      if (id) clearInterval(id)
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+    }
   }, [])
 
   return (
@@ -91,6 +110,14 @@ function PacketTicker() {
   )
 }
 
+const NAV_LINKS = [
+  { label: 'About', href: '#about' },
+  { label: 'Skills', href: '#skills' },
+  { label: 'Labs', href: '#labs' },
+  { label: 'Credentials', href: '#certifications' },
+  { label: 'Contact', href: '#contact' },
+]
+
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -132,13 +159,7 @@ export default function Navbar() {
     return () => observer.disconnect()
   }, [])
 
-  const navLinks = [
-    { label: 'About', href: '#about' },
-    { label: 'Skills', href: '#skills' },
-    { label: 'Labs', href: '#labs' },
-    { label: 'Credentials', href: '#certifications' },
-    { label: 'Contact', href: '#contact' },
-  ]
+  const navLinks = NAV_LINKS
 
   return (
     <nav

@@ -14,7 +14,6 @@ const labIcons = {
 function LabCard({ lab, onClick, visible, cardIdx }) {
   const Icon = labIcons[lab.id] || Network
   const cardRef = useRef(null)
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const [isHovered, setIsHovered] = useState(false)
 
   const colorMap = {
@@ -27,17 +26,26 @@ function LabCard({ lab, onClick, visible, cardIdx }) {
   const handleMouseMove = useCallback((e) => {
     if (!cardRef.current) return
     const rect = cardRef.current.getBoundingClientRect()
-    setMousePos({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    })
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    cardRef.current.style.setProperty('--mouse-x', `${x}px`)
+    cardRef.current.style.setProperty('--mouse-y', `${y}px`)
   }, [])
 
   return (
     <div
       ref={cardRef}
-      className="bento-card p-6 flex flex-col gap-4 cursor-pointer group relative overflow-hidden"
+      role="button"
+      tabIndex={0}
+      aria-label={`Buka detail eksplorasi lab: ${lab.title}`}
+      className="bento-card p-6 flex flex-col gap-4 cursor-pointer group relative overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
       onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onClick()
+        }
+      }}
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -47,12 +55,12 @@ function LabCard({ lab, onClick, visible, cardIdx }) {
         transition: `all 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${0.1 + cardIdx * 0.15}s`,
       }}
     >
-      {/* Mouse-following spotlight */}
+      {/* Mouse-following spotlight (CSS variables, 0 React re-renders) */}
       <div
         className="absolute pointer-events-none transition-opacity duration-300"
         style={{
-          left: mousePos.x - 120,
-          top: mousePos.y - 120,
+          left: 'calc(var(--mouse-x, -999px) - 120px)',
+          top: 'calc(var(--mouse-y, -999px) - 120px)',
           width: 240,
           height: 240,
           background: `radial-gradient(circle, ${colors.glow} 0%, transparent 70%)`,

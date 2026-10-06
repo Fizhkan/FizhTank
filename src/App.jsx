@@ -1,5 +1,4 @@
 import { useEffect } from 'react'
-import './index.css'
 import AquariumBackground from './components/AquariumBackground'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
@@ -10,6 +9,7 @@ import Contact from './components/Contact'
 import Footer from './components/Footer'
 import ScrollToTop from './components/ScrollToTop'
 import DepthMeter from './components/DepthMeter'
+import ErrorBoundary from './components/ErrorBoundary'
 import { site } from './data/site'
 
 function App() {
@@ -19,7 +19,8 @@ function App() {
     }
   }, [])
   return (
-    <div className="relative min-h-screen overflow-x-hidden" style={{ background: '#04060f' }}>
+    <ErrorBoundary>
+      <div className="relative min-h-screen overflow-x-hidden" style={{ background: '#010205' }}>
       {/* ── Full-screen aquarium world ── */}
       <AquariumBackground />
 
@@ -53,6 +54,7 @@ function App() {
       <DepthMeter />
       <ScrollToTop />
     </div>
+    </ErrorBoundary>
   )
 }
 

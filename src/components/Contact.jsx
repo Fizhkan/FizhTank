@@ -335,7 +335,11 @@ export default function Contact() {
 
             {/* Success Toast */}
             {status === 'success' && (
-              <div className="mb-4 p-3 rounded-lg bg-green-500/10 border border-green-500/20 flex items-center gap-3">
+              <div
+                role="status"
+                aria-live="polite"
+                className="mb-4 p-3 rounded-lg bg-green-500/10 border border-green-500/20 flex items-center gap-3"
+              >
                 <CheckCircle2 size={16} className="text-green-400 shrink-0" />
                 <p className="text-sm text-green-300 font-medium">{statusMsg}</p>
               </div>
@@ -343,7 +347,11 @@ export default function Contact() {
 
             {/* Error Toast */}
             {status === 'error' && (
-              <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center gap-3">
+              <div
+                role="alert"
+                aria-live="assertive"
+                className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center gap-3"
+              >
                 <AlertCircle size={16} className="text-red-400 shrink-0" />
                 <p className="text-sm text-red-300 font-medium">{statusMsg}</p>
               </div>
