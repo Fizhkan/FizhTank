@@ -6,7 +6,7 @@
 
 *Navigating packets, filtering streams, and securing the deep ecosystem.*
 
-[![CI Pipeline](https://github.com/Fizhkan/FizhTank/actions/workflows/ci.yml/badge.svg)](https://github.com/Fizhkan/FizhTank/actions/workflows/ci.yml)
+[![CI Pipeline](https://github.com/Fizhkan/FizhTank/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/Fizhkan/FizhTank/actions/workflows/ci.yml)
 [![React](https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-8-purple?style=for-the-badge&logo=vite)](https://vite.dev/)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com/)
