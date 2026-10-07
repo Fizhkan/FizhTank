@@ -4,7 +4,7 @@
  * Supports CIDR prefixes /1 through /32 with RFC 3021 /31 point-to-point support.
  */
 export function calculateSubnet(cidrInput) {
-  const trimmed = cidrInput.trim()
+  const trimmed = (typeof cidrInput === 'string' ? cidrInput : '').trim()
   const parts = trimmed.split('/')
   if (parts.length !== 2) {
     return { error: 'Format salah! Gunakan: subnet <IP>/<CIDR>\nContoh: subnet 192.168.1.0/26' }
@@ -60,6 +60,6 @@ export function calculateSubnet(cidrInput) {
     network: intToIp(networkInt),
     broadcast: intToIp(broadcastInt),
     usableRange: hostRange,
-    totalUsable: usableCount.toLocaleString(),
+    totalUsable: usableCount.toLocaleString('en-US'),
   }
 }

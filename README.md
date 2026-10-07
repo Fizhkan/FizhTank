@@ -6,9 +6,11 @@
 
 *Navigating packets, filtering streams, and securing the deep ecosystem.*
 
+[![CI Pipeline](https://github.com/Fizhkan/FizhTank/actions/workflows/ci.yml/badge.svg)](https://github.com/Fizhkan/FizhTank/actions/workflows/ci.yml)
 [![React](https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-8-purple?style=for-the-badge&logo=vite)](https://vite.dev/)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com/)
+[![Vitest](https://img.shields.io/badge/Vitest-Unit_Tested-6E9F18?style=for-the-badge&logo=vitest)](https://vitest.dev/)
 [![Arch Linux](https://img.shields.io/badge/Arch_Linux-Homelab-1793D1?style=for-the-badge&logo=archlinux)](https://archlinux.org/)
 [![License](https://img.shields.io/badge/License-MIT-emerald?style=for-the-badge)](LICENSE)
 
@@ -156,15 +158,20 @@ Fizhtank/
    ```
    Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-4. **Build for production:**
+4. **Run unit tests (Vitest):**
+   ```bash
+   npm run test
+   ```
+
+5. **Build for production (Client + SSR Prerender):**
    ```bash
    npm run build
    ```
    Outputs optimized static assets to the `dist/` directory.
 
-5. **Linting:**
+6. **Linting (Oxlint):**
    ```bash
-   npx oxlint
+   npm run lint
    ```
 
 ---
