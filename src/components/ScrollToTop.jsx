@@ -31,7 +31,7 @@ export default function ScrollToTop() {
     <button
       onClick={scrollToTop}
       aria-label="Scroll to top"
-      className="fixed bottom-6 right-6 z-50 group"
+      className="fixed bottom-6 right-6 z-50 group touch-manipulation select-none cursor-pointer"
       style={{
         opacity: show ? 1 : 0,
         transform: show ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.8)',
@@ -65,7 +65,7 @@ export default function ScrollToTop() {
         </defs>
       </svg>
       <div
-        className="w-12 h-12 rounded-full flex items-center justify-center border transition-all group-hover:shadow-[0_0_25px_rgba(139,92,246,0.4)]"
+        className="w-12 h-12 rounded-full flex items-center justify-center border transition-all duration-150 active:scale-90 group-hover:shadow-[0_0_25px_rgba(139,92,246,0.4)]"
         style={{
           background: 'rgba(8,12,28,0.9)',
           borderColor: 'rgba(139,92,246,0.3)',

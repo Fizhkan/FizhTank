@@ -241,7 +241,7 @@ export default function Navbar() {
 
         {/* Mobile Toggle */}
         <button
-          className="md:hidden w-9 h-9 flex items-center justify-center rounded-lg transition-all relative overflow-hidden"
+          className="md:hidden w-9 h-9 flex items-center justify-center rounded-lg transition-all active:scale-90 relative overflow-hidden touch-manipulation select-none cursor-pointer"
           style={{ border: '1px solid rgba(99,102,241,0.25)', color: '#a1a1aa' }}
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label={mobileOpen ? 'Tutup navigasi utama' : 'Buka navigasi utama'}
@@ -307,7 +307,7 @@ export default function Navbar() {
               key={link.label}
               href={link.href}
               tabIndex={mobileOpen ? 0 : -1}
-              className="text-zinc-100 hover:text-cyan-300 font-display font-semibold text-base transition-all py-1.5"
+              className="text-zinc-100 hover:text-cyan-300 active:scale-95 font-display font-semibold text-base transition-all py-1.5 touch-manipulation select-none"
               onClick={() => setMobileOpen(false)}
               style={{
                 opacity: mobileOpen ? 1 : 0,

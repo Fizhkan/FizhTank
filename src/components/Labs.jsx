@@ -38,7 +38,7 @@ function LabCard({ lab, onClick, visible, cardIdx }) {
       role="button"
       tabIndex={0}
       aria-label={`Buka detail eksplorasi lab: ${lab.title}`}
-      className="bento-card p-6 flex flex-col gap-4 cursor-pointer group relative overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+      className="bento-card p-6 flex flex-col gap-4 cursor-pointer group relative overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 active:scale-[0.98] select-none touch-manipulation"
       onClick={onClick}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -47,7 +47,11 @@ function LabCard({ lab, onClick, visible, cardIdx }) {
         }
       }}
       onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovered(true)}
+      onMouseEnter={() => {
+        if (typeof window !== 'undefined' && window.matchMedia?.('(hover: hover)')?.matches) {
+          setIsHovered(true)
+        }
+      }}
       onMouseLeave={() => setIsHovered(false)}
       style={{
         opacity: visible ? 1 : 0,
@@ -144,7 +148,7 @@ function LabCard({ lab, onClick, visible, cardIdx }) {
 
       {/* CTA */}
       <button
-        className="w-full text-center text-[13.5px] font-semibold text-violet-300 border border-violet-500/35 hover:bg-violet-500/15 hover:text-white rounded-lg py-2.5 transition-all mt-1 relative z-10 active:scale-[0.98] hover:border-violet-500/55 hover:shadow-[0_0_15px_rgba(139,92,246,0.2)]"
+        className="w-full text-center text-[13.5px] font-semibold text-violet-300 border border-violet-500/35 hover:bg-violet-500/15 hover:text-white rounded-lg py-2.5 transition-all mt-1 relative z-10 active:scale-[0.97] hover:border-violet-500/55 hover:shadow-[0_0_15px_rgba(139,92,246,0.2)] touch-manipulation select-none cursor-pointer"
         onClick={onClick}
       >
         {lab.status === 'planned' ? 'Lihat rencana lab →' : 'View Lab Write-up →'}

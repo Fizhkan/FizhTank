@@ -23,8 +23,12 @@ function SocialCard({ label, value, href, color, glowColor, visible, idx }) {
       href={href}
       target={isMailto ? undefined : '_blank'}
       rel={isMailto ? undefined : 'noopener noreferrer'}
-      className="bento-card p-5 flex items-center gap-4 group transition-all cursor-pointer border border-zinc-800 hover:border-cyan-500/40"
-      onMouseEnter={() => setIsHovered(true)}
+      className="bento-card p-5 flex items-center gap-4 group transition-all cursor-pointer border border-zinc-800 hover:border-cyan-500/40 active:scale-[0.98] select-none touch-manipulation"
+      onMouseEnter={() => {
+        if (typeof window !== 'undefined' && window.matchMedia?.('(hover: hover)')?.matches) {
+          setIsHovered(true)
+        }
+      }}
       onMouseLeave={() => setIsHovered(false)}
       style={{
         opacity: visible ? 1 : 0,
@@ -73,7 +77,7 @@ function AnimatedInput({ id, name, label, type = 'text', placeholder, value, onC
           required={required}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          className="w-full px-4 py-3 bg-zinc-900/80 border rounded-xl text-zinc-100 text-[14.5px] placeholder:text-zinc-500 focus:outline-none transition-all duration-300 resize-none font-sans"
+          className="w-full px-4 py-3 bg-zinc-900/80 border rounded-xl text-zinc-100 text-base sm:text-[14.5px] placeholder:text-zinc-500 focus:outline-none transition-all duration-300 resize-none font-sans touch-manipulation"
           style={{
             borderColor: isFocused ? 'rgba(124, 58, 237, 0.8)' : 'rgba(255, 255, 255, 0.08)',
             boxShadow: isFocused ? '0 0 15px rgba(124, 58, 237, 0.2), inset 0 1px 0 rgba(255,255,255,0.05)' : '',
@@ -91,7 +95,7 @@ function AnimatedInput({ id, name, label, type = 'text', placeholder, value, onC
           autoComplete={autoComplete}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          className="w-full px-4 py-3 bg-zinc-900/80 border rounded-xl text-zinc-100 text-[14.5px] placeholder:text-zinc-500 focus:outline-none transition-all duration-300 font-sans"
+          className="w-full px-4 py-3 bg-zinc-900/80 border rounded-xl text-zinc-100 text-base sm:text-[14.5px] placeholder:text-zinc-500 focus:outline-none transition-all duration-300 font-sans touch-manipulation"
           style={{
             borderColor: isFocused ? 'rgba(124, 58, 237, 0.8)' : 'rgba(255, 255, 255, 0.08)',
             boxShadow: isFocused ? '0 0 15px rgba(124, 58, 237, 0.2), inset 0 1px 0 rgba(255,255,255,0.05)' : '',
@@ -406,7 +410,7 @@ export default function Contact() {
               <button
                 type="submit"
                 disabled={isSending || cooldown > 0}
-                className="w-full flex items-center justify-center gap-2 py-3.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-semibold text-[15px] transition-all hover:shadow-[0_0_20px_rgba(139,92,246,0.35)] group relative overflow-hidden active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed tracking-wide cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 py-3.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-semibold text-[15px] transition-all hover:shadow-[0_0_20px_rgba(139,92,246,0.35)] group relative overflow-hidden active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed tracking-wide cursor-pointer touch-manipulation select-none"
               >
                 {/* Shimmer */}
                 <div

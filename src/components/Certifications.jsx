@@ -85,7 +85,7 @@ export default function Certifications() {
               <a
                 href={site.cvUrl}
                 download="CV_Siraj.pdf"
-                className="inline-flex items-center gap-2.5 px-5 py-3 rounded-xl font-mono text-sm font-semibold transition-all duration-300 shadow-lg group relative overflow-hidden"
+                className="inline-flex items-center gap-2.5 px-5 py-3 rounded-xl font-mono text-sm font-semibold transition-all duration-300 shadow-lg group relative overflow-hidden active:scale-95 touch-manipulation select-none cursor-pointer"
                 style={{
                   background: 'linear-gradient(135deg, rgba(124,58,237,0.9), rgba(6,182,212,0.85))',
                   boxShadow: '0 0 25px rgba(124,58,237,0.25)',

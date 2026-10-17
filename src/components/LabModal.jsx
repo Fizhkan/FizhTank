@@ -160,7 +160,7 @@ export default function LabModal({ lab, onClose }) {
             ref={closeButtonRef}
             onClick={handleClose}
             aria-label="Tutup dialog detail lab"
-            className="w-8 h-8 flex items-center justify-center rounded-lg border border-zinc-700 text-zinc-400 hover:border-red-500/50 hover:text-red-400 transition-all ml-4 shrink-0 hover:rotate-90 active:scale-90"
+            className="w-8 h-8 flex items-center justify-center rounded-lg border border-zinc-700 text-zinc-400 hover:border-red-500/50 hover:text-red-400 transition-all ml-4 shrink-0 hover:rotate-90 active:scale-90 cursor-pointer touch-manipulation select-none"
             style={{ transition: 'all 0.3s ease' }}
           >
             <X size={16} />
@@ -294,7 +294,7 @@ export default function LabModal({ lab, onClose }) {
                   href={validReportUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-cyan-950/50 border border-cyan-500/40 text-cyan-200 hover:text-white text-xs font-mono font-medium transition-all"
+                  className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-cyan-950/50 border border-cyan-500/40 text-cyan-200 hover:text-white text-xs font-mono font-medium transition-all active:scale-95 touch-manipulation select-none cursor-pointer"
                 >
                   <FileText size={13} />
                   <span>Report</span>
@@ -306,7 +306,7 @@ export default function LabModal({ lab, onClose }) {
                   href={validRepoUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-violet-600/20 border border-violet-500/40 text-violet-200 hover:text-white hover:bg-violet-600/30 text-xs font-mono font-medium transition-all"
+                  className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-violet-600/20 border border-violet-500/40 text-violet-200 hover:text-white hover:bg-violet-600/30 text-xs font-mono font-medium transition-all active:scale-95 touch-manipulation select-none cursor-pointer"
                 >
                   <ExternalLink size={13} />
                   <span>Repository</span>

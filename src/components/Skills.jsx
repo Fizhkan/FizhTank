@@ -29,7 +29,7 @@ function SkillItem({ name, level, context, visible, delay, accentColor }) {
 
   return (
     <div
-      className="p-3 rounded-xl border border-zinc-800/80 transition-all duration-300 relative overflow-hidden group/item"
+      className="p-3 rounded-xl border border-zinc-800/80 transition-all duration-300 relative overflow-hidden group/item touch-manipulation select-none active:scale-[0.98]"
       style={{
         background: hovered ? 'rgba(15, 23, 42, 0.65)' : 'rgba(8, 12, 28, 0.45)',
         borderColor: hovered ? accentColor : 'rgba(255, 255, 255, 0.07)',
@@ -37,7 +37,11 @@ function SkillItem({ name, level, context, visible, delay, accentColor }) {
         transform: visible ? 'translateY(0)' : 'translateY(12px)',
         transition: `all 0.5s ease ${delay}ms, border-color 0.25s, background-color 0.25s`,
       }}
-      onMouseEnter={() => setHovered(true)}
+      onMouseEnter={() => {
+        if (typeof window !== 'undefined' && window.matchMedia?.('(hover: hover)')?.matches) {
+          setHovered(true)
+        }
+      }}
       onMouseLeave={() => setHovered(false)}
     >
       <div className="flex items-start justify-between gap-2 mb-1.5">
@@ -80,9 +84,13 @@ function SkillCard({ group, visible, cardIdx }) {
   return (
     <div
       ref={cardRef}
-      className="bento-card p-6 flex flex-col gap-5 relative overflow-hidden group"
+      className="bento-card p-6 flex flex-col gap-5 relative overflow-hidden group touch-manipulation select-none"
       onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovered(true)}
+      onMouseEnter={() => {
+        if (typeof window !== 'undefined' && window.matchMedia?.('(hover: hover)')?.matches) {
+          setIsHovered(true)
+        }
+      }}
       onMouseLeave={() => setIsHovered(false)}
       style={{
         opacity: visible ? 1 : 0,

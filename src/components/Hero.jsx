@@ -604,19 +604,7 @@ export default function Hero() {
               >
                 <a
                   href="#labs"
-                  className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold text-[14.5px] sm:text-[15px] transition-all group text-white shadow-lg relative overflow-hidden w-full sm:w-auto"
-                  style={{
-                    background: 'linear-gradient(135deg, #7c3aed, #4f46e5)',
-                    boxShadow: '0 0 25px rgba(124,58,237,0.4)',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.boxShadow = '0 0 40px rgba(139,92,246,0.65)'
-                    e.currentTarget.style.transform = 'translateY(-2px)'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.boxShadow = '0 0 25px rgba(124,58,237,0.4)'
-                    e.currentTarget.style.transform = ''
-                  }}
+                  className="hero-btn-primary flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold text-[14.5px] sm:text-[15px] group text-white shadow-lg relative overflow-hidden w-full sm:w-auto cursor-pointer"
                 >
                   {/* Shimmer sweep effect */}
                   <div
@@ -633,23 +621,7 @@ export default function Hero() {
                 </a>
                 <a
                   href="#contact"
-                  className="flex items-center justify-center gap-2 px-5 py-3 border rounded-xl font-semibold text-[14.5px] sm:text-[15px] transition-all text-zinc-100 hover:text-cyan-200 backdrop-blur-sm tracking-wide w-full sm:w-auto"
-                  style={{
-                    borderColor: 'rgba(6,182,212,0.3)',
-                    background: 'rgba(6,182,212,0.05)',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(6,182,212,0.6)'
-                    e.currentTarget.style.background = 'rgba(6,182,212,0.1)'
-                    e.currentTarget.style.boxShadow = '0 0 20px rgba(6,182,212,0.2)'
-                    e.currentTarget.style.transform = 'translateY(-2px)'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(6,182,212,0.3)'
-                    e.currentTarget.style.background = 'rgba(6,182,212,0.05)'
-                    e.currentTarget.style.boxShadow = ''
-                    e.currentTarget.style.transform = ''
-                  }}
+                  className="hero-btn-secondary flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold text-[14.5px] sm:text-[15px] text-zinc-100 hover:text-cyan-200 tracking-wide w-full sm:w-auto cursor-pointer"
                 >
                   <Mail size={16} className="shrink-0 text-cyan-400" />
                   <span className="font-semibold text-zinc-100">Get in Touch</span>
@@ -823,7 +795,7 @@ export default function Hero() {
                         executeCommand(cmd)
                       }}
                       aria-label={`Jalankan perintah ${cmd}`}
-                      className="shrink-0 px-2.5 py-1 sm:py-0.5 rounded text-[11px] sm:text-[11.5px] font-mono font-medium transition-all border border-violet-500/30 text-zinc-200 hover:text-cyan-200 hover:border-cyan-400/50 hover:bg-cyan-500/15 active:scale-95 cursor-pointer whitespace-nowrap"
+                      className="shrink-0 px-2.5 py-1 sm:py-0.5 rounded text-[11px] sm:text-[11.5px] font-mono font-medium transition-all border border-violet-500/30 text-zinc-200 hover:text-cyan-200 hover:border-cyan-400/50 hover:bg-cyan-500/15 active:scale-95 cursor-pointer whitespace-nowrap touch-manipulation select-none"
                     >
                       {cmd}
                     </button>
@@ -874,7 +846,7 @@ function StatCard({ stat, statsVisible, idx }) {
 
   return (
     <div
-      className="bento-card p-5 flex items-center gap-4 transition-all duration-300 hover:-translate-y-1 group"
+      className="bento-card p-5 flex items-center gap-4 transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] group touch-manipulation select-none cursor-default"
       style={{
         borderColor: stat.borderGlow,
         opacity: statsVisible ? 1 : 0,
@@ -882,8 +854,10 @@ function StatCard({ stat, statsVisible, idx }) {
         transition: `all 0.6s cubic-bezier(0.16, 1, 0.3, 1) ${0.4 + idx * 0.15}s`,
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = 'rgba(167,139,250,0.5)'
-        e.currentTarget.style.boxShadow = `0 8px 30px ${stat.bg}`
+        if (typeof window !== 'undefined' && window.matchMedia?.('(hover: hover)')?.matches) {
+          e.currentTarget.style.borderColor = 'rgba(167,139,250,0.5)'
+          e.currentTarget.style.boxShadow = `0 8px 30px ${stat.bg}`
+        }
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.borderColor = stat.borderGlow
