@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
-import { Activity, Compass } from 'lucide-react'
+import { Activity } from 'lucide-react'
 
-// Zone mappings based on oceanographic depths (0m to 2600m)
 const ZONES = [
-  { max: 350, name: 'SUNLIT SHALLOWS', color: '#22d3ee' },
-  { max: 1100, name: 'TWILIGHT ZONE', color: '#818cf8' },
-  { max: 1950, name: 'ABYSSAL PLAIN', color: '#a78bfa' },
-  { max: 2600, name: 'HADAL TRENCH', color: '#c084fc' },
+  { min: 0, max: 200, name: 'EPIPELAGIC (SUNLIT)', color: '#22d3ee', temp: '22°C', pressure: '1-20 ATM' },
+  { min: 200, max: 1000, name: 'MESOPELAGIC (TWILIGHT)', color: '#38bdf8', temp: '8°C', pressure: '20-100 ATM' },
+  { min: 1000, max: 4000, name: 'BATHYPELAGIC (MIDNIGHT)', color: '#818cf8', temp: '4°C', pressure: '100-400 ATM' },
+  { min: 4000, max: 6000, name: 'ABYSSOPELAGIC (ABYSS)', color: '#a78bfa', temp: '2°C', pressure: '400-600 ATM' },
+  { min: 6000, max: 11000, name: 'HADOPELAGIC (TRENCH)', color: '#c084fc', temp: '1°C', pressure: '>600 ATM' },
 ]
 
 export default function DepthMeter() {
@@ -15,18 +15,17 @@ export default function DepthMeter() {
 
   useEffect(() => {
     let ticking = false
-
     const handleScroll = () => {
       if (!ticking) {
         requestAnimationFrame(() => {
           const maxScroll = document.documentElement.scrollHeight - window.innerHeight
           const progress = maxScroll > 0 ? Math.min(1, Math.max(0, window.scrollY / maxScroll)) : 0
-          const computedDepth = Math.round(progress * 2600)
+          // Map scroll progress to 0m - 2,800m
+          const computedDepth = Math.round(progress * 2800)
           setDepth(computedDepth)
 
           const zone = ZONES.find((z) => computedDepth <= z.max) || ZONES[ZONES.length - 1]
           setCurrentZone(zone)
-
           ticking = false
         })
         ticking = true
@@ -34,55 +33,43 @@ export default function DepthMeter() {
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })
-    handleScroll() // Initial run
-
+    handleScroll()
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   return (
     <aside
-      aria-label="Telemetri Kedalaman Ekosistem Akuarium"
-      className="fixed left-3 sm:left-auto sm:right-6 bottom-5 sm:bottom-24 z-40 select-none pointer-events-none"
+      aria-label="Bathymetric Ocean Depth Instrumentation"
+      className="fixed bottom-6 right-6 z-40 select-none pointer-events-none"
     >
-      <div
-        className="pointer-events-auto flex items-center gap-2 sm:gap-3 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl backdrop-blur-md transition-all duration-300 group"
-        style={{
-          background: 'rgba(5, 9, 22, 0.85)',
-          border: '1px solid rgba(139, 92, 246, 0.25)',
-          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.6), 0 0 16px rgba(109, 40, 217, 0.15)',
-        }}
-        title="Indikator Kedalaman Navigasi Akuarium"
-      >
-        {/* Pulsing Sonar Node */}
-        <div className="relative flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 shrink-0">
+      <div className="pointer-events-auto flex items-center gap-3 px-3.5 py-2.5 rounded-2xl bg-slate-950/85 border border-white/10 backdrop-blur-2xl shadow-[0_15px_30px_rgba(0,0,0,0.7)] text-xs font-mono transition-all duration-300">
+        {/* Depth Meter Node */}
+        <div className="relative flex items-center justify-center w-5 h-5 shrink-0">
           <span
-            className="absolute inset-0 rounded-full animate-ping opacity-60"
+            className="absolute inset-0 rounded-full animate-ping opacity-50"
             style={{ backgroundColor: currentZone.color }}
           />
-          <Activity size={13} style={{ color: currentZone.color, position: 'relative' }} />
+          <Activity size={14} style={{ color: currentZone.color, position: 'relative' }} />
         </div>
 
-        {/* Telemetry Readout */}
+        {/* Readout */}
         <div className="flex flex-col">
-          <div className="flex items-center gap-1 sm:gap-1.5 font-mono text-[10px] sm:text-[11px] font-semibold tracking-wider uppercase">
+          <div className="flex items-center gap-1.5 font-bold tracking-wider text-[11px]">
             <span style={{ color: currentZone.color }}>DEPTH:</span>
-            <span className="text-zinc-100 tabular-nums font-bold">
-              {depth.toLocaleString()} m
-            </span>
+            <span className="text-white tabular-nums">{depth.toLocaleString()} M</span>
           </div>
-          <div className="hidden sm:flex items-center gap-1 text-[10px] font-mono text-zinc-400">
-            <Compass size={10} className="text-violet-400" />
-            <span>{currentZone.name}</span>
-          </div>
+          <span className="text-[10px] text-slate-400 tracking-tight hidden sm:inline">
+            {currentZone.name.split(' ')[0]} // {currentZone.temp}
+          </span>
         </div>
 
-        {/* Vertical Depth Progress Bar */}
-        <div className="w-1 h-7 bg-zinc-800 rounded-full overflow-hidden flex flex-col justify-end">
+        {/* Vertical Depth Column Progress Bar */}
+        <div className="w-1 h-7 bg-white/10 rounded-full overflow-hidden flex flex-col justify-end">
           <div
             className="w-full rounded-full transition-all duration-200"
             style={{
-              height: `${Math.max(4, (depth / 2600) * 100)}%`,
-              background: `linear-gradient(180deg, #22d3ee, ${currentZone.color})`,
+              height: `${Math.max(6, (depth / 2800) * 100)}%`,
+              backgroundColor: currentZone.color,
             }}
           />
         </div>

@@ -1,134 +1,29 @@
 import { useState, useEffect } from 'react'
-import { Fish, Menu, X, Anchor, Activity } from 'lucide-react'
-import { site } from '../data/site'
-
-// Live "network stats" ticker — purely decorative random values
-function PacketTicker() {
-  const [pkts, setPkts] = useState(1247)
-  const [lat, setLat] = useState(1.2)
-  const [active, setActive] = useState(true)
-
-  useEffect(() => {
-    let id = null
-    const startTicker = () => {
-      if (id) clearInterval(id)
-      id = setInterval(() => {
-        if (typeof document !== 'undefined' && document.hidden) return
-        setPkts((p) => p + Math.floor(Math.random() * 18 + 2))
-        setLat(+(Math.random() * 2.8 + 0.4).toFixed(1))
-        setActive((a) => !a || Math.random() > 0.15)
-      }, 900)
-    }
-
-    startTicker()
-    const onVisibilityChange = () => {
-      if (document.hidden) {
-        if (id) clearInterval(id)
-        id = null
-      } else {
-        startTicker()
-      }
-    }
-    document.addEventListener('visibilitychange', onVisibilityChange)
-    return () => {
-      if (id) clearInterval(id)
-      document.removeEventListener('visibilitychange', onVisibilityChange)
-    }
-  }, [])
-
-  return (
-    <div
-      className="hidden md:flex items-center gap-3 px-3.5 py-1.5 rounded-lg font-mono text-[12px] font-medium backdrop-blur-sm select-none"
-      style={{
-        background: 'rgba(4,10,25,0.75)',
-        border: '1px solid rgba(6,182,212,0.25)',
-        color: 'rgba(6,182,212,0.8)',
-      }}
-      title="Simulasi telemetri jaringan"
-      aria-label="Simulasi telemetri jaringan"
-    >
-      {/* Sonar pulse icon */}
-      <span className="relative flex items-center justify-center w-4 h-4">
-        <span
-          className="absolute inset-0 rounded-full"
-          style={{
-            background: 'rgba(6,182,212,0.2)',
-            animation: 'depth-ping 2.2s ease-out infinite',
-          }}
-        />
-        <Activity size={11} style={{ color: '#06b6d4', position: 'relative' }} />
-      </span>
-
-      {/* Packet count */}
-      <span>
-        <span className="text-violet-300 font-medium">pkt</span>
-        <span
-          className="ml-1 tabular-nums font-semibold text-zinc-100"
-        >
-          {pkts.toLocaleString()}
-        </span>
-      </span>
-
-      <span style={{ color: 'rgba(99,102,241,0.3)' }}>|</span>
-
-      {/* Latency */}
-      <span>
-        <span className="text-violet-300 font-medium">lat</span>
-        <span
-          className="ml-1 tabular-nums font-semibold"
-          style={{
-            color: lat < 1.5 ? '#34d399' : lat < 2.2 ? '#fbbf24' : '#f87171',
-            transition: 'color 0.3s ease',
-          }}
-        >
-          {lat}ms
-        </span>
-      </span>
-
-      <span style={{ color: 'rgba(99,102,241,0.3)' }}>|</span>
-
-      {/* Status */}
-      <span className="flex items-center gap-1.5">
-        <span
-          className="inline-block w-1.5 h-1.5 rounded-full blink"
-          style={{
-            background: active ? '#34d399' : '#f87171',
-            transition: 'background 0.3s',
-          }}
-        />
-        <span
-          className="font-semibold tracking-wide"
-          style={{
-            color: active ? '#34d399' : '#f87171',
-            transition: 'color 0.3s',
-          }}
-        >
-          {active ? 'DEMO' : 'WAIT'}
-        </span>
-      </span>
-    </div>
-  )
-}
+import { Radio, Menu, X, Waves, ArrowUpRight, Volume2, VolumeX } from 'lucide-react'
+import { toggleAudio, isAudioActive, playWaterBubble, playSonarPing } from '../utils/audio'
 
 const NAV_LINKS = [
-  { label: 'About', href: '#about' },
-  { label: 'Skills', href: '#skills' },
-  { label: 'Labs', href: '#labs' },
-  { label: 'Credentials', href: '#certifications' },
-  { label: 'Contact', href: '#contact' },
+  { label: 'Labs', index: '01', href: '#labs' },
+  { label: 'Protocols', index: '02', href: '#skills' },
+  { label: 'Credentials', index: '03', href: '#certifications' },
+  { label: 'Uplink', index: '04', href: '#contact' },
 ]
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
+  const [activeSection, setActiveSection] = useState('hero')
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [activeSection, setActiveSection] = useState('')
+  const [packets, setPackets] = useState(1482)
+  const [latency, setLatency] = useState(0.8)
+  const [audioActive, setAudioActive] = useState(() => isAudioActive())
 
+  // Track scroll depth for navbar blur
   useEffect(() => {
     let ticking = false
     const onScroll = () => {
       if (!ticking) {
         requestAnimationFrame(() => {
-          setScrolled(window.scrollY > 30)
+          setScrolled(window.scrollY > 40)
           ticking = false
         })
         ticking = true
@@ -138,9 +33,19 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // Active section tracking
+  // Live telemetry pulse
   useEffect(() => {
-    const sections = ['about', 'skills', 'labs', 'certifications', 'contact']
+    const interval = setInterval(() => {
+      if (document.hidden) return
+      setPackets((prev) => prev + Math.floor(Math.random() * 12 + 3))
+      setLatency(+(Math.random() * 0.8 + 0.4).toFixed(1))
+    }, 1200)
+    return () => clearInterval(interval)
+  }, [])
+
+  // Section observer for active link
+  useEffect(() => {
+    const sections = ['hero', 'skills', 'labs', 'certifications', 'contact']
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -149,7 +54,7 @@ export default function Navbar() {
           }
         })
       },
-      { rootMargin: '-40% 0px -60% 0px' }
+      { rootMargin: '-40% 0px -50% 0px' }
     )
 
     sections.forEach((id) => {
@@ -159,167 +64,200 @@ export default function Navbar() {
     return () => observer.disconnect()
   }, [])
 
-  const navLinks = NAV_LINKS
+  const handleAudioToggle = () => {
+    const active = toggleAudio()
+    setAudioActive(active)
+  }
+
+  const handleSonarPing = () => {
+    playSonarPing()
+    window.dispatchEvent(new CustomEvent('fizhtank-feed'))
+  }
 
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled ? 'backdrop-blur-xl border-b' : 'bg-transparent'
-      }`}
-      style={
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? { background: 'rgba(4,6,15,0.85)', borderColor: 'rgba(99,102,241,0.15)' }
-          : {}
-      }
+          ? 'bg-slate-950/80 backdrop-blur-2xl border-b border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.5)]'
+          : 'bg-transparent border-b border-transparent'
+      }`}
     >
-      <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-        {/* Logo */}
-        <a href="#" className="flex items-center gap-2.5 group">
-          <div
-            className="relative w-9 h-9 flex items-center justify-center rounded-xl transition-all bio-glow group-hover:scale-110"
-            style={{
-              background: 'rgba(109,40,217,0.12)',
-              border: '1px solid rgba(139,92,246,0.35)',
-              transition: 'all 0.3s ease',
-            }}
-          >
-            <Fish size={17} className="text-violet-400 group-hover:text-cyan-400 transition-colors duration-300" />
-            <span
-              className="absolute -top-1 -right-1 w-2 h-2 rounded-full blink"
-              style={{ background: 'rgba(6,182,212,0.6)' }}
-            />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between">
+        {/* Brand / Station Call-sign */}
+        <a
+          href="#"
+          onMouseEnter={playWaterBubble}
+          className="flex items-center gap-3 group cursor-pointer"
+        >
+          <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-105 transition-transform shadow-[0_0_15px_rgba(6,182,212,0.15)]">
+            <Radio size={16} />
           </div>
-          <span className="font-extrabold text-xl tracking-tight font-display">
-            <span className="text-zinc-50">Fizh</span>
-            <span
-              className="bg-clip-text text-transparent"
-              style={{ backgroundImage: 'linear-gradient(135deg, #c4b5fd, #22d3ee)' }}
-            >
-              Tank
+
+          <div className="flex flex-col">
+            <span className="font-extrabold font-display tracking-tight text-white text-base uppercase">
+              FizhTank
             </span>
-          </span>
-          <span
-            className="hidden sm:flex items-center gap-1 ml-1 font-mono text-[11px] font-semibold text-cyan-300 bg-cyan-950/60 px-2 py-0.5 rounded-full border border-cyan-500/30"
-          >
-            <Anchor size={10} className="text-cyan-400" />
-            <span>v2.0</span>
-          </span>
+            <span className="text-[10px] font-mono text-cyan-400/80 tracking-widest uppercase">
+              ABYSSAL STATION
+            </span>
+          </div>
         </a>
 
-        {/* Live Packet Ticker — replaces progress bar */}
-        <PacketTicker />
+        {/* Live Hydro-Acoustic Telemetry Pill (Center) */}
+        <div className="hidden lg:flex items-center gap-3 px-4 py-1.5 rounded-full border border-white/10 bg-white/[0.03] backdrop-blur-md font-mono text-xs text-slate-300 select-none">
+          <span className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
+            <span className="text-slate-400 font-medium">ACOUSTIC:</span>
+          </span>
+          <span className="font-semibold text-white tabular-nums">{packets.toLocaleString()} PKT</span>
+          <span className="text-slate-600">//</span>
+          <span className="text-slate-400">RTT:</span>
+          <span className="font-semibold text-emerald-400 tabular-nums">{latency}ms</span>
+          <span className="text-slate-600">//</span>
+          <button
+            onClick={handleSonarPing}
+            onMouseEnter={playWaterBubble}
+            className="flex items-center gap-1 text-[11px] text-cyan-400 hover:text-cyan-300 font-bold transition-colors cursor-pointer"
+            title="Kirim gelombang sonar akustik ke kedalaman samudra"
+          >
+            <Waves size={12} />
+            <span>SONAR PING</span>
+          </button>
+        </div>
 
-        {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-6">
-          {navLinks.map((link) => {
-            const sectionId = link.href.replace('#', '')
-            const isActive = activeSection === sectionId
+        {/* Desktop Navigation Links & Controls */}
+        <nav className="hidden md:flex items-center gap-2 font-mono text-xs">
+          {/* Audio Synthesizer Toggle */}
+          <button
+            onClick={handleAudioToggle}
+            aria-label={audioActive ? 'Mute oceanic hydro-synth audio' : 'Unmute oceanic hydro-synth audio'}
+            title={audioActive ? 'Matikan audio drone samudra (52Hz)' : 'Aktifkan audio synthesizer drone samudra'}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all cursor-pointer ${
+              audioActive
+                ? 'border-cyan-400/60 bg-cyan-500/15 text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.2)]'
+                : 'border-white/10 bg-white/[0.03] text-slate-400 hover:text-slate-200 hover:border-white/20'
+            }`}
+          >
+            {audioActive ? (
+              <>
+                <Volume2 size={13} className="text-cyan-300 shrink-0" />
+                <span className="text-[10px] font-bold tracking-wider uppercase">AUDIO [ON]</span>
+                {/* 4 Animated Equalizer Wave Bars */}
+                <span className="flex items-end gap-0.5 h-3 ml-0.5">
+                  <span className="w-0.5 bg-cyan-300 rounded-full animate-[pulse_0.6s_ease-in-out_infinite] h-2.5" />
+                  <span className="w-0.5 bg-cyan-300 rounded-full animate-[pulse_0.9s_ease-in-out_infinite] h-3" />
+                  <span className="w-0.5 bg-cyan-300 rounded-full animate-[pulse_0.5s_ease-in-out_infinite] h-1.5" />
+                  <span className="w-0.5 bg-cyan-300 rounded-full animate-[pulse_0.8s_ease-in-out_infinite] h-2" />
+                </span>
+              </>
+            ) : (
+              <>
+                <VolumeX size={13} className="shrink-0" />
+                <span className="text-[10px] tracking-wider uppercase">AUDIO [OFF]</span>
+              </>
+            )}
+          </button>
+
+          {NAV_LINKS.map((link) => {
+            const isActive = activeSection === link.href.replace('#', '')
             return (
               <a
                 key={link.label}
                 href={link.href}
-                className="nav-link relative"
-                style={{
-                  color: isActive ? '#e4e4f0' : undefined,
-                }}
+                onMouseEnter={playWaterBubble}
+                className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${
+                  isActive
+                    ? 'text-white bg-white/[0.08] font-semibold'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.03]'
+                }`}
               >
-                {link.label}
-                {/* Active indicator dot */}
-                <span
-                  className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
-                  style={{
-                    background: 'linear-gradient(135deg, #8b5cf6, #06b6d4)',
-                    opacity: isActive ? 1 : 0,
-                    transform: isActive ? 'scale(1)' : 'scale(0)',
-                    transition: 'all 0.3s ease',
-                  }}
-                />
+                <span className="text-cyan-400/70 text-[10px] font-bold">{link.index}</span>
+                <span>{link.label}</span>
               </a>
             )
           })}
-        </div>
 
-        {/* Mobile Toggle */}
-        <button
-          className="md:hidden w-9 h-9 flex items-center justify-center rounded-lg transition-all active:scale-90 relative overflow-hidden touch-manipulation select-none cursor-pointer"
-          style={{ border: '1px solid rgba(99,102,241,0.25)', color: '#a1a1aa' }}
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label={mobileOpen ? 'Tutup navigasi utama' : 'Buka navigasi utama'}
-          aria-expanded={mobileOpen}
-          aria-controls="mobile-navigation-menu"
-        >
-          <div
-            className="absolute inset-0 flex items-center justify-center transition-all duration-300"
-            style={{
-              opacity: mobileOpen ? 0 : 1,
-              transform: mobileOpen ? 'rotate(90deg) scale(0.5)' : 'rotate(0) scale(1)',
-            }}
+          <a
+            href="https://github.com/Fizhkan"
+            target="_blank"
+            rel="noopener noreferrer"
+            onMouseEnter={playWaterBubble}
+            className="ml-2 inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full border border-white/15 bg-white/[0.04] text-slate-200 hover:text-white hover:border-cyan-400/50 hover:bg-white/[0.08] transition-all cursor-pointer font-mono text-xs"
           >
-            <Menu size={18} />
-          </div>
-          <div
-            className="absolute inset-0 flex items-center justify-center transition-all duration-300"
-            style={{
-              opacity: mobileOpen ? 1 : 0,
-              transform: mobileOpen ? 'rotate(0) scale(1)' : 'rotate(-90deg) scale(0.5)',
-            }}
+            <span>GitHub</span>
+            <ArrowUpRight size={13} className="text-slate-400" />
+          </a>
+        </nav>
+
+        {/* Mobile Menu Toggle Button */}
+        <div className="flex md:hidden items-center gap-2">
+          <button
+            onClick={handleAudioToggle}
+            aria-label={audioActive ? 'Mute audio' : 'Unmute audio'}
+            className={`w-9 h-9 rounded-xl border flex items-center justify-center transition-colors ${
+              audioActive
+                ? 'border-cyan-400/50 bg-cyan-500/20 text-cyan-300'
+                : 'border-white/10 bg-white/[0.04] text-slate-400'
+            }`}
           >
-            <X size={18} />
-          </div>
-        </button>
+            {audioActive ? <Volume2 size={16} /> : <VolumeX size={16} />}
+          </button>
+
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label={mobileOpen ? 'Tutup navigasi' : 'Buka navigasi'}
+            className="w-9 h-9 rounded-xl border border-white/10 bg-white/[0.04] flex items-center justify-center text-slate-300 hover:text-white transition-colors cursor-pointer"
+          >
+            {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
+        </div>
       </div>
 
-      {/* Mobile Menu — Animated Slide-down */}
-      <div
-        id="mobile-navigation-menu"
-        aria-hidden={!mobileOpen}
-        inert={!mobileOpen ? true : undefined}
-        className={`md:hidden absolute top-full left-0 right-0 backdrop-blur-xl border-b overflow-hidden ${
-          !mobileOpen ? 'pointer-events-none' : ''
-        }`}
-        style={{
-          background: 'rgba(4,6,15,0.95)',
-          borderColor: 'rgba(99,102,241,0.15)',
-          maxHeight: mobileOpen ? '300px' : '0',
-          opacity: mobileOpen ? 1 : 0,
-          visibility: mobileOpen ? 'visible' : 'hidden',
-          transition: 'max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, visibility 0.4s',
-        }}
-      >
-        <div className="py-4 px-6 flex flex-col gap-4">
-          <div className="flex items-center gap-2 py-1">
-            <span className="relative flex h-2 w-2">
-              <span
-                className="blink absolute inline-flex h-full w-full rounded-full opacity-75"
-                style={{ background: '#06b6d4' }}
-              />
-              <span
-                className="relative inline-flex rounded-full h-2 w-2"
-                style={{ background: '#0891b2' }}
-              />
-            </span>
-            <span className="text-[12.5px] font-mono font-medium text-purple-300">
-              🫧 Swimming in Packets{site.availability && !site.availability.includes('[ISI') ? ` · ${site.availability}` : ''}
-            </span>
+      {/* Mobile Drawer Menu */}
+      {mobileOpen && (
+        <div className="md:hidden border-b border-white/10 bg-slate-950/95 backdrop-blur-2xl px-6 py-6 font-mono text-sm space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-white/10 text-xs text-slate-400">
+            <span>STATION TELEMETRY</span>
+            <span className="text-emerald-400 font-semibold">{latency}ms // {packets} PKT</span>
           </div>
-          {navLinks.map((link, idx) => (
-            <a
-              key={link.label}
-              href={link.href}
-              tabIndex={mobileOpen ? 0 : -1}
-              className="text-zinc-100 hover:text-cyan-300 active:scale-95 font-display font-semibold text-base transition-all py-1.5 touch-manipulation select-none"
-              onClick={() => setMobileOpen(false)}
-              style={{
-                opacity: mobileOpen ? 1 : 0,
-                transform: mobileOpen ? 'translateX(0)' : 'translateX(-15px)',
-                transition: `all 0.3s ease ${0.1 + idx * 0.07}s`,
+
+          <div className="flex flex-col gap-2">
+            {NAV_LINKS.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                onClick={() => setMobileOpen(false)}
+                className="py-2.5 flex items-center justify-between text-slate-200 hover:text-cyan-400 transition-colors"
+              >
+                <span>{link.label}</span>
+                <span className="text-xs text-cyan-400 font-bold">{link.index}</span>
+              </a>
+            ))}
+
+            <button
+              onClick={() => {
+                handleSonarPing()
+                setMobileOpen(false)
               }}
+              className="py-2.5 flex items-center justify-between text-cyan-400 hover:text-cyan-300 transition-colors text-left"
             >
-              {link.label}
+              <span>TRIGGER SONAR PING</span>
+              <Waves size={14} />
+            </button>
+
+            <a
+              href="https://github.com/Fizhkan"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMobileOpen(false)}
+              className="py-2.5 flex items-center justify-between text-slate-200 hover:text-cyan-400 transition-colors"
+            >
+              <span>GitHub / Fizhkan</span>
+              <ArrowUpRight size={14} className="text-slate-400" />
             </a>
-          ))}
+          </div>
         </div>
-      </div>
-    </nav>
+      )}
+    </header>
   )
 }

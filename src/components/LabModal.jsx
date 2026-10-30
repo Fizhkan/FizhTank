@@ -112,7 +112,7 @@ export default function LabModal({ lab, onClose }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="lab-modal-title"
-        className="relative w-full max-w-2xl max-h-[92vh] overflow-y-auto bg-zinc-950 border border-zinc-800 rounded-2xl"
+        className="relative w-full max-w-2xl max-h-[92vh] overflow-y-auto apple-glass rounded-2xl"
         style={{
           opacity: isOpen ? 1 : 0,
           transform: isOpen ? 'translateY(0) scale(1)' : 'translateY(30px) scale(0.95)',

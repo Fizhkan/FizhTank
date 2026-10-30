@@ -1,883 +1,579 @@
 import { useState, useRef, useEffect } from 'react'
 import {
-  ArrowRight,
-  Mail,
+  ArrowUpRight,
+  Radio,
+  Terminal as TerminalIcon,
+  Activity,
+  Layers,
   Shield,
   Network,
-  Terminal as TerminalIcon,
   Waves,
-  Radio,
-  Activity,
-  RotateCcw,
-  Fish,
 } from 'lucide-react'
-import { useScrollReveal, useAnimatedCounter, useCursorGlow } from '../hooks/useScrollReveal'
+import { useScrollReveal, useAnimatedCounter } from '../hooks/useScrollReveal'
 import { labsData } from '../data/labsData'
 import { site } from '../data/site'
 import { calculateSubnet } from '../utils/subnetCalculator'
+import { playWaterBubble, playSonarPing } from '../utils/audio'
 
-// Initial terminal history (simulasi demo telemetri)
-const INITIAL_TERMINAL_LOGS = [
-  { type: 'cmd', text: 'whoami' },
-  { type: 'output', text: `fizhtank — ${site.jobTitle.toLowerCase()}`, color: 'text-zinc-200' },
-  { type: 'cmd', text: 'cat /etc/ocean.conf' },
-  { type: 'output', text: '# /etc/ocean.conf (simulasi demo)', color: 'text-cyan-400' },
-  { type: 'output', text: '  theme   = cyberpunk-aquarium-demo', color: 'text-violet-400' },
-  { type: 'output', text: '  focus   = learning-network-and-security', color: 'text-violet-400' },
-  { type: 'output', text: '  status  = DEMO_ENVIRONMENT_READY', color: 'text-violet-400' },
-  { type: 'cmd', text: 'ping -c1 demo.gateway' },
-  { type: 'output', text: '64 bytes from demo.gateway: icmp_seq=1 ttl=64 time=1.2ms (simulasi)', color: 'text-emerald-400' },
-  { type: 'cmd', text: 'nmap -sS -p 22,80,443 192.168.1.1' },
-  { type: 'output', text: 'PORT   STATE SERVICE (simulasi)\n22/tcp open  ssh\n80/tcp open  http\n443/tcp open  https\nScan demo selesai. (simulasi telemetri demo)', color: 'text-cyan-300' },
+// Interactive Sonar Nodes representing our network ecosystem
+const SONAR_NODES = [
+  { id: 'core-l3', label: 'CORE-L3-ROUTER', x: 50, y: 48, ip: '192.168.10.1', type: 'Core Switch / SVI', status: 'ACTIVE', latency: '0.4ms', icon: Network },
+  { id: 'edge-fw', label: 'EDGE-FIREWALL', x: 26, y: 28, ip: '10.0.0.1', type: 'Stateful Packet Filter', status: 'FILTERING', latency: '1.2ms', icon: Shield },
+  { id: 'dns-sink', label: 'PIHOLE-SINKHOLE', x: 74, y: 32, ip: '192.168.20.53', type: 'Local DNS Resolver', status: 'BLOCKING', latency: '0.8ms', icon: Layers },
+  { id: 'packet-tap', label: 'WIRESHARK-TAP', x: 30, y: 72, ip: '0.0.0.0 (Promisc)', type: 'Raw Packet Monitor', status: 'SNIFFING', latency: '0.1ms', icon: Activity },
+  { id: 'uplink-wan', label: 'SURFACE-GATEWAY', x: 72, y: 70, ip: '203.0.113.1', type: 'WAN BGP Peering', status: 'ESTABLISHED', latency: '4.8ms', icon: Radio },
 ]
 
-// ── Typewriter hook: SSR renders full text immediately for crawlers ────────
-function useTypewriter(text, speed = 50, startDelay = 600) {
-  const [displayed, setDisplayed] = useState(() => (typeof window === 'undefined' ? text : text))
-  const [done, setDone] = useState(false)
-
-  useEffect(() => {
-    let idx = 0
-    let interval
-    const timeout = setTimeout(() => {
-      setDisplayed('')
-      interval = setInterval(() => {
-        idx++
-        setDisplayed(text.slice(0, idx))
-        if (idx >= text.length) {
-          clearInterval(interval)
-          setDone(true)
-        }
-      }, speed)
-    }, startDelay)
-
-    return () => {
-      clearTimeout(timeout)
-      if (interval) clearInterval(interval)
-    }
-  }, [text, speed, startDelay])
-
-  return { displayed, done }
-}
-
-// ── Typing indicator for terminal output ──
-function TypingIndicator() {
-  return (
-    <span className="inline-flex gap-0.5 ml-1">
-      {[0, 1, 2].map(i => (
-        <span
-          key={i}
-          className="w-1 h-1 rounded-full bg-violet-400"
-          style={{
-            animation: `blink-dot 1.4s ease-in-out ${i * 0.2}s infinite`,
-          }}
-        />
-      ))}
-    </span>
-  )
-}
-
 export default function Hero() {
-  const [terminalHistory, setTerminalHistory] = useState(INITIAL_TERMINAL_LOGS)
-  const [inputVal, setInputVal] = useState('')
-  const [tankFed, setTankFed] = useState(false)
-  const [isTyping, setIsTyping] = useState(false)
-  const [commandHistory, setCommandHistory] = useState([])
-  const [historyPointer, setHistoryPointer] = useState(-1)
-  const inputRef = useRef(null)
+  const [activeTab, setActiveTab] = useState('radar') // 'radar' | 'vlsm' | 'cli'
+  const [selectedNode, setSelectedNode] = useState(SONAR_NODES[0])
+  const [subnetInput, setSubnetInput] = useState('192.168.10.0/26')
+  const [subnetResult, setSubnetResult] = useState(() => calculateSubnet('192.168.10.0/26'))
+
+  // CLI state
+  const [terminalHistory, setTerminalHistory] = useState([
+    { type: 'sys', text: `FIZHTANK STATION KERNEL // v2.6.4 (OCEANOGRAPHIC SHELL)` },
+    { type: 'sys', text: `OPERATOR: ${site.title.split('|')[0].trim()} [${site.jobTitle}]` },
+    { type: 'cmd', text: 'cat /etc/station.manifest' },
+    { type: 'out', text: `ROLE      : ${site.jobTitle}\nACADEMIC  : ${site.subtitle}\nPROTOCOL  : IPv4 / VLSM / 802.1Q / OSPFv2 / TLS 1.3\nMISSION   : ${site.tagline}` },
+    { type: 'cmd', text: 'status --quick' },
+    { type: 'out', text: `[✓] Hydro-Acoustic Radar Online\n[✓] VLSM Segmentation Engine Active\n[✓] 3 Planned Research Dossiers Loaded` },
+  ])
+  const [cliInput, setCliInput] = useState('')
   const terminalBodyRef = useRef(null)
 
-  // Scroll reveal for the section
-  const [sectionRef, sectionVisible] = useScrollReveal({ threshold: 0.05 })
-  // Stats reveal
-  const [statsRef, statsVisible] = useScrollReveal({ threshold: 0.2 })
-  // Cursor glow for the hero card
-  const { ref: glowRef, glowStyle } = useCursorGlow()
+  // Section reveals
+  const [headerRef, headerVisible] = useScrollReveal({ threshold: 0.1 })
+  const [instrumentRef, instrumentVisible] = useScrollReveal({ threshold: 0.1 })
+  const [statsRef, statsVisible] = useScrollReveal({ threshold: 0.15 })
 
-  // Typewriter headline
-  const { displayed: typewriterText, done: typewriterDone } = useTypewriter(
-    'Network Ecosystems',
-    45,
-    800
-  )
-
-  // Auto-scroll terminal to bottom when new logs arrive
+  // Auto-scroll CLI terminal
   useEffect(() => {
-    if (terminalBodyRef.current) {
+    if (activeTab === 'cli' && terminalBodyRef.current) {
       terminalBodyRef.current.scrollTop = terminalBodyRef.current.scrollHeight
     }
-  }, [terminalHistory])
+  }, [terminalHistory, activeTab])
 
-  const executeCommand = (cmdText) => {
-    const trimmed = cmdText.trim()
+  // Handle VLSM Calculation
+  const handleCalculateSubnet = (inputStr) => {
+    setSubnetInput(inputStr)
+    const res = calculateSubnet(inputStr)
+    setSubnetResult(res)
+  }
+
+  // Handle CLI Command Execution
+  const handleRunCommand = (e) => {
+    e.preventDefault()
+    const trimmed = cliInput.trim()
     if (!trimmed) return
 
-    // Save to command history
-    setCommandHistory((prev) => [...prev, trimmed])
-    setHistoryPointer(-1)
-
-    // Show typing indicator briefly
-    setIsTyping(true)
-
-    const newLogs = [...terminalHistory, { type: 'cmd', text: trimmed }]
     const lower = trimmed.toLowerCase()
+    const nextLogs = [...terminalHistory, { type: 'cmd', text: trimmed }]
 
-    const respond = () => {
-      const responseLogs = [...newLogs]
-
-      if (lower === 'help') {
-        responseLogs.push({
-          type: 'output',
-          text:
-            'Available commands:\n  whoami      - Identity & professional background\n  skills      - Core competencies & tech stack\n  projects    - Featured enterprise networking & security labs\n  labs        - Overview of featured lab write-ups\n  subnet <ip> - IPv4 VLSM calculator (e.g. subnet 192.168.1.0/26)\n  traceroute  - Network packet hop tracer (e.g. traceroute 8.8.8.8)\n  ping <ip>   - ICMP diagnostic transmission\n  nmap        - Stealth network port reconnaissance\n  contact     - Communication matrix & channels\n  cat cv.txt  - Quick terminal summary of CV\n  feed        - [Easter Egg] Feed bioluminescent tank\n  clear       - Wipe terminal history',
-          color: 'text-zinc-300',
-        })
-      } else if (lower.startsWith('subnet')) {
-        const cidrArg = trimmed.split(' ')[1]
-        if (!cidrArg) {
-          responseLogs.push({
-            type: 'output',
-            text: 'Usage: subnet <IPv4>/<CIDR>\nContoh: subnet 192.168.1.0/26\n        subnet 10.20.0.0/23',
-            color: 'text-amber-300',
-          })
+    if (lower === 'help') {
+      nextLogs.push({
+        type: 'out',
+        text: 'Available Commands:\n  whoami      - Station operator credentials\n  subnet <ip> - Compute VLSM CIDR block (e.g. subnet 10.0.0.0/24)\n  radar       - Switch station view to Hydro-Acoustic Radar\n  vlsm        - Switch station view to VLSM Matrix\n  feed        - Trigger acoustic sonar bloom in ocean canvas\n  clear       - Purge terminal buffer',
+      })
+    } else if (lower === 'whoami') {
+      nextLogs.push({
+        type: 'out',
+        text: `${site.jobTitle}\n${site.subtitle}\nContact: ${site.email}`,
+      })
+    } else if (lower.startsWith('subnet')) {
+      const arg = trimmed.split(' ')[1]
+      if (!arg) {
+        nextLogs.push({ type: 'err', text: 'Usage: subnet <ip/cidr> (e.g. subnet 192.168.1.0/26)' })
+      } else {
+        const res = calculateSubnet(arg)
+        if (res.error) {
+          nextLogs.push({ type: 'err', text: `Calculation Error: ${res.error}` })
         } else {
-          const res = calculateSubnet(cidrArg)
-          if (res.error) {
-            responseLogs.push({
-              type: 'output',
-              text: `[Error] ${res.error}`,
-              color: 'text-red-400',
-            })
-          } else {
-            const table = [
-              '┌─── [IPv4 VLSM SUBNET CALCULATOR] ──────────────────┐',
-              `  Target IP       : ${res.ip} ${res.cidr}`,
-              `  Subnet Mask     : ${res.netmask}`,
-              `  Wildcard Mask   : ${res.wildcard}`,
-              `  Network ID      : ${res.network}`,
-              `  Broadcast IP    : ${res.broadcast}`,
-              `  Usable Host IP  : ${res.usableRange}`,
-              `  Total Usable    : ${res.totalUsable} hosts`,
-              '└────────────────────────────────────────────────────┘',
-            ].join('\n')
-            responseLogs.push({
-              type: 'output',
-              text: table,
-              color: 'text-cyan-300',
-            })
-          }
+          nextLogs.push({
+            type: 'out',
+            text: `CIDR: ${res.cidr} [/${res.prefix}]\nNetmask: ${res.netmask}\nNetwork: ${res.networkAddress}\nUsable : ${res.firstUsable} - ${res.lastUsable} (${res.usableHosts} hosts)\nBcast  : ${res.broadcastAddress}`,
+          })
+          setSubnetInput(arg)
+          setSubnetResult(res)
         }
-      } else if (lower.startsWith('traceroute') || lower.startsWith('trace')) {
-        const target = trimmed.split(' ')[1] || '8.8.8.8'
-        responseLogs.push({
-          type: 'output',
-          text: [
-            `traceroute to ${target} (${target}), 30 hops max, 60 byte packets (simulasi)`,
-            ` 1  gw.fizhtank.local (192.168.1.1)        0.842 ms  [L3 Core Switch]`,
-            ` 2  pfsense.security.lan (10.10.1.1)       1.314 ms  [Firewall / NAT]`,
-            ` 3  edge-upstream.isp.net (203.0.113.1)    4.652 ms  [ISP Border Router]`,
-            ` 4  target-host (${target})                11.238 ms [Target Resolved]`,
-            `Trace complete. 0% packet loss.`,
-          ].join('\n'),
-          color: 'text-emerald-400',
-        })
-      } else if (lower === 'whoami') {
-        responseLogs.push({
-          type: 'output',
-          text: `fizhtank // Siraj\nStatus      : ${site.jobTitle}\nPendidikan  : ${site.subtitle}\nFokus Belajar : Cisco IOS, Packet Tracer, Wireshark, Arch Linux`,
-          color: 'text-cyan-300',
-        })
-      } else if (lower === 'projects') {
-        responseLogs.push({
-          type: 'output',
-          text:
-            '=== LAB ROADMAP & EKSPLORASI ===\n1. Enterprise Multi-VLAN Segmentation (Rencana Lab)\n2. Packet Stream & Credential Inspection (Rencana Lab)\n3. Linux Network Firewall & Homelab Service (Rencana Lab)\nKetik "labs" atau scroll ke section #labs untuk melihat rencana langkah pengerjaan.',
-          color: 'text-emerald-300',
-        })
-      } else if (lower === 'contact') {
-        const contactMatrix = [
-          '=== CONTACT MATRIX ===',
-          `Email    : ${site.email}`,
-          'GitHub   : https://github.com/Fizhkan',
-          ...(site.linkedinUrl && !site.linkedinUrl.includes('[ISI') ? [`LinkedIn : ${site.linkedinUrl}`] : []),
-          'Form     : Langsung isi form di section #contact di bawah.',
-        ].join('\n')
-        responseLogs.push({
-          type: 'output',
-          text: contactMatrix,
-          color: 'text-blue-300',
-        })
-      } else if (lower === 'cat cv.txt' || lower === 'cv.txt' || lower === 'cv') {
-        const activeCertNames = (site.certifications || [])
-          .filter((c) => (c.name || c.nama) && !(c.name || c.nama).includes('[ISI'))
-          .map((c) => c.name || c.nama)
-        const certSummary = activeCertNames.length > 0 ? activeCertNames.join(', ') : 'Belum dipublikasikan (studi mandiri & lab)'
-        const cvStatus = site.cvUrl && !site.cvUrl.includes('[ISI')
-          ? 'Tersedia untuk diunduh di section Credentials.'
-          : 'Belum tersedia untuk diunduh (dalam persiapan).'
-
-        const cvSummaryText = [
-          '================================================',
-          'CURRICULUM VITAE - SIRAJ (FIZHTANK)',
-          '================================================',
-          `Role           : ${site.jobTitle}`,
-          `Pendidikan     : ${site.subtitle}`,
-          'Fokus Belajar  : Jaringan & Keamanan Komputer',
-          `Sertifikasi    : ${certSummary}`,
-          `Status CV      : ${cvStatus}`,
-          '================================================',
-        ].join('\n')
-
-        responseLogs.push({
-          type: 'output',
-          text: cvSummaryText,
-          color: 'text-violet-300',
-        })
-      } else if (lower === 'skills') {
-        responseLogs.push({
-          type: 'output',
-          text:
-            '[NETWORKING] : IPv4 Subnetting (Dasar), OSPF, VLAN 802.1Q (Belajar)\n[SYSTEMS]    : Arch Linux, Bash Scripting, systemd (Dasar)\n[SECURITY]   : Wireshark, Nmap, Firewall UFW/iptables (Belajar)',
-          color: 'text-violet-300',
-        })
-      } else if (lower === 'labs') {
-        responseLogs.push({
-          type: 'output',
-          text:
-            '1. [Network Design]   Enterprise Multi-VLAN Segmentation (Status: Planned)\n2. [Security Analysis] Packet Stream & Credential Inspection (Status: Planned)\n3. [Linux Homelab]    Linux Network Firewall & Homelab Service (Status: Planned)\nScroll down ke #labs untuk melihat rencana langkah tiap lab.',
-          color: 'text-emerald-300',
-        })
-      } else if (lower.startsWith('ping')) {
-        const target = trimmed.split(' ')[1] || 'gateway.fizhtank.internal'
-        responseLogs.push(
-          {
-            type: 'output',
-            text: `PING ${target} (56 data bytes) (simulasi):\n64 bytes from ${target}: icmp_seq=1 ttl=64 time=0.98ms (simulasi)\n64 bytes from ${target}: icmp_seq=2 ttl=64 time=1.12ms (simulasi)\n--- ${target} ping statistics (simulasi): 0% packet loss ---`,
-            color: 'text-emerald-400',
-          }
-        )
-      } else if (lower.startsWith('nmap')) {
-        responseLogs.push({
-          type: 'output',
-          text:
-            'Starting Nmap 7.94 ( https://nmap.org ) (simulasi demo)\nNmap scan report for homelab-demo.lan (192.168.1.1)\nHost is up (0.00042s latency).\nPORT     STATE SERVICE (simulasi)\n22/tcp   open  ssh\n53/tcp   open  domain\n80/tcp   open  http\n443/tcp  open  https\nScan demo selesai (simulasi lab).',
-          color: 'text-cyan-300',
-        })
-      } else if (lower === 'feed') {
-        setTankFed(true)
-        window.dispatchEvent(new CustomEvent('fizhtank-feed'))
-        setTimeout(() => setTankFed(false), 5000)
-        responseLogs.push({
-          type: 'output',
-          text:
-            '🐟 [ECOSYSTEM EVENT] Bioluminescent nutrient flakes dropped!\n✨ Fish organisms are actively gathering near surface caustics.\nTank parameters: Water clarity 99.8% | Depth 2600m | Oxygen 98.4%',
-          color: 'text-amber-300',
-        })
-      } else if (lower === 'clear') {
-        setTerminalHistory([])
-        setInputVal('')
-        setIsTyping(false)
-        return
-      } else if (lower.startsWith('cat')) {
-        responseLogs.push({
-          type: 'output',
-          text:
-            '# /etc/ocean.conf (simulasi demo)\n[theme]\nprofile = cyberpunk-aquarium-demo\nfocus = learning-network-and-security\nstatus = DEMO_ACTIVE',
-          color: 'text-violet-300',
-        })
-      } else {
-        responseLogs.push({
-          type: 'output',
-          text: `bash: ${trimmed}: command not found. Type 'help' for available commands.`,
-          color: 'text-red-400',
-        })
       }
-
-      setTerminalHistory(responseLogs)
-      setIsTyping(false)
+    } else if (lower === 'radar') {
+      setActiveTab('radar')
+      nextLogs.push({ type: 'sys', text: 'Switched viewport to Hydro-Acoustic Radar Matrix.' })
+    } else if (lower === 'vlsm') {
+      setActiveTab('vlsm')
+      nextLogs.push({ type: 'sys', text: 'Switched viewport to VLSM Matrix Analyzer.' })
+    } else if (lower === 'feed') {
+      playSonarPing()
+      window.dispatchEvent(new CustomEvent('fizhtank-feed'))
+      nextLogs.push({ type: 'sys', text: 'Acoustic bloom triggered. Bioluminescent plume dispersing.' })
+    } else if (lower === 'clear') {
+      setTerminalHistory([])
+      setCliInput('')
+      return
+    } else {
+      nextLogs.push({
+        type: 'err',
+        text: `Command not recognized: '${trimmed}'. Type 'help' for station manual.`,
+      })
     }
 
-    // Add command immediately, show response after a brief "processing" delay
-    setTerminalHistory(newLogs)
-    setInputVal('')
-    setTimeout(respond, 350 + Math.random() * 300)
+    setTerminalHistory(nextLogs)
+    setCliInput('')
   }
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      executeCommand(inputVal)
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault()
-      if (commandHistory.length === 0) return
-      const nextPointer = historyPointer === -1 ? commandHistory.length - 1 : Math.max(0, historyPointer - 1)
-      setHistoryPointer(nextPointer)
-      setInputVal(commandHistory[nextPointer] || '')
-    } else if (e.key === 'ArrowDown') {
-      e.preventDefault()
-      if (historyPointer === -1) return
-      const nextPointer = historyPointer + 1
-      if (nextPointer >= commandHistory.length) {
-        setHistoryPointer(-1)
-        setInputVal('')
-      } else {
-        setHistoryPointer(nextPointer)
-        setInputVal(commandHistory[nextPointer] || '')
-      }
-    } else if (e.key === 'Tab') {
-      e.preventDefault()
-      const match = [
-        'help',
-        'whoami',
-        'subnet 192.168.1.0/26',
-        'traceroute 8.8.8.8',
-        'skills',
-        'projects',
-        'labs',
-        'contact',
-        'cat cv.txt',
-        'ping 8.8.8.8',
-        'nmap',
-        'feed',
-        'clear',
-      ].find(
-        (c) => c.startsWith(inputVal.trim().toLowerCase()) && c !== inputVal.trim().toLowerCase()
-      )
-      if (match) {
-        setInputVal(match)
-      }
-    }
-  }
-
-  const focusInput = () => {
-    if (inputRef.current) {
-      inputRef.current.focus()
-    }
-  }
-
-  const quickCommands = [
-    'help',
-    'whoami',
-    'subnet 192.168.1.0/26',
-    'traceroute 8.8.8.8',
-    'skills',
-    'projects',
-    'cat cv.txt',
-    'contact',
-    'feed',
-    'clear',
-  ]
-
-  // Stats derived honestly from lab roadmap data
-  const plannedCount = labsData.filter((l) => l.status === 'planned').length
-  const inProgressCount = labsData.filter((l) => l.status === 'in-progress').length
-  const completedCount = labsData.filter((l) => l.status === 'complete').length
-
-  const stats = [
-    {
-      icon: Network,
-      label: 'Planned Labs',
-      val: `${plannedCount}`,
-      numericVal: plannedCount,
-      suffix: '',
-      desc: 'Topologi & roadmap belajar',
-      color: 'text-violet-400',
-      borderGlow: 'rgba(124,58,237,0.25)',
-      bg: 'rgba(109,40,217,0.08)',
-    },
-    {
-      icon: Shield,
-      label: 'In-Progress Labs',
-      val: `${inProgressCount}`,
-      numericVal: inProgressCount,
-      suffix: '',
-      desc: 'Eksperimen sedang dikerjakan',
-      color: 'text-cyan-400',
-      borderGlow: 'rgba(6,182,212,0.25)',
-      bg: 'rgba(6,182,212,0.08)',
-    },
-    {
-      icon: TerminalIcon,
-      label: 'Completed Labs',
-      val: `${completedCount}`,
-      numericVal: completedCount,
-      suffix: '',
-      desc: 'Selesai dengan hasil verifikasi',
-      color: 'text-emerald-400',
-      borderGlow: 'rgba(16,185,129,0.25)',
-      bg: 'rgba(16,185,129,0.08)',
-    },
-  ]
+  // Stat Counters
+  const plannedLabs = labsData.length
+  const countPlanned = useAnimatedCounter(plannedLabs, statsVisible, 1200)
+  const countProtocols = useAnimatedCounter(12, statsVisible, 1500)
+  const countDepth = useAnimatedCounter(2400, statsVisible, 1800)
 
   return (
-    <section
-      id="about"
-      ref={sectionRef}
-      className="relative min-h-screen flex flex-col justify-start md:justify-center pt-24 sm:pt-28 pb-16 px-4 sm:px-6 w-full max-w-full overflow-hidden"
-    >
-      {/* Ambient shallow-water radial glow — matches bright surface zone */}
+    <section className="relative pt-32 sm:pt-40 pb-20 px-4 sm:px-6 max-w-7xl mx-auto overflow-hidden">
+      {/* ── Top Masthead Bar ── */}
       <div
-        className="absolute inset-0 pointer-events-none"
+        ref={headerRef}
+        className="mb-8 sm:mb-12 transition-all duration-700"
         style={{
-          background:
-            'radial-gradient(ellipse 100% 70% at 50% -5%, rgba(6,182,212,0.22) 0%, transparent 60%), ' +
-            'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(91,33,182,0.28) 0%, transparent 55%), ' +
-            'radial-gradient(ellipse 60% 40% at 20% 80%, rgba(6,182,212,0.05) 0%, transparent 60%)',
-        }}
-        aria-hidden="true"
-      />
-
-      {/* ── Surface Caustic Light Rays (Optimized) ── */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
-        {[
-          { left: '12%', w: 90,  dur: '6.2s', delay: '0s',   op: 0.18 },
-          { left: '38%', w: 120, dur: '7.5s', delay: '1.2s', op: 0.22 },
-          { left: '65%', w: 95,  dur: '6.8s', delay: '0.6s', op: 0.18 },
-          { left: '84%', w: 80,  dur: '7.2s', delay: '1.8s', op: 0.15 },
-        ].map((r, i) => (
-          <div
-            key={i}
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: r.left,
-              width: `${r.w}px`,
-              height: '75%',
-              background:
-                'linear-gradient(180deg, rgba(139,92,246,0.75) 0%, rgba(6,182,212,0.28) 45%, transparent 100%)',
-              borderRadius: '0 0 50% 50%',
-              transformOrigin: 'top center',
-              animation: `caustic-sway ${r.dur} ease-in-out ${r.delay} infinite`,
-              filter: 'blur(4px)',
-              opacity: r.op,
-              transform: 'translateZ(0)',
-            }}
-          />
-        ))}
-      </div>
-
-      <div
-        className="relative z-10 max-w-6xl mx-auto w-full min-w-0"
-        style={{
-          opacity: sectionVisible ? 1 : 0,
-          transform: sectionVisible ? 'translateY(0)' : 'translateY(30px)',
-          transition: 'opacity 0.8s ease, transform 0.8s ease',
+          opacity: headerVisible ? 1 : 0,
+          transform: headerVisible ? 'translateY(0)' : 'translateY(24px)',
         }}
       >
-        {/* Top badge with Sonar ping */}
-        <div
-          className="flex justify-center mb-6 sm:mb-8"
-          style={{
-            opacity: sectionVisible ? 1 : 0,
-            transform: sectionVisible ? 'translateY(0) scale(1)' : 'translateY(-15px) scale(0.95)',
-            transition: 'all 0.6s ease 0.2s',
-          }}
-        >
-          <div className="flex flex-wrap items-center gap-2 px-3.5 py-2 rounded-2xl sm:rounded-full bg-violet-950/60 border border-violet-500/35 text-violet-300 text-xs sm:text-sm font-mono backdrop-blur-md shadow-[0_0_20px_rgba(109,40,217,0.25)]">
-            <span className="relative flex h-2 w-2 shrink-0">
-              <span className="blink absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-400 shadow-[0_0_8px_#06b6d4]" />
-            </span>
-            <span className="text-zinc-100 font-semibold tracking-wide text-xs sm:text-sm">{site.jobTitle}</span>
-            <span className="text-zinc-500 hidden sm:inline">|</span>
-            <span className="text-cyan-300 text-[11px] sm:text-xs font-mono font-medium flex items-center gap-1.5 shrink-0">
-              <Radio size={12} className="animate-pulse text-cyan-400 shrink-0" />
-              Belajar OSI Layer 1-7
-            </span>
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/10 font-mono text-[11px] sm:text-xs text-slate-400">
+          <div className="flex items-center gap-2">
+            <span className="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_#22d3ee]" />
+            <span className="text-slate-200 font-semibold tracking-wider uppercase">STATION FIZHTANK</span>
+            <span className="text-slate-600">//</span>
+            <span className="text-cyan-400/90 font-medium">07°14'S, 112°45'E</span>
+          </div>
+          <div className="flex items-center gap-4 text-slate-400">
+            <span>BATHYAL DEPTH: <strong className="text-slate-100">2,400M</strong></span>
+            <span className="hidden sm:inline text-slate-600">|</span>
+            <span className="hidden sm:inline text-emerald-400/90 font-medium">TELEMETRY: 60 FPS</span>
           </div>
         </div>
 
-        {/* Main Bento Hero Card */}
-        <div
-          ref={glowRef}
-          className="bento-card p-4 sm:p-8 md:p-12 mb-6 relative overflow-hidden border border-violet-500/20 shadow-[0_8px_32px_rgba(0,0,0,0.6)] w-full max-w-full min-w-0"
-          style={{
-            opacity: sectionVisible ? 1 : 0,
-            transform: sectionVisible ? 'translateY(0)' : 'translateY(40px)',
-            transition: 'all 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.3s',
-          }}
-        >
-          {/* Cursor-following glow */}
-          <div style={glowStyle} />
+        {/* ── Monumental Display Headline (Awwwards Style) ── */}
+        <div className="mt-8 sm:mt-12">
+          <p className="font-mono text-xs sm:text-[13px] uppercase tracking-[0.25em] text-cyan-400/80 mb-3 sm:mb-4 flex items-center gap-2">
+            <span>// 001</span>
+            <span className="w-8 h-px bg-cyan-500/40" />
+            <span>Abyssal Network Laboratory &amp; Security Engineering</span>
+          </p>
 
-          {/* Subtle top edge gradient highlight */}
-          <div
-            className="absolute top-0 left-0 right-0 h-px pointer-events-none"
-            style={{
-              background: 'linear-gradient(90deg, transparent 0%, rgba(167,139,250,0.4) 30%, rgba(6,182,212,0.5) 70%, transparent 100%)',
-            }}
-          />
+          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-[84px] font-extrabold tracking-[-0.04em] leading-[0.95] text-white font-display uppercase">
+            Architecting <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-100 via-cyan-200 to-cyan-400">
+              Resilient Networks.
+            </span>
+          </h1>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center relative z-10 w-full max-w-full min-w-0">
-            {/* Left: Headline & Bio (6 cols) */}
-            <div className="col-span-1 lg:col-span-6 flex flex-col justify-center w-full max-w-full min-w-0">
-              <div
-                className="flex flex-wrap items-center gap-2 mb-2 w-full min-w-0"
-                style={{
-                  opacity: sectionVisible ? 1 : 0,
-                  transform: sectionVisible ? 'translateX(0)' : 'translateX(-20px)',
-                  transition: 'all 0.7s ease 0.5s',
-                }}
+          <div className="mt-6 sm:mt-8 grid lg:grid-cols-12 gap-6 items-baseline">
+            <p className="lg:col-span-8 text-slate-300 text-base sm:text-lg leading-relaxed font-normal max-w-2xl">
+              Catatan riset dan laboratorium <strong className="text-white font-semibold">Siraj (Fizhkan)</strong> — Mahasiswa D3 Teknik Informatika yang mendalami perancangan topologi enterprise, segmentasi VLAN multi-departemen, inspeksi aliran paket Wireshark, dan mitigasi keamanan stateful.
+            </p>
+
+            <div className="lg:col-span-4 flex flex-wrap sm:flex-nowrap items-center gap-3">
+              <a
+                href="#labs"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-cyan-400 text-slate-950 font-semibold text-sm hover:bg-cyan-300 transition-all duration-200 active:scale-95 shadow-[0_0_25px_rgba(34,211,238,0.3)] cursor-pointer"
               >
-                <span className="font-mono text-xs font-semibold tracking-wide text-cyan-300 shrink-0">about</span>
-                <span className="text-zinc-600 shrink-0">·</span>
-                <Waves size={14} className="text-cyan-400 bio-glow shrink-0" />
-                <span className="text-[11px] sm:text-xs uppercase tracking-wider font-mono font-semibold text-cyan-300/80 break-words">
-                  // Depth 2600m • Abyss Architecture
-                </span>
-              </div>
+                <span>Explore Specimen</span>
+                <ArrowUpRight size={16} />
+              </a>
 
-              {/* Subtitle */}
-              <div
-                className="text-xs sm:text-[13px] font-mono text-violet-300/90 mb-3 break-words w-full"
-                style={{
-                  opacity: sectionVisible ? 1 : 0,
-                  transform: sectionVisible ? 'translateX(0)' : 'translateX(-15px)',
-                  transition: 'all 0.7s ease 0.55s',
-                }}
+              <a
+                href="#contact"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full border border-white/15 bg-white/[0.03] text-slate-200 hover:text-white hover:border-cyan-400/50 hover:bg-white/[0.06] font-semibold text-sm backdrop-blur-md transition-all duration-200 active:scale-95 cursor-pointer"
               >
-                {site.subtitle}
-              </div>
+                <span>Initialize Uplink</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
 
-              <h1 className="text-2xl sm:text-4xl lg:text-[42px] xl:text-[46px] font-extrabold leading-tight sm:leading-[1.18] mb-5 tracking-tight font-display break-words w-full">
-                <span
-                  className="text-zinc-50 inline-block"
-                  style={{
-                    opacity: sectionVisible ? 1 : 0,
-                    transform: sectionVisible ? 'translateY(0)' : 'translateY(20px)',
-                    transition: 'all 0.7s ease 0.6s',
-                  }}
-                >
-                  Designing Secure
-                </span>
-                <br />
-                <span
-                  className="bg-clip-text text-transparent text-bio-shimmer inline-block break-words sm:whitespace-nowrap"
-                  style={{
-                    backgroundImage:
-                      'linear-gradient(135deg, #c4b5fd 0%, #60a5fa 30%, #22d3ee 70%, #c4b5fd 100%)',
-                  }}
-                >
-                  {typewriterText}
-                  {!typewriterDone && (
-                    <span
-                      className="inline-block w-[3px] h-[1em] ml-1 align-middle"
-                      style={{
-                        background: 'linear-gradient(180deg, #a78bfa, #06b6d4)',
-                        animation: 'blink-dot 1s step-end infinite',
-                      }}
-                    />
-                  )}
-                </span>
-              </h1>
+      {/* ── Interactive Centerpiece Installation (Awwwards Grade) ── */}
+      <div
+        ref={instrumentRef}
+        className="mt-8 transition-all duration-700"
+        style={{
+          opacity: instrumentVisible ? 1 : 0,
+          transform: instrumentVisible ? 'translateY(0)' : 'translateY(28px)',
+        }}
+      >
+        <div className="relative rounded-2xl apple-glass shadow-[0_25px_60px_rgba(0,0,0,0.85)] overflow-hidden">
+          {/* Header Bar with Mode Selectors */}
+          <div className="flex flex-wrap items-center justify-between border-b border-white/10 px-4 sm:px-6 py-3.5 bg-white/[0.02]">
+            <div className="flex items-center gap-2 font-mono text-xs text-slate-300">
+              <span className="w-2.5 h-2.5 rounded-sm bg-cyan-400 shadow-[0_0_8px_#22d3ee]" />
+              <span className="font-semibold tracking-wider uppercase">HYDRO-ACOUSTIC TELEMETRY BENCH</span>
+            </div>
 
-              <p
-                className="text-zinc-200 text-sm sm:text-[17px] leading-relaxed mb-3.5 font-normal break-words w-full"
-                style={{
-                  opacity: sectionVisible ? 1 : 0,
-                  transform: sectionVisible ? 'translateY(0)' : 'translateY(15px)',
-                  transition: 'all 0.7s ease 0.9s',
+            {/* Mode Switch Tabs with Instant Apple Feedback */}
+            <div className="flex items-center gap-1 p-1 rounded-xl bg-white/[0.04] border border-white/10 text-xs font-mono">
+              <button
+                onClick={() => {
+                  playWaterBubble()
+                  setActiveTab('radar')
                 }}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                  activeTab === 'radar'
+                    ? 'bg-cyan-400 text-slate-950 font-bold shadow-[0_0_12px_rgba(34,211,238,0.3)]'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
               >
-                Belajar merancang jaringan, segmentasi VLAN, dan dasar keamanan lewat lab simulasi.
-              </p>
-              <p
-                lang="en"
-                className="font-mono text-xs sm:text-[14px] mb-8 text-cyan-300 font-medium flex items-center gap-2 break-words w-full"
-                style={{
-                  opacity: sectionVisible ? 1 : 0,
-                  transform: sectionVisible ? 'translateY(0)' : 'translateY(15px)',
-                  transition: 'all 0.7s ease 1s',
-                }}
-              >
-                <span className="text-violet-400 font-bold shrink-0">&gt;&gt;</span>
-                <span className="break-words">{site.tagline}</span>
-              </p>
+                <Radio size={13} />
+                <span>SONAR RADAR</span>
+              </button>
 
-              {/* Action Buttons */}
-              <div
-                className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full sm:w-auto"
-                style={{
-                  opacity: sectionVisible ? 1 : 0,
-                  transform: sectionVisible ? 'translateY(0)' : 'translateY(15px)',
-                  transition: 'all 0.7s ease 1.1s',
+              <button
+                onClick={() => {
+                  playWaterBubble()
+                  setActiveTab('vlsm')
                 }}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                  activeTab === 'vlsm'
+                    ? 'bg-cyan-400 text-slate-950 font-bold shadow-[0_0_12px_rgba(34,211,238,0.3)]'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
               >
-                <a
-                  href="#labs"
-                  className="hero-btn-primary flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold text-[14.5px] sm:text-[15px] group text-white shadow-lg relative overflow-hidden w-full sm:w-auto cursor-pointer"
-                >
-                  {/* Shimmer sweep effect */}
+                <Layers size={13} />
+                <span>VLSM MATRIX</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  playWaterBubble()
+                  setActiveTab('cli')
+                }}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                  activeTab === 'cli'
+                    ? 'bg-cyan-400 text-slate-950 font-bold shadow-[0_0_12px_rgba(34,211,238,0.3)]'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <TerminalIcon size={13} />
+                <span>STATION CLI</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Tab 1: Sonar Radar Matrix */}
+          {activeTab === 'radar' && (
+            <div className="p-4 sm:p-8 grid lg:grid-cols-12 gap-8 items-center min-h-[440px]">
+              {/* Radar Scope Viewport */}
+              <div className="lg:col-span-7 flex flex-col items-center justify-center">
+                <div className="relative w-full max-w-[380px] aspect-square rounded-full border border-cyan-500/20 bg-slate-950/80 p-2 shadow-[inset_0_0_60px_rgba(6,182,212,0.06)] overflow-hidden">
+                  {/* Concentric Sonar Distance Rings */}
+                  <div className="absolute inset-4 rounded-full border border-cyan-500/15 border-dashed" />
+                  <div className="absolute inset-16 rounded-full border border-cyan-500/20" />
+                  <div className="absolute inset-28 rounded-full border border-cyan-500/15" />
+                  <div className="absolute inset-40 rounded-full border border-cyan-500/10" />
+
+                  {/* Crosshairs */}
+                  <div className="absolute inset-x-0 top-1/2 h-px bg-cyan-500/20" />
+                  <div className="absolute inset-y-0 left-1/2 w-px bg-cyan-500/20" />
+
+                  {/* Rotating Sweeper Beam */}
                   <div
-                    className="absolute inset-0 pointer-events-none"
+                    className="absolute inset-0 origin-center pointer-events-none"
                     style={{
-                      background: 'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.15) 50%, transparent 60%)',
-                      backgroundSize: '250% 100%',
-                      animation: 'shimmer-sweep 3s ease-in-out infinite',
+                      background: 'conic-gradient(from 0deg, transparent 0deg, transparent 310deg, rgba(6, 182, 212, 0.28) 360deg)',
+                      animation: 'radar-sweep 5s linear infinite',
                     }}
                   />
-                  <Waves size={16} className="relative z-10 text-white shrink-0" />
-                  <span className="relative z-10 font-semibold tracking-wide text-white">Explore Labs</span>
-                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform relative z-10 text-white shrink-0" />
-                </a>
-                <a
-                  href="#contact"
-                  className="hero-btn-secondary flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold text-[14.5px] sm:text-[15px] text-zinc-100 hover:text-cyan-200 tracking-wide w-full sm:w-auto cursor-pointer"
-                >
-                  <Mail size={16} className="shrink-0 text-cyan-400" />
-                  <span className="font-semibold text-zinc-100">Get in Touch</span>
-                </a>
-              </div>
-            </div>
 
-            {/* Right: Interactive Terminal with Radar Scope Header (6 cols) */}
-            <div
-              className="col-span-1 lg:col-span-6 relative w-full max-w-full min-w-0"
-              style={{
-                opacity: sectionVisible ? 1 : 0,
-                transform: sectionVisible ? 'translateX(0)' : 'translateX(30px)',
-                transition: 'all 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.6s',
-              }}
-            >
-              {/* ── Glowing Sonar Scope Backdrop Decor ── */}
-              <div
-                className="absolute -top-10 -right-8 w-44 h-44 rounded-full border border-cyan-500/15 pointer-events-none hidden sm:flex items-center justify-center overflow-hidden"
-                style={{
-                  background: 'radial-gradient(circle, rgba(6,182,212,0.05) 0%, transparent 70%)',
-                }}
-              >
-                {/* Sonar sweep cone */}
-                <div
-                  className="radar-sweep-beam absolute inset-0"
-                  style={{
-                    background: 'conic-gradient(from 0deg, transparent 0deg, transparent 310deg, rgba(6,182,212,0.28) 360deg)',
-                  }}
-                />
-                {/* Concentric rings */}
-                <div className="w-32 h-32 rounded-full border border-cyan-500/15" />
-                <div className="w-20 h-20 rounded-full border border-cyan-500/20" />
-                <div className="w-8 h-8 rounded-full border border-violet-500/30" />
-                {/* Crosshairs */}
-                <div className="absolute top-0 bottom-0 w-px bg-cyan-500/15" />
-                <div className="absolute left-0 right-0 h-px bg-cyan-500/15" />
-                {/* Blips */}
-                <div
-                  className="radar-blip absolute w-2 h-2 rounded-full bg-cyan-400"
-                  style={{ top: '28%', left: '68%' }}
-                  title="Gateway Switch Active"
-                />
-                <div
-                  className="radar-blip absolute w-1.5 h-1.5 rounded-full bg-violet-400"
-                  style={{ top: '70%', left: '35%', animationDelay: '1.2s' }}
-                  title="Wireshark Capture Tap"
-                />
+                  {/* Sonar Network Nodes */}
+                  {SONAR_NODES.map((node) => {
+                    const isSelected = selectedNode.id === node.id
+                    const Icon = node.icon
+                    return (
+                      <button
+                        key={node.id}
+                        onClick={() => {
+                          playWaterBubble()
+                          setSelectedNode(node)
+                        }}
+                        className={`absolute -translate-x-1/2 -translate-y-1/2 p-2 rounded-xl transition-all cursor-pointer group ${
+                          isSelected
+                            ? 'bg-cyan-400 text-slate-950 scale-125 z-20 shadow-[0_0_20px_#22d3ee]'
+                            : 'bg-slate-900/90 text-cyan-300 border border-cyan-500/40 hover:scale-110 z-10'
+                        }`}
+                        style={{ left: `${node.x}%`, top: `${node.y}%` }}
+                        title={`${node.label} (${node.ip})`}
+                      >
+                        <Icon size={14} />
+                        <span className="sr-only">{node.label}</span>
+
+                        {/* Ping Ripple */}
+                        {isSelected && (
+                          <span className="absolute inset-0 rounded-xl bg-cyan-400 animate-ping opacity-40 pointer-events-none" />
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
+
+                <div className="mt-4 flex items-center gap-4 text-[11px] font-mono text-slate-400">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+                    <span>ACOUSTIC SWEEP ACTIVE</span>
+                  </span>
+                  <span>//</span>
+                  <span>CLICK NODES TO INSPECT TELEMETRY</span>
+                </div>
               </div>
 
-              {/* ── Interactive Terminal Frame ── */}
-              <div
-                onClick={focusInput}
-                className="relative rounded-2xl overflow-hidden cursor-text transition-all duration-300 terminal-float w-full max-w-full min-w-0"
-                style={{
-                  background: 'rgba(3, 7, 18, 0.94)',
-                  border: '1px solid rgba(139, 92, 246, 0.3)',
-                  boxShadow:
-                    '0 0 50px rgba(109, 40, 217, 0.18), 0 20px 40px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255,255,255,0.08)',
-                }}
-              >
-                {/* Terminal Window Header */}
-                <div
-                  className="flex items-center justify-between px-4 py-3 border-b select-none"
-                  style={{
-                    background: 'linear-gradient(90deg, rgba(15,23,42,0.95) 0%, rgba(8,12,28,0.95) 100%)',
-                    borderColor: 'rgba(99,102,241,0.2)',
-                  }}
-                >
-                  <div className="flex items-center gap-2" aria-hidden="true">
-                    <div className="w-3 h-3 rounded-full bg-red-500/80 shadow-[0_0_6px_rgba(239,68,68,0.5)]" />
-                    <div className="w-3 h-3 rounded-full bg-yellow-500/80 shadow-[0_0_6px_rgba(234,179,8,0.5)]" />
-                    <div className="w-3 h-3 rounded-full bg-green-500/80 shadow-[0_0_6px_rgba(34,197,94,0.5)]" />
-                    <span className="ml-2 text-xs sm:text-[13px] text-zinc-300 font-mono font-medium flex items-center gap-1.5">
-                      <TerminalIcon size={12} className="text-violet-400" />
-                      fizhtank@arch: ~
-                    </span>
+              {/* Node Telemetry Specimen Card */}
+              <div className="lg:col-span-5 bg-white/[0.02] border border-white/10 rounded-xl p-5 sm:p-6 font-mono text-xs">
+                <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                  <span className="text-cyan-400 font-semibold tracking-wider">// TELEMETRY INSPECTOR</span>
+                  <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">
+                    {selectedNode.status}
+                  </span>
+                </div>
+
+                <div className="mt-4 space-y-3.5 text-slate-300">
+                  <div>
+                    <span className="text-slate-500 block text-[10px] uppercase">Node Identity</span>
+                    <span className="text-slate-100 font-bold text-sm tracking-wide">{selectedNode.label}</span>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-mono font-semibold bg-cyan-950/70 border border-cyan-500/40 text-cyan-300">
-                      <Activity size={10} className="text-cyan-400 animate-pulse" />
-                      INTERACTIVE
-                    </span>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setTerminalHistory([])
-                      }}
-                      title="Clear terminal"
-                      aria-label="Bersihkan riwayat terminal"
-                      className="text-zinc-400 hover:text-zinc-200 p-1 rounded hover:bg-zinc-800/60 transition-colors cursor-pointer"
-                    >
-                      <RotateCcw size={12} />
-                    </button>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <span className="text-slate-500 block text-[10px] uppercase">IP Address</span>
+                      <span className="text-cyan-300 font-semibold">{selectedNode.ip}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 block text-[10px] uppercase">RTT Latency</span>
+                      <span className="text-emerald-400 font-semibold">{selectedNode.latency}</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="text-slate-500 block text-[10px] uppercase">Network Function</span>
+                    <span className="text-slate-200">{selectedNode.type}</span>
+                  </div>
+
+                  <div className="pt-3 border-t border-white/10 text-slate-400 text-[11px] leading-relaxed">
+                    Node ini adalah bagian dari simulasi topologi jaringan FizhTank, bertugas memvalidasi routing paket antar-VLAN dan inspeksi keamanan perimeter.
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent('fizhtank-feed'))
+                    }}
+                    className="w-full mt-2 py-2 px-3 rounded-lg border border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 font-semibold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95"
+                  >
+                    <Waves size={13} />
+                    <span>Ping Node &amp; Emit Sonar Wave</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Tab 2: Live VLSM Subnet Calculator */}
+          {activeTab === 'vlsm' && (
+            <div className="p-4 sm:p-8 min-h-[440px]">
+              <div className="max-w-3xl mx-auto">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
+                  <div>
+                    <h3 className="text-base sm:text-lg font-bold text-white font-display">
+                      Interactive VLSM Subnet Engine
+                    </h3>
+                    <p className="text-slate-400 text-xs font-mono mt-0.5">
+                      Hitung alokasi blok IPv4, network boundary, dan usable host range secara real-time.
+                    </p>
+                  </div>
+
+                  {/* Preset Pills */}
+                  <div className="flex items-center gap-1.5 font-mono text-xs">
+                    <span className="text-slate-500 text-[11px] mr-1 hidden sm:inline">PRESETS:</span>
+                    {['192.168.10.0/26', '10.0.0.0/22', '172.16.8.0/28'].map((preset) => (
+                      <button
+                        key={preset}
+                        onClick={() => handleCalculateSubnet(preset)}
+                        className={`px-2.5 py-1 rounded-md text-[11px] transition-all cursor-pointer ${
+                          subnetInput === preset
+                            ? 'bg-cyan-500 text-slate-950 font-bold'
+                            : 'bg-white/[0.04] text-slate-300 hover:bg-white/[0.08]'
+                        }`}
+                      >
+                        {preset.split('/')[1] ? `/${preset.split('/')[1]}` : preset}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
-                {/* Terminal Body Logs */}
-                <div
-                  ref={terminalBodyRef}
-                  role="log"
-                  aria-live="polite"
-                  aria-relevant="additions text"
-                  aria-label="Riwayat output terminal fizhtank"
-                  className="p-3 sm:p-5 font-mono text-xs sm:text-[13.5px] space-y-2 h-[260px] sm:h-[290px] overflow-y-auto overflow-x-hidden terminal-scroll w-full max-w-full min-w-0"
-                >
-                  {terminalHistory.map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="leading-relaxed animate-terminal-line w-full min-w-0"
-                      style={{ animationDelay: `${idx * 0.02}s` }}
-                    >
-                      {item.type === 'cmd' ? (
-                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                          <span className="text-violet-400 shrink-0 font-bold text-xs sm:text-[13.5px]">fizhtank@arch:~$</span>
-                          <span className="text-zinc-100 font-medium text-xs sm:text-[13.5px] break-words">{item.text}</span>
-                        </div>
-                      ) : (
-                        <div
-                          className={`pl-3 sm:pl-4 border-l border-zinc-700/60 whitespace-pre-wrap break-all sm:break-words leading-relaxed text-[11px] sm:text-[12.5px] ${item.color || 'text-zinc-300'}`}
-                        >
-                          {item.text}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-
-                  {/* Typing indicator */}
-                  {isTyping && (
-                    <div className="flex items-center gap-2 pl-4 text-zinc-400 text-xs sm:text-[13px]">
-                      <span>Processing</span>
-                      <TypingIndicator />
-                    </div>
-                  )}
-
-                  {/* Active Input Line */}
-                  <div className="flex items-center gap-2 pt-1 w-full min-w-0">
-                    <span className="text-violet-400 font-bold shrink-0 text-xs sm:text-[13.5px]">fizhtank@arch:~$</span>
+                {/* Subnet Input Field */}
+                <div className="mt-6 flex flex-col sm:flex-row items-stretch gap-3">
+                  <div className="relative flex-1">
                     <input
-                      ref={inputRef}
                       type="text"
-                      value={inputVal}
-                      onChange={(e) => setInputVal(e.target.value)}
-                      onKeyDown={handleKeyDown}
-                      placeholder="type 'help'..."
-                      aria-label="Input baris perintah terminal"
-                      className="bg-transparent text-cyan-300 outline-none w-full min-w-0 placeholder:text-zinc-500 font-mono text-xs sm:text-[13.5px]"
-                      autoComplete="off"
-                      spellCheck="false"
+                      value={subnetInput}
+                      onChange={(e) => handleCalculateSubnet(e.target.value)}
+                      placeholder="e.g. 192.168.1.0/24"
+                      className="w-full px-4 py-3 rounded-xl bg-slate-900/90 border border-cyan-500/30 text-white font-mono text-sm placeholder:text-slate-600 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all"
                     />
                   </div>
                 </div>
 
-                {/* Quick-command suggestions toolbar */}
-                <div
-                  className="px-3 sm:px-4 py-2 border-t flex items-center gap-1.5 overflow-x-auto no-scrollbar sm:flex-wrap select-none"
-                  style={{
-                    background: 'rgba(6, 10, 24, 0.95)',
-                    borderColor: 'rgba(99, 102, 241, 0.15)',
-                  }}
-                >
-                  <span className="text-[11px] text-zinc-400 font-mono uppercase tracking-wider font-semibold mr-1 hidden sm:inline shrink-0">
-                    Commands:
-                  </span>
-                  {quickCommands.map((cmd) => (
-                    <button
-                      key={cmd}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        executeCommand(cmd)
-                      }}
-                      aria-label={`Jalankan perintah ${cmd}`}
-                      className="shrink-0 px-2.5 py-1 sm:py-0.5 rounded text-[11px] sm:text-[11.5px] font-mono font-medium transition-all border border-violet-500/30 text-zinc-200 hover:text-cyan-200 hover:border-cyan-400/50 hover:bg-cyan-500/15 active:scale-95 cursor-pointer whitespace-nowrap touch-manipulation select-none"
-                    >
-                      {cmd}
-                    </button>
-                  ))}
-                </div>
+                {/* Output Breakdown Cards */}
+                {subnetResult && !subnetResult.error ? (
+                  <div className="mt-6 space-y-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono">
+                      <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10">
+                        <span className="text-[10px] text-slate-500 uppercase block">Network Address</span>
+                        <span className="text-cyan-300 font-bold text-sm sm:text-base">{subnetResult.networkAddress}</span>
+                      </div>
+
+                      <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10">
+                        <span className="text-[10px] text-slate-500 uppercase block">Subnet Mask</span>
+                        <span className="text-slate-200 font-bold text-sm sm:text-base">{subnetResult.netmask}</span>
+                      </div>
+
+                      <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10">
+                        <span className="text-[10px] text-slate-500 uppercase block">Usable Host Range</span>
+                        <span className="text-slate-200 font-bold text-xs sm:text-xs leading-tight block mt-1">
+                          {subnetResult.firstUsable} <br />— {subnetResult.lastUsable}
+                        </span>
+                      </div>
+
+                      <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10">
+                        <span className="text-[10px] text-slate-500 uppercase block">Total Usable Hosts</span>
+                        <span className="text-emerald-400 font-bold text-sm sm:text-base tabular-nums">
+                          {subnetResult.usableHosts.toLocaleString()} hosts
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Visual IP Block Range Bar */}
+                    <div className="p-4 rounded-xl bg-slate-900/70 border border-white/10">
+                      <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 mb-2">
+                        <span>BLOCK SEGMENTATION VISUALIZER:</span>
+                        <span className="text-cyan-400">/{subnetResult.prefix}</span>
+                      </div>
+                      <div className="h-4 w-full bg-slate-800 rounded-lg overflow-hidden flex">
+                        <div
+                          className="bg-gradient-to-r from-cyan-500 to-blue-500 h-full rounded-l-lg transition-all duration-300"
+                          style={{ width: '85%' }}
+                          title="Usable Allocation"
+                        />
+                        <div
+                          className="bg-amber-500 h-full transition-all duration-300"
+                          style={{ width: '15%' }}
+                          title="Broadcast & Network IDs"
+                        />
+                      </div>
+                      <div className="flex justify-between items-center text-[10px] font-mono text-slate-500 mt-2">
+                        <span>NET: {subnetResult.networkAddress}</span>
+                        <span>BROADCAST: {subnetResult.broadcastAddress}</span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-xs font-mono">
+                    Input CIDR format tidak valid. Contoh format yang benar: 192.168.1.0/24 atau 10.0.0.0/16
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Tab 3: Station CLI Terminal */}
+          {activeTab === 'cli' && (
+            <div className="p-4 sm:p-6 min-h-[440px] flex flex-col font-mono text-xs">
+              <div
+                ref={terminalBodyRef}
+                className="flex-1 max-h-[340px] overflow-y-auto space-y-2 pr-2 text-slate-300 terminal-scroll"
+              >
+                {terminalHistory.map((line, idx) => (
+                  <div key={idx} className="leading-relaxed">
+                    {line.type === 'sys' && <p className="text-cyan-400/90 font-medium">{line.text}</p>}
+                    {line.type === 'cmd' && (
+                      <p className="text-slate-100 flex items-center gap-1.5">
+                        <span className="text-violet-400 font-bold">&gt;</span>
+                        <span>{line.text}</span>
+                      </p>
+                    )}
+                    {line.type === 'out' && <pre className="text-slate-300 whitespace-pre-wrap pl-3">{line.text}</pre>}
+                    {line.type === 'err' && <p className="text-red-400 pl-3">{line.text}</p>}
+                  </div>
+                ))}
               </div>
 
-              {/* Tank Fed Celebration Toast */}
-              {tankFed && (
-                <div
-                  className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full border border-amber-400/40 text-amber-300 text-xs font-mono shadow-[0_0_20px_rgba(251,191,36,0.3)] backdrop-blur-md z-20 flex items-center gap-2"
-                  style={{
-                    background: 'rgba(20, 15, 5, 0.95)',
-                    animation: 'toast-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
-                  }}
+              {/* Command Input Bar */}
+              <form onSubmit={handleRunCommand} className="mt-4 pt-3 border-t border-white/10 flex items-center gap-2">
+                <span className="text-cyan-400 font-bold">&gt;&gt;</span>
+                <input
+                  type="text"
+                  value={cliInput}
+                  onChange={(e) => setCliInput(e.target.value)}
+                  placeholder="Ketik 'help' untuk daftar command..."
+                  className="flex-1 bg-transparent text-white focus:outline-none placeholder:text-slate-600 font-mono text-xs"
+                />
+                <button
+                  type="submit"
+                  className="px-3 py-1 rounded bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/30 text-xs transition-all cursor-pointer"
                 >
-                  <Fish size={14} className="text-amber-400" />
-                  <span className="font-semibold">Tank Fed! Bioluminescence active (+100 XP)</span>
-                </div>
-              )}
-
-              {/* Ambient bottom glow under terminal */}
-              <div
-                className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-4/5 h-12 rounded-full pointer-events-none"
-                style={{
-                  background: 'radial-gradient(ellipse, rgba(124,58,237,0.3) 0%, transparent 70%)',
-                  filter: 'blur(16px)',
-                }}
-              />
+                  Run
+                </button>
+              </form>
             </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── Station Telemetry Spec Panels (Quick Stats) ── */}
+      <div
+        ref={statsRef}
+        className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 font-mono text-xs transition-all duration-700"
+        style={{
+          opacity: statsVisible ? 1 : 0,
+          transform: statsVisible ? 'translateY(0)' : 'translateY(24px)',
+        }}
+      >
+        <div className="p-5 rounded-xl border border-white/10 bg-slate-950/60 backdrop-blur-md flex items-center justify-between">
+          <div>
+            <span className="text-slate-500 block text-[10px] uppercase">SPECIMEN RESEARCH LABS</span>
+            <span className="text-2xl font-extrabold text-white font-display mt-0.5 block tabular-nums">
+              0{countPlanned} DOSSIERS
+            </span>
+            <span className="text-cyan-400 text-[11px]">VLAN · TLS · Firewall</span>
+          </div>
+          <div className="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+            <Layers size={18} />
           </div>
         </div>
 
-        {/* Quick Stats Row with Animated Counters & Stagger */}
-        <div ref={statsRef} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {stats.map((stat, idx) => (
-            <StatCard key={stat.label} stat={stat} statsVisible={statsVisible} idx={idx} />
-          ))}
+        <div className="p-5 rounded-xl border border-white/10 bg-slate-950/60 backdrop-blur-md flex items-center justify-between">
+          <div>
+            <span className="text-slate-500 block text-[10px] uppercase">CORE PROTOCOLS EXPLORED</span>
+            <span className="text-2xl font-extrabold text-white font-display mt-0.5 block tabular-nums">
+              {countProtocols}+ PROTOCOLS
+            </span>
+            <span className="text-emerald-400 text-[11px]">802.1Q · OSPF · Wireshark</span>
+          </div>
+          <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <Network size={18} />
+          </div>
+        </div>
+
+        <div className="p-5 rounded-xl border border-white/10 bg-slate-950/60 backdrop-blur-md flex items-center justify-between">
+          <div>
+            <span className="text-slate-500 block text-[10px] uppercase">MAXIMUM LAB DEPTH</span>
+            <span className="text-2xl font-extrabold text-white font-display mt-0.5 block tabular-nums">
+              {countDepth.toLocaleString()} M
+            </span>
+            <span className="text-violet-400 text-[11px]">Mariana Abyssal Sim</span>
+          </div>
+          <div className="w-10 h-10 rounded-lg bg-violet-500/10 border border-violet-500/30 flex items-center justify-center text-violet-400">
+            <Activity size={18} />
+          </div>
         </div>
       </div>
     </section>
   )
 }
-
-function StatCard({ stat, statsVisible, idx }) {
-  const Icon = stat.icon
-  const count = useAnimatedCounter(stat.numericVal, statsVisible, 1500)
-
-  return (
-    <div
-      className="bento-card p-5 flex items-center gap-4 transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] group touch-manipulation select-none cursor-default"
-      style={{
-        borderColor: stat.borderGlow,
-        opacity: statsVisible ? 1 : 0,
-        transform: statsVisible ? 'translateY(0)' : 'translateY(25px)',
-        transition: `all 0.6s cubic-bezier(0.16, 1, 0.3, 1) ${0.4 + idx * 0.15}s`,
-      }}
-      onMouseEnter={(e) => {
-        if (typeof window !== 'undefined' && window.matchMedia?.('(hover: hover)')?.matches) {
-          e.currentTarget.style.borderColor = 'rgba(167,139,250,0.5)'
-          e.currentTarget.style.boxShadow = `0 8px 30px ${stat.bg}`
-        }
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = stat.borderGlow
-        e.currentTarget.style.boxShadow = ''
-      }}
-    >
-      <div
-        className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border group-hover:scale-110 transition-transform duration-300"
-        style={{ background: stat.bg, borderColor: stat.borderGlow }}
-      >
-        <Icon size={22} className={stat.color} />
-      </div>
-      <div>
-        <p className="text-2xl sm:text-3xl font-extrabold font-display text-zinc-50 tracking-tight tabular-nums">
-          {count}{stat.suffix}
-        </p>
-        <p className="text-[13.5px] font-semibold text-zinc-200 mt-0.5">{stat.label}</p>
-        <p className="text-[12px] text-zinc-400 font-mono mt-0.5">{stat.desc}</p>
-      </div>
-    </div>
-  )
-}
-
