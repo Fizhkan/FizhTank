@@ -95,7 +95,7 @@ export default function Hero() {
         } else {
           nextLogs.push({
             type: 'out',
-            text: `CIDR: ${res.cidr} [/${res.prefix}]\nNetmask: ${res.netmask}\nNetwork: ${res.networkAddress}\nUsable : ${res.firstUsable} - ${res.lastUsable} (${res.usableHosts} hosts)\nBcast  : ${res.broadcastAddress}`,
+            text: `CIDR: ${res.cidr}\nNetmask: ${res.netmask}\nNetwork: ${res.network}\nUsable : ${res.usableRange} (${res.totalUsable} hosts)\nBcast  : ${res.broadcast}`,
           })
           setSubnetInput(arg)
           setSubnetResult(res)
@@ -485,9 +485,9 @@ export default function Hero() {
                 {subnetResult && !subnetResult.error ? (
                   <div className="p-5 rounded-xl border border-white/10 bg-slate-900/60 space-y-3">
                     <div className="flex items-center justify-between pb-3 border-b border-white/10">
-                      <span className="text-white font-bold">{subnetResult.cidr}</span>
+                      <span className="text-white font-bold">{subnetInput}</span>
                       <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 text-[10px] font-bold">
-                        /{subnetResult.prefix}
+                        {subnetResult.cidr}
                       </span>
                     </div>
 
@@ -498,31 +498,31 @@ export default function Hero() {
                       </div>
                       <div>
                         <span className="text-slate-500 text-[10px] block">USABLE HOSTS</span>
-                        <span className="text-emerald-400 font-bold">{subnetResult.usableHosts.toLocaleString()}</span>
+                        <span className="text-emerald-400 font-bold">{subnetResult.totalUsable || subnetResult.usableHosts || '0'}</span>
                       </div>
                       <div>
                         <span className="text-slate-500 text-[10px] block">NETWORK ADDR</span>
-                        <span className="text-slate-200 font-semibold">{subnetResult.networkAddress}</span>
+                        <span className="text-slate-200 font-semibold">{subnetResult.network || subnetResult.networkAddress}</span>
                       </div>
                       <div>
                         <span className="text-slate-500 text-[10px] block">BROADCAST ADDR</span>
-                        <span className="text-slate-200 font-semibold">{subnetResult.broadcastAddress}</span>
+                        <span className="text-slate-200 font-semibold">{subnetResult.broadcast || subnetResult.broadcastAddress}</span>
                       </div>
                     </div>
 
                     <div className="pt-2 border-t border-white/5">
                       <span className="text-slate-500 text-[10px] block mb-1">USABLE HOST RANGE</span>
                       <div className="p-2 rounded bg-black/40 text-cyan-300 text-[11px] flex items-center justify-between">
-                        <span>{subnetResult.firstUsable}</span>
-                        <span className="text-slate-600">-&gt;</span>
-                        <span>{subnetResult.lastUsable}</span>
+                        <span>{subnetResult.usableRange}</span>
                       </div>
                     </div>
                   </div>
                 ) : (
                   <div className="p-6 rounded-xl border border-rose-500/30 bg-rose-500/5 text-rose-300">
                     <span className="font-bold block mb-1">Invalid CIDR format</span>
-                    <span className="text-[11px] text-slate-400">Contoh format valid: 192.168.1.0/24 atau 10.0.0.0/26</span>
+                    <span className="text-[11px] text-slate-400">
+                      {subnetResult?.error || 'Contoh format valid: 192.168.1.0/24 atau 10.0.0.0/26'}
+                    </span>
                   </div>
                 )}
               </div>

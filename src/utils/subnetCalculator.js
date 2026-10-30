@@ -7,7 +7,7 @@ export function calculateSubnet(cidrInput) {
   const trimmed = (typeof cidrInput === 'string' ? cidrInput : '').trim()
   const parts = trimmed.split('/')
   if (parts.length !== 2) {
-    return { error: 'Format salah! Gunakan: subnet <IP>/<CIDR>\nContoh: subnet 192.168.1.0/26' }
+    return { error: 'Format salah! Gunakan format IP/CIDR (contoh: 192.168.1.0/26)' }
   }
 
   const ipStr = parts[0].trim()
@@ -55,11 +55,15 @@ export function calculateSubnet(cidrInput) {
   return {
     ip: ipStr,
     cidr: `/${maskBits}`,
+    prefix: maskBits,
     netmask: intToIp(maskInt),
     wildcard: intToIp(wildcardInt),
     network: intToIp(networkInt),
+    networkAddress: intToIp(networkInt),
     broadcast: intToIp(broadcastInt),
+    broadcastAddress: intToIp(broadcastInt),
     usableRange: hostRange,
     totalUsable: usableCount.toLocaleString('en-US'),
+    usableHosts: usableCount,
   }
 }

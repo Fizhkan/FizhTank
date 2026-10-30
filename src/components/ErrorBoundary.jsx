@@ -22,23 +22,23 @@ export default class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-[#010205] text-zinc-100 flex items-center justify-center p-6">
-          <div className="max-w-md w-full p-8 rounded-2xl border border-red-500/30 bg-zinc-950/80 backdrop-blur-xl text-center space-y-4 shadow-[0_0_50px_rgba(239,68,68,0.15)]">
-            <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center mx-auto text-red-400">
+        <div className="min-h-screen bg-[#010712] text-slate-100 flex items-center justify-center p-6">
+          <div className="max-w-md w-full p-8 rounded-3xl apple-glass text-center space-y-4 shadow-[0_20px_50px_rgba(0,0,0,0.85)]">
+            <div className="w-14 h-14 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center mx-auto text-rose-400">
               <AlertTriangle size={28} />
             </div>
-            <h2 className="text-xl font-bold font-display text-zinc-50">
+            <h2 className="text-xl font-bold font-display text-white">
               Telemetry Signal Interrupted
             </h2>
-            <p className="text-sm text-zinc-400 leading-relaxed font-sans">
-              Terjadi anomali pada antarmuka deep ecosystem. Silakan muat ulang halaman untuk membangun kembali koneksi stream.
+            <p className="text-sm text-slate-300 leading-relaxed font-sans">
+              Terjadi anomali pada antarmuka sistem akuarium. Silakan muat ulang halaman untuk membangun kembali koneksi stream.
             </p>
             <button
               onClick={this.handleReload}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl text-sm font-semibold transition-all cursor-pointer shadow-lg shadow-violet-600/25"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-cyan-400 hover:bg-cyan-300 text-slate-950 rounded-full text-sm font-bold transition-all cursor-pointer shadow-lg shadow-cyan-400/25 active:scale-95"
             >
               <RefreshCw size={15} />
-              Muat Ulang Halaman
+              <span>Muat Ulang Halaman</span>
             </button>
           </div>
         </div>
