@@ -98,7 +98,7 @@ export default function Navbar() {
               FizhTank
             </span>
             <span className="text-[10px] font-mono text-cyan-400/80 tracking-widest uppercase">
-              ABYSSAL STATION
+              AQUARIUM TANK LAB
             </span>
           </div>
         </a>

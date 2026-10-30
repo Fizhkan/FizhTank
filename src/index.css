@@ -33,11 +33,11 @@ html {
   max-width: 100vw;
   overflow-x: hidden;
   -webkit-tap-highlight-color: transparent;
-  background-color: #010308;
+  background-color: #010712;
 }
 
 body {
-  background-color: #010308;
+  background-color: #010712;
   color: #f1f5f9;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif;
   -webkit-font-smoothing: antialiased;
