@@ -7,34 +7,31 @@ export default function ScrollToTop() {
   useEffect(() => {
     let ticking = false
     function onScroll() {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          setShow(window.scrollY > 500)
-          ticking = false
-        })
-        ticking = true
-      }
+      if (ticking) return
+      ticking = true
+      window.requestAnimationFrame(() => {
+        setShow(window.scrollY > 600)
+        ticking = false
+      })
     }
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
   return (
     <button
-      onClick={scrollToTop}
-      aria-label="Kembali ke permukaan"
-      className="fixed bottom-20 right-6 z-40 group touch-manipulation select-none cursor-pointer p-2.5 rounded-full border border-white/10 bg-slate-950/80 backdrop-blur-xl text-slate-400 hover:text-white hover:border-cyan-400/50 hover:bg-slate-900 transition-all duration-300 shadow-[0_10px_25px_rgba(0,0,0,0.5)] active:scale-95"
+      type="button"
+      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      aria-label="Kembali ke atas"
+      tabIndex={show ? 0 : -1}
+      className="glass fixed right-5 bottom-5 z-40 flex h-12 w-12 items-center justify-center rounded-full text-aqua transition-all duration-300 hover:text-white active:scale-95 sm:right-7 sm:bottom-6"
       style={{
         opacity: show ? 1 : 0,
-        transform: show ? 'translateY(0) scale(1)' : 'translateY(15px) scale(0.85)',
+        transform: show ? 'translateY(0)' : 'translateY(12px)',
         pointerEvents: show ? 'auto' : 'none',
       }}
     >
-      <ArrowUp size={16} className="text-cyan-400 group-hover:-translate-y-0.5 transition-transform" />
+      <ArrowUp size={18} aria-hidden="true" />
     </button>
   )
 }

@@ -1,19 +1,44 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
-import { X, Target, ListOrdered, ExternalLink, ShieldCheck, Network, Cpu, Info, FileText } from 'lucide-react'
+import { X, Target, ListOrdered, ExternalLink, ShieldCheck, Network, Cpu, Info, FileText, CheckCircle2 } from 'lucide-react'
+
+const STATUS_LABEL = {
+  planned: 'Direncanakan',
+  'in-progress': 'Sedang dikerjakan',
+  complete: 'Selesai',
+}
+
+const hasValue = (v) => Boolean(v && v.trim() !== '' && !v.includes('[ISI'))
+
+function Section({ icon: Icon, title, children, visible = true, delay = 0 }) {
+  return (
+    <section
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible ? 'translateY(0)' : 'translateY(16px)',
+        transition: `opacity 0.5s ease ${0.1 + delay * 0.1}s, transform 0.5s ease ${0.1 + delay * 0.1}s`,
+      }}
+    >
+      <div className="mb-3 flex items-center gap-2">
+        <Icon size={17} className="text-aqua" aria-hidden="true" />
+        <h3 className="text-lg text-white">{title}</h3>
+      </div>
+      {children}
+    </section>
+  )
+}
 
 export default function LabModal({ lab, onClose }) {
   const [isOpen, setIsOpen] = useState(false)
-  const [sectionsRevealed, setSectionsRevealed] = useState(false)
+  const [revealed, setRevealed] = useState(false)
   const triggerRef = useRef(null)
   const dialogRef = useRef(null)
   const closeButtonRef = useRef(null)
 
   const handleClose = useCallback(() => {
     setIsOpen(false)
-    setTimeout(onClose, 300)
+    setTimeout(onClose, 250)
   }, [onClose])
 
-  // Save previous focused trigger and restore on unmount
   useEffect(() => {
     triggerRef.current = document.activeElement
     return () => {
@@ -23,7 +48,6 @@ export default function LabModal({ lab, onClose }) {
     }
   }, [])
 
-  // Animate in on mount and focus close button
   useEffect(() => {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -31,11 +55,10 @@ export default function LabModal({ lab, onClose }) {
         closeButtonRef.current?.focus()
       })
     })
-    const timer = setTimeout(() => setSectionsRevealed(true), 300)
+    const timer = setTimeout(() => setRevealed(true), 250)
     return () => clearTimeout(timer)
   }, [])
 
-  // Close on Escape & Tab Focus Trapping
   useEffect(() => {
     const handler = (e) => {
       if (e.key === 'Escape') {
@@ -49,20 +72,15 @@ export default function LabModal({ lab, onClose }) {
           'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
         )
         if (focusable.length === 0) return
-
         const first = focusable[0]
         const last = focusable[focusable.length - 1]
 
-        if (e.shiftKey) {
-          if (document.activeElement === first) {
-            e.preventDefault()
-            last.focus()
-          }
-        } else {
-          if (document.activeElement === last) {
-            e.preventDefault()
-            first.focus()
-          }
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault()
+          last.focus()
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault()
+          first.focus()
         }
       }
     }
@@ -75,36 +93,22 @@ export default function LabModal({ lab, onClose }) {
     }
   }, [handleClose])
 
-  const colorMap = {
-    blue: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
-    violet: 'text-violet-400 bg-violet-500/10 border-violet-500/20',
-    green: 'text-green-400 bg-green-500/10 border-green-500/20',
-  }
-  const accent = colorMap[lab.accentColor] || colorMap.blue
-
-  const modalIcon = lab.id === 1 ? Network : lab.id === 2 ? ShieldCheck : Cpu
-
+  const ModalIcon = lab.id === 1 ? Network : lab.id === 2 ? ShieldCheck : Cpu
   const isPlanned = lab.status === 'planned'
   const isComplete = lab.status === 'complete'
 
-  // Valid optional links (only render if filled and not a placeholder)
-  const validRepoUrl =
-    lab.repoUrl && !lab.repoUrl.includes('[ISI') && lab.repoUrl.trim() !== '' ? lab.repoUrl : null
-  const validReportUrl =
-    lab.reportUrl && !lab.reportUrl.includes('[ISI') && lab.reportUrl.trim() !== '' ? lab.reportUrl : null
-  const validTopologyImage =
-    lab.topologyImage && !lab.topologyImage.includes('[ISI') && lab.topologyImage.trim() !== ''
-      ? lab.topologyImage
-      : null
+  const repoUrl = hasValue(lab.repoUrl) ? lab.repoUrl : null
+  const reportUrl = hasValue(lab.reportUrl) ? lab.reportUrl : null
+  const topologyImage = hasValue(lab.topologyImage) ? lab.topologyImage : null
 
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center p-4"
       onClick={(e) => e.target === e.currentTarget && handleClose()}
       style={{
-        backdropFilter: isOpen ? 'blur(10px)' : 'blur(0px)',
-        background: isOpen ? 'rgba(4, 6, 15, 0.85)' : 'rgba(4, 6, 15, 0)',
-        transition: 'all 0.3s ease',
+        backdropFilter: isOpen ? 'blur(8px)' : 'blur(0px)',
+        background: isOpen ? 'rgba(2, 18, 24, 0.78)' : 'rgba(2, 18, 24, 0)',
+        transition: 'background 0.25s ease, backdrop-filter 0.25s ease',
       }}
     >
       <div
@@ -112,228 +116,136 @@ export default function LabModal({ lab, onClose }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="lab-modal-title"
-        className="relative w-full max-w-2xl max-h-[92vh] overflow-y-auto apple-glass rounded-2xl"
+        className="glass relative max-h-[92vh] w-full max-w-2xl overflow-y-auto"
         style={{
           opacity: isOpen ? 1 : 0,
-          transform: isOpen ? 'translateY(0) scale(1)' : 'translateY(30px) scale(0.95)',
-          transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-          boxShadow: isOpen ? '0 0 60px rgba(0,0,0,0.8), 0 0 120px rgba(109,40,217,0.1)' : 'none',
+          transform: isOpen ? 'translateY(0) scale(1)' : 'translateY(24px) scale(0.97)',
+          transition: 'opacity 0.3s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
+          background: 'rgba(4, 38, 50, 0.96)',
         }}
       >
-        {/* Animated top edge glow */}
-        <div
-          className="absolute top-0 left-0 right-0 h-px pointer-events-none"
-          style={{
-            background: 'linear-gradient(90deg, transparent 0%, rgba(167,139,250,0.4) 30%, rgba(6,182,212,0.5) 70%, transparent 100%)',
-            opacity: isOpen ? 1 : 0,
-            transition: 'opacity 0.5s ease 0.2s',
-          }}
-        />
-
-        {/* Header */}
-        <div className="sticky top-0 z-10 flex items-start justify-between p-6 bg-zinc-950/95 backdrop-blur-sm border-b border-zinc-800">
-          <div className="flex items-center gap-3">
-            <div
-              className={`w-10 h-10 rounded-lg border flex items-center justify-center shrink-0 ${accent}`}
-              style={{
-                transform: isOpen ? 'rotate(0deg) scale(1)' : 'rotate(-10deg) scale(0.8)',
-                transition: 'all 0.5s ease 0.2s',
-              }}
-            >
-              {modalIcon && <modalIcon size={18} />}
-            </div>
+        <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-white/10 bg-[rgba(4,38,50,0.98)] p-5 sm:p-6">
+          <div className="flex items-start gap-4">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-aqua/40 bg-aqua/10 text-aqua">
+              <ModalIcon size={20} aria-hidden="true" />
+            </span>
             <div>
-              <div className="flex items-center gap-2 mb-0.5">
-                <span className="text-[12px] text-cyan-300 font-mono font-semibold tracking-wider block">
-                  {lab.category}
-                </span>
-                <span className="text-[11px] font-mono px-2 py-0.2 rounded-full border bg-zinc-800/80 text-zinc-300 border-zinc-700/60 uppercase">
-                  {lab.status}
-                </span>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm text-aqua">{lab.category}</span>
+                <span className="chip">{STATUS_LABEL[lab.status] || lab.status}</span>
               </div>
-              <h2 id="lab-modal-title" className="text-xl sm:text-2xl font-bold font-display text-zinc-50 leading-tight">
+              <h2 id="lab-modal-title" className="mt-1 text-2xl leading-tight text-white sm:text-3xl">
                 {lab.title}
               </h2>
             </div>
           </div>
+
           <button
             ref={closeButtonRef}
+            type="button"
             onClick={handleClose}
-            aria-label="Tutup dialog detail lab"
-            className="w-8 h-8 flex items-center justify-center rounded-lg border border-zinc-700 text-zinc-400 hover:border-red-500/50 hover:text-red-400 transition-all ml-4 shrink-0 hover:rotate-90 active:scale-90 cursor-pointer touch-manipulation select-none"
-            style={{ transition: 'all 0.3s ease' }}
+            aria-label="Tutup detail lab"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/20 text-mist transition-colors hover:border-white/50 hover:text-white"
           >
-            <X size={16} />
+            <X size={18} aria-hidden="true" />
           </button>
         </div>
 
-        {/* Content */}
-        <div className="p-6 space-y-6">
-          {/* Objective */}
-          <Section
-            icon={Target}
-            title="Objective"
-            iconClass="text-amber-400"
-            visible={sectionsRevealed}
-            delay={0}
-          >
-            <p className="text-zinc-200 text-[14.5px] sm:text-base leading-relaxed">
-              {lab.writeup?.objective}
-            </p>
+        <div className="space-y-7 p-5 sm:p-6">
+          <Section icon={Target} title="Tujuan" visible={revealed} delay={0}>
+            <p className="leading-relaxed text-mist">{lab.writeup?.objective}</p>
           </Section>
 
-          {/* Planned Steps (Rencana Langkah) */}
           {lab.writeup?.plannedSteps && (
-            <Section
-              icon={ListOrdered}
-              title="Rencana Langkah Pengerjaan"
-              iconClass="text-cyan-400"
-              visible={sectionsRevealed}
-              delay={1}
-            >
-              <div className="space-y-2.5">
+            <Section icon={ListOrdered} title="Rencana langkah" visible={revealed} delay={1}>
+              <ol className="space-y-2.5">
                 {lab.writeup.plannedSteps.map((step, i) => (
-                  <div
-                    key={i}
-                    className="flex items-start gap-3 p-3 rounded-xl bg-zinc-900/60 border border-zinc-800/80 text-[13.5px] text-zinc-200 leading-relaxed font-sans"
+                  <li
+                    key={step}
+                    className="glass-inset flex items-start gap-3 p-3.5"
                     style={{
-                      opacity: sectionsRevealed ? 1 : 0,
-                      transform: sectionsRevealed ? 'translateX(0)' : 'translateX(-12px)',
-                      transition: `all 0.4s ease ${0.3 + i * 0.08}s`,
+                      opacity: revealed ? 1 : 0,
+                      transform: revealed ? 'translateX(0)' : 'translateX(-10px)',
+                      transition: `opacity 0.4s ease ${0.25 + i * 0.07}s, transform 0.4s ease ${0.25 + i * 0.07}s`,
                     }}
                   >
-                    <span className="w-6 h-6 rounded-lg bg-violet-950/60 border border-violet-500/30 text-violet-300 font-mono text-xs font-semibold flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-aqua/50 text-xs font-semibold text-aqua">
                       {i + 1}
                     </span>
-                    <span className="flex-1 text-zinc-300">{step}</span>
-                  </div>
+                    <span className="leading-relaxed text-foam">{step}</span>
+                  </li>
                 ))}
-              </div>
+              </ol>
             </Section>
           )}
 
-          {/* Optional Topology Image (Only rendered if filled) */}
-          {validTopologyImage && (
-            <Section
-              icon={Target}
-              title="Topologi"
-              iconClass="text-blue-400"
-              visible={sectionsRevealed}
-              delay={2}
-            >
+          {topologyImage && (
+            <Section icon={Network} title="Topologi" visible={revealed} delay={2}>
               <img
-                src={validTopologyImage}
+                src={topologyImage}
                 alt={lab.topologyAlt || `Topologi untuk ${lab.title}`}
-                className="w-full rounded-xl border border-zinc-800"
+                className="w-full rounded-xl border border-white/15"
               />
             </Section>
           )}
 
-          {/* Planned Status Notice */}
           {isPlanned && (
             <div
-              className="p-4 rounded-xl bg-violet-950/30 border border-violet-500/25 flex items-center gap-3 text-zinc-300 text-sm font-sans"
-              style={{
-                opacity: sectionsRevealed ? 1 : 0,
-                transition: 'opacity 0.5s ease 0.4s',
-              }}
+              className="flex items-center gap-3 rounded-xl border border-aqua/30 bg-aqua/10 p-4 text-[0.9375rem] text-foam"
+              style={{ opacity: revealed ? 1 : 0, transition: 'opacity 0.5s ease 0.4s' }}
             >
-              <Info size={18} className="text-cyan-400 shrink-0" />
-              <p className="leading-relaxed">
-                Write-up ditambahkan setelah lab selesai.
-              </p>
+              <Info size={18} className="shrink-0 text-aqua" aria-hidden="true" />
+              <p>Write-up hasil lab ditambahkan setelah lab selesai dikerjakan.</p>
             </div>
           )}
 
-          {/* Completed Lab Sections (Only if complete) */}
           {isComplete && lab.writeup?.commands && (
-            <Section
-              icon={Target}
-              title="Key Configuration Commands"
-              iconClass="text-violet-400"
-              visible={sectionsRevealed}
-              delay={2}
-            >
-              <div className="code-block group hover:border-violet-500/30 transition-colors duration-300 font-mono text-xs">
+            <Section icon={Target} title="Perintah kunci" visible={revealed} delay={2}>
+              <pre className="glass-inset overflow-x-auto p-4 font-mono text-[0.8125rem] leading-relaxed whitespace-pre-wrap text-foam">
                 {lab.writeup.commands}
-              </div>
+              </pre>
             </Section>
           )}
 
           {isComplete && lab.writeup?.verification && (
-            <Section
-              icon={Target}
-              title="Hasil Verifikasi"
-              iconClass="text-green-400"
-              visible={sectionsRevealed}
-              delay={3}
-            >
-              <div className="space-y-2">
-                {lab.writeup.verification.map((v, i) => (
-                  <p key={i} className="text-zinc-300 text-xs font-mono">
-                    • {v}
-                  </p>
+            <Section icon={CheckCircle2} title="Hasil verifikasi" visible={revealed} delay={3}>
+              <ul className="space-y-2 text-mist">
+                {lab.writeup.verification.map((v) => (
+                  <li key={v} className="flex items-start gap-2">
+                    <CheckCircle2 size={16} className="mt-1 shrink-0 text-kelp" aria-hidden="true" />
+                    <span>{v}</span>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </Section>
           )}
 
-          {/* Bottom Bar: Tags & Optional Links */}
-          <div className="pt-4 border-t border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+          <div className="flex flex-col items-start justify-between gap-4 border-t border-white/10 pt-5 sm:flex-row sm:items-center">
+            <ul className="flex flex-wrap gap-2">
               {lab.tags.map((tag) => (
-                <span key={tag} className="tech-badge">
+                <li key={tag} className="chip">
                   {tag}
-                </span>
+                </li>
               ))}
-            </div>
+            </ul>
 
-            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-              {validReportUrl && (
-                <a
-                  href={validReportUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-cyan-950/50 border border-cyan-500/40 text-cyan-200 hover:text-white text-xs font-mono font-medium transition-all active:scale-95 touch-manipulation select-none cursor-pointer"
-                >
-                  <FileText size={13} />
-                  <span>Report</span>
+            <div className="flex items-center gap-2">
+              {reportUrl && (
+                <a href={reportUrl} target="_blank" rel="noopener noreferrer" className="btn btn-ghost min-h-10! px-4! py-2! text-sm">
+                  <FileText size={15} aria-hidden="true" />
+                  <span>Laporan</span>
                 </a>
               )}
-
-              {validRepoUrl && (
-                <a
-                  href={validRepoUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-violet-600/20 border border-violet-500/40 text-violet-200 hover:text-white hover:bg-violet-600/30 text-xs font-mono font-medium transition-all active:scale-95 touch-manipulation select-none cursor-pointer"
-                >
-                  <ExternalLink size={13} />
-                  <span>Repository</span>
+              {repoUrl && (
+                <a href={repoUrl} target="_blank" rel="noopener noreferrer" className="btn btn-ghost min-h-10! px-4! py-2! text-sm">
+                  <ExternalLink size={15} aria-hidden="true" />
+                  <span>Repositori</span>
                 </a>
               )}
             </div>
           </div>
         </div>
       </div>
-    </div>
-  )
-}
-
-function Section({ icon: Icon, title, iconClass, children, visible = true, delay = 0 }) {
-  return (
-    <div
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? 'translateY(0)' : 'translateY(20px)',
-        transition: `all 0.5s ease ${0.15 + delay * 0.12}s`,
-      }}
-    >
-      <div className="flex items-center gap-2 mb-3">
-        <Icon size={15} className={iconClass} />
-        <h3 className="text-[14.5px] font-bold font-display text-zinc-100 tracking-tight">{title}</h3>
-      </div>
-      {children}
     </div>
   )
 }

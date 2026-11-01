@@ -1,17 +1,13 @@
 /**
- * ══════════════════════════════════════════════════════════════════════════════
- * FIZHTANK — PROCEDURAL WEB AUDIO SYNTHESIZER (ZERO EXTERNAL ASSETS)
- * ══════════════════════════════════════════════════════════════════════════════
- * Uses Web Audio API to synthesize subtle, high-end, organic oceanic sounds:
- * 1. Ambient deep-sea drone (sub-bass low-pass filtered hum)
- * 2. Water droplet / acoustic click chime on hover & tap
- * 3. Sonar acoustic ping for radar interactions
- * ══════════════════════════════════════════════════════════════════════════════
+ * Suara tank, disintesis dengan Web Audio API (tanpa file audio).
+ *  - dengung lembut filter akuarium (noise coklat yang dilunakkan)
+ *  - tetes air kecil saat hover dan klik
+ *  - cipratan saat makanan dijatuhkan
+ * Suara mati secara default dan hanya menyala setelah pengunjung menekan tombol suara.
  */
 
 let audioCtx = null
-let ambientDroneNode = null
-let ambientGainNode = null
+let ambient = null
 let isMuted = true
 
 function getAudioContext() {
@@ -35,11 +31,9 @@ export function toggleAudio() {
   isMuted = !isMuted
 
   if (isMuted) {
-    if (ambientGainNode) {
-      ambientGainNode.gain.setTargetAtTime(0, ctx.currentTime, 0.2)
-    }
+    if (ambient) ambient.gain.gain.setTargetAtTime(0, ctx.currentTime, 0.2)
   } else {
-    startAmbientDrone()
+    startAmbient()
     playWaterBubble()
   }
 
@@ -50,47 +44,60 @@ export function isAudioActive() {
   return !isMuted
 }
 
-// 1. Ambient Deep-Sea Sub-Bass Drone
-function startAmbientDrone() {
+// Dengung filter: noise coklat dilewatkan low-pass, volumenya bergelombang pelan
+function startAmbient() {
   const ctx = getAudioContext()
-  if (!ctx || ambientDroneNode) return
+  if (!ctx) return
+
+  if (ambient) {
+    ambient.gain.gain.setTargetAtTime(0.05, ctx.currentTime, 0.4)
+    return
+  }
 
   try {
-    // Low frequency ocean hum (52 Hz & 78 Hz harmonic)
-    const osc1 = ctx.createOscillator()
-    const osc2 = ctx.createOscillator()
+    const length = ctx.sampleRate * 4
+    const buffer = ctx.createBuffer(1, length, ctx.sampleRate)
+    const data = buffer.getChannelData(0)
+    let last = 0
+    for (let i = 0; i < length; i++) {
+      const white = Math.random() * 2 - 1
+      last = (last + 0.02 * white) / 1.02
+      data[i] = last * 3.5
+    }
+
+    const source = ctx.createBufferSource()
+    source.buffer = buffer
+    source.loop = true
+
     const filter = ctx.createBiquadFilter()
-    ambientGainNode = ctx.createGain()
-
-    osc1.type = 'sine'
-    osc1.frequency.setValueAtTime(52, ctx.currentTime)
-
-    osc2.type = 'sine'
-    osc2.frequency.setValueAtTime(78, ctx.currentTime)
-
-    // Low pass filter to create deep ocean resonance
     filter.type = 'lowpass'
-    filter.frequency.setValueAtTime(120, ctx.currentTime)
-    filter.Q.setValueAtTime(3, ctx.currentTime)
+    filter.frequency.value = 520
+    filter.Q.value = 0.7
 
-    ambientGainNode.gain.setValueAtTime(0.001, ctx.currentTime)
-    ambientGainNode.gain.exponentialRampToValueAtTime(0.06, ctx.currentTime + 2)
+    const gain = ctx.createGain()
+    gain.gain.setValueAtTime(0.001, ctx.currentTime)
+    gain.gain.exponentialRampToValueAtTime(0.05, ctx.currentTime + 2)
 
-    osc1.connect(filter)
-    osc2.connect(filter)
-    filter.connect(ambientGainNode)
-    ambientGainNode.connect(ctx.destination)
+    const lfo = ctx.createOscillator()
+    const lfoGain = ctx.createGain()
+    lfo.frequency.value = 0.12
+    lfoGain.gain.value = 0.012
+    lfo.connect(lfoGain)
+    lfoGain.connect(gain.gain)
 
-    osc1.start()
-    osc2.start()
+    source.connect(filter)
+    filter.connect(gain)
+    gain.connect(ctx.destination)
 
-    ambientDroneNode = { osc1, osc2 }
+    source.start()
+    lfo.start()
+    ambient = { gain }
   } catch (err) {
-    console.warn('Web Audio drone init error:', err)
+    console.warn('Web Audio ambient init error:', err)
   }
 }
 
-// 2. Synthesized Water Droplet / Crisp Acoustic Chime
+// Tetes air kecil
 export function playWaterBubble() {
   if (isMuted) return
   const ctx = getAudioContext()
@@ -99,10 +106,9 @@ export function playWaterBubble() {
   try {
     const osc = ctx.createOscillator()
     const gain = ctx.createGain()
+    const now = ctx.currentTime
 
     osc.type = 'sine'
-    const now = ctx.currentTime
-    // Pitch sweep mimicking water droplet tension
     osc.frequency.setValueAtTime(450, now)
     osc.frequency.exponentialRampToValueAtTime(880, now + 0.08)
 
@@ -114,31 +120,50 @@ export function playWaterBubble() {
 
     osc.start(now)
     osc.stop(now + 0.13)
-  } catch {}
+  } catch {
+    /* audio tidak tersedia, abaikan */
+  }
 }
 
-// 3. Acoustic Sonar Ping
-export function playSonarPing() {
+// Cipratan saat makanan jatuh ke permukaan
+export function playFeedSplash() {
   if (isMuted) return
   const ctx = getAudioContext()
   if (!ctx) return
 
   try {
-    const osc = ctx.createOscillator()
-    const gain = ctx.createGain()
-
-    osc.type = 'sine'
     const now = ctx.currentTime
-    osc.frequency.setValueAtTime(1200, now)
-    osc.frequency.exponentialRampToValueAtTime(600, now + 0.4)
 
-    gain.gain.setValueAtTime(0.08, now)
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8)
-
-    osc.connect(gain)
-    gain.connect(ctx.destination)
-
+    const osc = ctx.createOscillator()
+    const oscGain = ctx.createGain()
+    osc.type = 'sine'
+    osc.frequency.setValueAtTime(320, now)
+    osc.frequency.exponentialRampToValueAtTime(140, now + 0.18)
+    oscGain.gain.setValueAtTime(0.07, now)
+    oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.22)
+    osc.connect(oscGain)
+    oscGain.connect(ctx.destination)
     osc.start(now)
-    osc.stop(now + 0.85)
-  } catch {}
+    osc.stop(now + 0.24)
+
+    const size = Math.floor(ctx.sampleRate * 0.12)
+    const buffer = ctx.createBuffer(1, size, ctx.sampleRate)
+    const data = buffer.getChannelData(0)
+    for (let i = 0; i < size; i++) {
+      data[i] = (Math.random() * 2 - 1) * (1 - i / size)
+    }
+    const noise = ctx.createBufferSource()
+    noise.buffer = buffer
+    const hp = ctx.createBiquadFilter()
+    hp.type = 'highpass'
+    hp.frequency.value = 1800
+    const nGain = ctx.createGain()
+    nGain.gain.value = 0.05
+    noise.connect(hp)
+    hp.connect(nGain)
+    nGain.connect(ctx.destination)
+    noise.start(now)
+  } catch {
+    /* audio tidak tersedia, abaikan */
+  }
 }

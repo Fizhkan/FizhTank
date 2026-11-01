@@ -1,166 +1,90 @@
 import { useState, lazy, Suspense } from 'react'
-import { ArrowUpRight, Network, ShieldCheck, Cpu } from 'lucide-react'
+import { ArrowUpRight, Network, ShieldCheck, Cpu, ArrowRight } from 'lucide-react'
 import { useScrollReveal } from '../hooks/useScrollReveal'
 import { labsData } from '../data/labsData'
 import { playWaterBubble } from '../utils/audio'
 
 const LabModal = lazy(() => import('./LabModal'))
 
-// ── Interactive Architectural SVG Schematics for each Specimen ──
-function SpecimenBlueprint({ labId }) {
+const STATUS_LABEL = {
+  planned: 'Direncanakan',
+  'in-progress': 'Sedang dikerjakan',
+  complete: 'Selesai',
+}
+
+const LAB_ICONS = { 1: Network, 2: ShieldCheck, 3: Cpu }
+
+// Diagram rancangan tiap lab. Semuanya rencana, bukan hasil pengujian.
+function Diagram({ labId }) {
   if (labId === 1) {
     return (
-      <div className="w-full h-56 sm:h-64 rounded-xl bg-slate-950/90 border border-cyan-500/20 p-4 font-mono text-[11px] relative overflow-hidden flex flex-col justify-between shadow-[inset_0_0_30px_rgba(6,182,212,0.05)]">
-        {/* Grid pattern background */}
-        <div
-          className="absolute inset-0 opacity-15 pointer-events-none"
-          style={{
-            backgroundImage: 'radial-gradient(circle, #22d3ee 1px, transparent 1px)',
-            backgroundSize: '16px 16px',
-          }}
-        />
-
-        <div className="flex items-center justify-between text-slate-400 border-b border-white/10 pb-2 relative z-10">
-          <span className="text-cyan-400 font-semibold tracking-wider">TOPOLOGY: CISCO INTER-VLAN (802.1Q)</span>
-          <span className="text-emerald-400 font-bold">STATUS: PLANNED ARCHITECTURE</span>
-        </div>
-
-        {/* Schematic diagram */}
-        <div className="relative z-10 flex flex-col items-center justify-center my-auto gap-4">
-          {/* Core Switch Node */}
-          <div className="px-4 py-2 rounded-lg bg-cyan-950/80 border border-cyan-400/50 text-cyan-300 font-bold flex items-center gap-2 shadow-[0_0_15px_rgba(6,182,212,0.2)]">
-            <Network size={14} className="text-cyan-400" />
-            <span>CORE-L3-SWITCH // SVI ROUTING [OSPF]</span>
+      <div className="glass-inset p-4 sm:p-5">
+        <p className="text-sm text-mist">Rancangan topologi</p>
+        <div className="mt-4 flex flex-col items-center gap-3">
+          <div className="flex items-center gap-2 rounded-xl border border-aqua/50 bg-aqua/10 px-4 py-2 text-[0.9375rem] font-medium text-white">
+            <Network size={16} className="text-aqua" aria-hidden="true" />
+            Core L3 switch (SVI)
           </div>
-
-          {/* Trunk Lines */}
-          <div className="w-48 sm:w-64 h-px bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent relative">
-            <span className="absolute -top-2 left-1/2 -translate-x-1/2 text-[9px] bg-slate-950 px-1.5 text-slate-500">
-              802.1Q TRUNK
-            </span>
-          </div>
-
-          {/* 3 Department VLANs */}
-          <div className="grid grid-cols-3 gap-2 sm:gap-4 w-full">
-            <div className="p-2 rounded border border-white/10 bg-white/[0.02] text-center">
-              <span className="text-cyan-400 font-bold block text-[10px]">VLAN 10</span>
-              <span className="text-slate-300 text-[10px]">IT OPS</span>
-              <span className="text-slate-500 text-[9px] block">192.168.10.0/24</span>
-            </div>
-            <div className="p-2 rounded border border-amber-500/30 bg-amber-500/5 text-center">
-              <span className="text-amber-400 font-bold block text-[10px]">VLAN 20</span>
-              <span className="text-slate-300 text-[10px]">HR DEPT</span>
-              <span className="text-slate-500 text-[9px] block">192.168.20.0/24</span>
-            </div>
-            <div className="p-2 rounded border border-purple-500/30 bg-purple-500/5 text-center relative">
-              <span className="absolute -top-1.5 -right-1.5 px-1 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[8px] font-bold">
-                ACL LOCK
-              </span>
-              <span className="text-purple-400 font-bold block text-[10px]">VLAN 30</span>
-              <span className="text-slate-300 text-[10px]">FINANCE</span>
-              <span className="text-slate-500 text-[9px] block">192.168.30.0/24</span>
-            </div>
+          <div className="relative h-5 w-px bg-aqua/50" aria-hidden="true" />
+          <p className="-mt-1 text-xs text-mist">trunk 802.1Q</p>
+          <div className="grid w-full grid-cols-3 gap-2 sm:gap-3">
+            {[
+              ['VLAN 10', 'IT', '192.168.10.0/24'],
+              ['VLAN 20', 'HR', '192.168.20.0/24'],
+              ['VLAN 30', 'Finance', '192.168.30.0/24'],
+            ].map(([vlan, name, net]) => (
+              <div key={vlan} className="rounded-lg border border-white/15 bg-white/5 p-2.5 text-center">
+                <p className="text-sm font-semibold text-white">{vlan}</p>
+                <p className="text-sm text-mist">{name}</p>
+                <p className="mt-1 font-mono text-[0.6875rem] text-mist/80 sm:text-xs">{net}</p>
+              </div>
+            ))}
           </div>
         </div>
-
-        <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1 border-t border-white/5 relative z-10">
-          <span>EXTENDED ACL: DENY VLAN 20 -&gt; VLAN 30</span>
-          <span>STP: RAPID-PVST+ ENABLED</span>
-        </div>
+        <p className="mt-4 border-t border-white/10 pt-3 text-sm text-mist">
+          Rencana ACL: akses dari VLAN 20 (HR) ke VLAN 30 (Finance) diblokir.
+        </p>
       </div>
     )
   }
 
   if (labId === 2) {
     return (
-      <div className="w-full h-56 sm:h-64 rounded-xl bg-slate-950/90 border border-violet-500/20 p-4 font-mono text-[11px] relative overflow-hidden flex flex-col justify-between shadow-[inset_0_0_30px_rgba(139,92,246,0.05)]">
-        <div
-          className="absolute inset-0 opacity-15 pointer-events-none"
-          style={{
-            backgroundImage: 'radial-gradient(circle, #a78bfa 1px, transparent 1px)',
-            backgroundSize: '16px 16px',
-          }}
-        />
-
-        <div className="flex items-center justify-between text-slate-400 border-b border-white/10 pb-2 relative z-10">
-          <span className="text-violet-400 font-semibold tracking-wider">TAP: WIRESHARK PACKET SNIFFER</span>
-          <span className="text-cyan-400 font-bold">STREAM REASSEMBLY</span>
-        </div>
-
-        {/* Packet Stream Matrix */}
-        <div className="relative z-10 flex flex-col gap-2 my-auto">
-          <div className="p-2 rounded bg-rose-950/40 border border-rose-500/30 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
-              <span className="text-rose-300 font-bold">HTTP / FTP (CLEARTEXT)</span>
-            </div>
-            <span className="text-rose-400/90 text-[10px]">EXPOSED CREDENTIALS IN PAYLOAD</span>
+      <div className="glass-inset p-4 sm:p-5">
+        <p className="text-sm text-mist">Yang akan diamati di Wireshark</p>
+        <div className="mt-4 space-y-3">
+          <div className="rounded-lg border border-coral/40 bg-coral/10 p-3">
+            <p className="font-semibold text-white">HTTP dan FTP (plaintext)</p>
+            <p className="mt-0.5 text-[0.9375rem] text-mist">Username dan password diperkirakan terbaca di payload.</p>
           </div>
-
-          <div className="flex items-center justify-center my-0.5">
-            <span className="text-[9px] text-slate-500 font-semibold tracking-widest uppercase">
-              VS // CRYPTOGRAPHIC MITIGATION
-            </span>
-          </div>
-
-          <div className="p-2 rounded bg-emerald-950/40 border border-emerald-500/30 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              <span className="text-emerald-300 font-bold">TLS 1.3 / HTTPS (AEAD CIPHER)</span>
-            </div>
-            <span className="text-emerald-400/90 text-[10px]">ECDHE KEY EXCHANGE ENCRYPTED</span>
+          <div className="rounded-lg border border-kelp/40 bg-kelp/10 p-3">
+            <p className="font-semibold text-white">HTTPS (TLS 1.3)</p>
+            <p className="mt-0.5 text-[0.9375rem] text-mist">Payload setelah handshake diperkirakan hanya terlihat sebagai data terenkripsi.</p>
           </div>
         </div>
-
-        <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1 border-t border-white/5 relative z-10">
-          <span>PCAP DISPLAY FILTER: tcp.port == 443 || http</span>
-          <span>TCP 3-WAY HANDSHAKE OBSERVED</span>
-        </div>
+        <p className="mt-4 border-t border-white/10 pt-3 text-sm text-mist">
+          Filter yang akan dipakai: <code className="font-mono text-aqua">tcp.port == 443 || http</code>
+        </p>
       </div>
     )
   }
 
-  // Lab 3
   return (
-    <div className="w-full h-56 sm:h-64 rounded-xl bg-slate-950/90 border border-emerald-500/20 p-4 font-mono text-[11px] relative overflow-hidden flex flex-col justify-between shadow-[inset_0_0_30px_rgba(16,185,129,0.05)]">
-      <div
-        className="absolute inset-0 opacity-15 pointer-events-none"
-        style={{
-          backgroundImage: 'radial-gradient(circle, #34d399 1px, transparent 1px)',
-          backgroundSize: '16px 16px',
-        }}
-      />
-
-      <div className="flex items-center justify-between text-slate-400 border-b border-white/10 pb-2 relative z-10">
-        <span className="text-emerald-400 font-semibold tracking-wider">GATEWAY: ARCH LINUX HOMELAB</span>
-        <span className="text-cyan-400 font-bold">STATEFUL UFW / PI-HOLE</span>
-      </div>
-
-      <div className="relative z-10 flex flex-col items-center justify-center my-auto gap-3">
-        <div className="grid grid-cols-2 gap-3 w-full">
-          <div className="p-2 rounded bg-white/[0.03] border border-white/10">
-            <span className="text-slate-400 text-[10px] block font-bold mb-1">UFW FIREWALL POLICY</span>
-            <span className="text-rose-400 block text-[10px] font-semibold">DEFAULT: DENY (INCOMING)</span>
-            <span className="text-emerald-400 block text-[10px] font-semibold">ALLOW: 2202/TCP (SSH KEY)</span>
-          </div>
-
-          <div className="p-2 rounded bg-emerald-950/30 border border-emerald-500/20">
-            <span className="text-emerald-400 text-[10px] block font-bold mb-1">PI-HOLE DNS SINKHOLE</span>
-            <span className="text-slate-300 block text-[10px]">PORT 53 (UDP/TCP)</span>
-            <span className="text-cyan-400 block text-[10px] font-semibold">BLOCKLIST: 140,000+ DOMAINS</span>
-          </div>
+    <div className="glass-inset p-4 sm:p-5">
+      <p className="text-sm text-mist">Rancangan gateway homelab</p>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <div className="rounded-lg border border-white/15 bg-white/5 p-3">
+          <p className="font-semibold text-white">Firewall UFW</p>
+          <p className="mt-0.5 text-[0.9375rem] text-mist">Deny incoming, allow outgoing. SSH hanya dengan key-pair.</p>
         </div>
-
-        <div className="p-2 rounded bg-slate-900/90 border border-white/10 w-full flex items-center justify-between">
-          <span className="text-slate-400 text-[10px]">NMAP AUDIT RESULT:</span>
-          <span className="text-slate-200 text-[10px] font-bold">0 UNWANTED OPEN PORTS DETECTED</span>
+        <div className="rounded-lg border border-white/15 bg-white/5 p-3">
+          <p className="font-semibold text-white">Pi-hole</p>
+          <p className="mt-0.5 text-[0.9375rem] text-mist">DNS lokal di port 53 untuk memblokir domain iklan.</p>
         </div>
       </div>
-
-      <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1 border-t border-white/5 relative z-10">
-        <span>IPTABLES FORWARDING: ESTABLISHED,RELATED</span>
-        <span>ARCH LINUX // SYSTEMD-RESOLVED</span>
-      </div>
+      <p className="mt-4 border-t border-white/10 pt-3 text-sm text-mist">
+        Target pengecekan: Nmap dari mesin lain tidak menemukan port terbuka yang tidak diperlukan.
+      </p>
     </div>
   )
 }
@@ -170,227 +94,139 @@ export default function Labs() {
   const [modalLab, setModalLab] = useState(null)
 
   const [headerRef, headerVisible] = useScrollReveal({ threshold: 0.1 })
-  const [contentRef, contentVisible] = useScrollReveal({ threshold: 0.1 })
+  const [contentRef, contentVisible] = useScrollReveal({ threshold: 0.08 })
 
   const currentLab = labsData.find((l) => l.id === activeLabId) || labsData[0]
 
-  const handleSelectLab = (id) => {
-    playWaterBubble()
-    setActiveLabId(id)
-  }
+  const reveal = (visible, offset = 24) => ({
+    opacity: visible ? 1 : 0,
+    transform: visible ? 'translateY(0)' : `translateY(${offset}px)`,
+  })
 
   return (
-    <section id="labs" className="relative py-28 px-4 sm:px-6 max-w-7xl mx-auto">
-      {/* ── Editorial Header Bar ── */}
-      <div
-        ref={headerRef}
-        className="mb-14 sm:mb-18 transition-all duration-700"
-        style={{
-          opacity: headerVisible ? 1 : 0,
-          transform: headerVisible ? 'translateY(0)' : 'translateY(24px)',
-        }}
-      >
-        <p className="font-mono text-xs sm:text-[13px] uppercase tracking-[0.25em] text-cyan-400/80 mb-3 flex items-center gap-2">
-          <span>// 002</span>
-          <span className="w-8 h-px bg-cyan-500/40" />
-          <span>Research Dossiers &amp; Lab Architecture</span>
+    <section id="labs" className="relative mx-auto max-w-7xl px-5 py-24 sm:px-8">
+      <div ref={headerRef} className="mb-12 max-w-2xl transition-all duration-700" style={reveal(headerVisible)}>
+        <p className="eyebrow">Lab</p>
+        <h2 className="section-title on-water mt-4">Lab yang sedang saya rancang</h2>
+        <p className="lede on-water mt-4">
+          Ketiga lab ini belum saya kerjakan. Di sini ada tujuan, rencana topologi, dan langkah-langkahnya.
+          Write-up lengkap menyusul setelah labnya selesai.
         </p>
-
-        <div className="grid lg:grid-cols-12 gap-6 items-end">
-          <div className="lg:col-span-8">
-            <h2 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-[-0.03em] leading-tight text-white font-display uppercase">
-              Network Specimen <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-100 via-cyan-200 to-cyan-400">
-                &amp; Lab Blueprints.
-              </span>
-            </h2>
-          </div>
-
-          <div className="lg:col-span-4">
-            <p className="text-slate-400 text-sm sm:text-base leading-relaxed font-normal">
-              Eksplorasi arsitektur jaringan virtual dan keamanan siber. Setiap spesimen dilengkapi rancangan topologi, parameter simulasi, dan rencana pengujian terperinci.
-            </p>
-          </div>
-        </div>
       </div>
 
-      {/* ── Asymmetric Exhibition Layout ── */}
       <div
         ref={contentRef}
-        className="grid lg:grid-cols-12 gap-8 items-start transition-all duration-700"
-        style={{
-          opacity: contentVisible ? 1 : 0,
-          transform: contentVisible ? 'translateY(0)' : 'translateY(28px)',
-        }}
+        className="grid grid-cols-1 items-start gap-6 transition-all duration-700 lg:grid-cols-12"
+        style={reveal(contentVisible, 28)}
       >
-        {/* Left: Active Specimen Showcase & Topology Blueprint (7 cols) */}
-        <div className="lg:col-span-7 rounded-2xl apple-glass p-6 sm:p-8 flex flex-col justify-between shadow-[0_25px_60px_rgba(0,0,0,0.85)] relative overflow-hidden">
-          {/* Blueprint Canvas Display */}
-          <div>
-            <div className="flex items-center justify-between pb-4 border-b border-white/10 font-mono text-xs">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse" />
-                <span className="text-white font-bold tracking-wider">
-                  SPECIMEN DOSSIER 0{currentLab.id}
-                </span>
-                <span className="text-slate-600">//</span>
-                <span className="text-cyan-400">{currentLab.category}</span>
-              </div>
-
-              <span className="px-2.5 py-0.5 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-cyan-300 font-mono text-[10px] font-bold uppercase tracking-wider">
-                {currentLab.status}
-              </span>
-            </div>
-
-            {/* Specimen Title & Abstract */}
-            <div className="mt-6">
-              <h3 className="text-2xl sm:text-3xl font-bold font-display text-white leading-tight">
-                {currentLab.title}
-              </h3>
-
-              <p className="mt-3 text-slate-300 text-sm sm:text-base leading-relaxed font-normal">
-                {currentLab.description}
-              </p>
-            </div>
-
-            {/* Interactive Architecture Schematic */}
-            <div className="mt-6">
-              <SpecimenBlueprint labId={currentLab.id} />
-            </div>
-
-            {/* Research Objective Preview */}
-            <div className="mt-6 p-4 rounded-xl bg-white/[0.02] border border-white/10 font-mono text-xs text-slate-300">
-              <span className="text-cyan-400 font-bold block mb-1.5 uppercase tracking-wider text-[11px]">
-                OBJECTIVE &amp; VERIFICATION FOCUS:
-              </span>
-              <p className="leading-relaxed text-slate-300">
-                {currentLab.writeup.objective}
-              </p>
-            </div>
-
-            {/* Planned Milestones (First 3) */}
-            <div className="mt-4 space-y-1.5 font-mono text-xs text-slate-400">
-              {currentLab.writeup.plannedSteps.slice(0, 3).map((step, idx) => (
-                <div key={idx} className="flex items-start gap-2">
-                  <span className="text-cyan-400 font-bold shrink-0">{`[${idx + 1}]`}</span>
-                  <span className="text-slate-300">{step.replace(/^\d+\.\s*/, '')}</span>
-                </div>
-              ))}
-            </div>
+        <article className="glass p-6 sm:p-8 lg:col-span-7" aria-live="polite">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="chip">Lab 0{currentLab.id}</span>
+            <span className="chip">{currentLab.category}</span>
+            <span className="chip border-aqua/40 text-aqua">{STATUS_LABEL[currentLab.status] || currentLab.status}</span>
           </div>
 
-          {/* Action Footer Button */}
-          <div className="mt-8 pt-6 border-t border-white/10 flex flex-wrap items-center justify-between gap-4">
-            <div className="flex flex-wrap gap-1.5 font-mono text-[11px]">
-              {currentLab.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/10 text-slate-300"
-                >
-                  {tag}
-                </span>
+          <h3 className="mt-5 text-3xl text-white sm:text-4xl">{currentLab.title}</h3>
+          <p className="mt-3 text-[1.0625rem] leading-relaxed text-mist">{currentLab.description}</p>
+
+          <div className="mt-6">
+            <Diagram labId={currentLab.id} />
+          </div>
+
+          <div className="mt-6">
+            <h4 className="text-lg text-white">Tujuan</h4>
+            <p className="mt-1.5 leading-relaxed text-mist">{currentLab.writeup.objective}</p>
+          </div>
+
+          <div className="mt-6">
+            <h4 className="text-lg text-white">Langkah awal</h4>
+            <ol className="mt-3 space-y-2.5">
+              {currentLab.writeup.plannedSteps.slice(0, 3).map((step, idx) => (
+                <li key={step} className="flex items-start gap-3 text-mist">
+                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-aqua/50 text-xs font-semibold text-aqua">
+                    {idx + 1}
+                  </span>
+                  <span className="leading-relaxed">{step}</span>
+                </li>
               ))}
-            </div>
+            </ol>
+          </div>
+
+          <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-6">
+            <ul className="flex flex-wrap gap-2">
+              {currentLab.tags.map((tag) => (
+                <li key={tag} className="chip">
+                  {tag}
+                </li>
+              ))}
+            </ul>
 
             <button
+              type="button"
               onClick={() => {
                 playWaterBubble()
                 setModalLab(currentLab)
               }}
-              data-cursor="INSPECT"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold font-mono text-xs tracking-wider uppercase transition-all duration-200 cursor-pointer shadow-[0_0_20px_rgba(34,211,238,0.25)] active:scale-95"
+              className="btn btn-primary"
             >
-              <span>INSPECT FULL DOSSIER</span>
-              <ArrowUpRight size={14} />
+              <span>Lihat semua langkah</span>
+              <ArrowUpRight size={16} aria-hidden="true" />
             </button>
           </div>
-        </div>
+        </article>
 
-        {/* Right: Specimen Selector Deck (5 cols) */}
-        <div className="lg:col-span-5 flex flex-col gap-4">
-          <div className="flex items-center justify-between font-mono text-xs text-slate-400 px-2">
-            <span>INDEX OF SPECIMENS</span>
-            <span className="text-cyan-400 font-bold">{labsData.length} TOTAL DOSSIERS</span>
-          </div>
+        <div className="flex flex-col gap-3 lg:col-span-5">
+          <p className="px-1 text-sm text-mist">Pilih lab ({labsData.length})</p>
 
           {labsData.map((lab) => {
-            const isSelected = lab.id === activeLabId
-            const Icon = lab.id === 1 ? Network : lab.id === 2 ? ShieldCheck : Cpu
-
+            const selected = lab.id === activeLabId
+            const Icon = LAB_ICONS[lab.id] || Cpu
             return (
-              <div
+              <button
                 key={lab.id}
-                role="button"
-                tabIndex={0}
-                onClick={() => handleSelectLab(lab.id)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault()
-                    handleSelectLab(lab.id)
-                  }
+                type="button"
+                aria-pressed={selected}
+                onClick={() => {
+                  playWaterBubble()
+                  setActiveLabId(lab.id)
                 }}
-                data-cursor="SELECT"
-                className={`p-6 rounded-2xl border transition-all duration-300 text-left cursor-pointer group select-none ${
-                  isSelected
-                    ? 'border-cyan-400/60 bg-slate-900/90 shadow-[0_10px_30px_rgba(6,182,212,0.15)] ring-1 ring-cyan-400/30'
-                    : 'border-white/10 bg-slate-950/60 hover:bg-slate-900/50 hover:border-white/20'
+                className={`glass group w-full p-5 text-left transition-[border-color,background-color,transform] duration-200 active:scale-[0.99] ${
+                  selected ? 'border-aqua/70! bg-water/90!' : 'hover:border-white/30'
                 }`}
               >
-                <div className="flex items-center justify-between pb-3 border-b border-white/10 font-mono text-xs">
-                  <div className="flex items-center gap-2">
-                    <span className="text-cyan-400 font-bold text-sm">0{lab.id}</span>
-                    <span className="text-slate-500">//</span>
-                    <span className="text-slate-300 font-medium">{lab.category}</span>
-                  </div>
-
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400">
-                    {lab.status}
-                  </span>
-                </div>
-
-                <div className="mt-4 flex items-start gap-3.5">
-                  <div
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform ${
-                      isSelected
-                        ? 'bg-cyan-400 text-slate-950 scale-105'
-                        : 'bg-white/[0.04] border border-white/10 text-cyan-400 group-hover:scale-105'
-                    }`}
-                  >
-                    <Icon size={18} />
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <h4
-                      className={`text-base font-bold font-display transition-colors line-clamp-1 ${
-                        isSelected ? 'text-white' : 'text-slate-200 group-hover:text-cyan-300'
-                      }`}
-                    >
-                      {lab.title}
-                    </h4>
-
-                    <p className="mt-1 text-xs text-slate-400 line-clamp-2 leading-relaxed">
-                      {lab.description}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-4 flex items-center justify-between text-xs font-mono pt-3 border-t border-white/5">
-                  <span className="text-slate-500 text-[11px]">{lab.tags.slice(0, 3).join(' • ')}</span>
+                <div className="flex items-start gap-4">
                   <span
-                    className={`font-semibold transition-colors text-[11px] ${
-                      isSelected ? 'text-cyan-300' : 'text-slate-400 group-hover:text-cyan-400'
+                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${
+                      selected ? 'bg-aqua text-deep' : 'border border-white/20 text-aqua'
                     }`}
                   >
-                    {isSelected ? 'ACTIVE VIEWPORT' : 'CLICK TO VIEW'}
+                    <Icon size={19} aria-hidden="true" />
                   </span>
+
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm text-mist">
+                      Lab 0{lab.id} · {lab.category}
+                    </span>
+                    <span className="mt-0.5 block font-display text-xl leading-snug font-semibold text-white">
+                      {lab.title}
+                    </span>
+                    <span className="mt-1.5 line-clamp-2 block text-[0.9375rem] leading-relaxed text-mist">
+                      {lab.description}
+                    </span>
+                  </span>
+
+                  <ArrowRight
+                    size={18}
+                    aria-hidden="true"
+                    className={`mt-1 shrink-0 transition-transform ${selected ? 'text-aqua' : 'text-mist/60 group-hover:translate-x-0.5'}`}
+                  />
                 </div>
-              </div>
+              </button>
             )
           })}
         </div>
       </div>
 
-      {/* ── Modal Dialog for Deep Research Dossier Inspection ── */}
       {modalLab && (
         <Suspense fallback={null}>
           <LabModal lab={modalLab} onClose={() => setModalLab(null)} />

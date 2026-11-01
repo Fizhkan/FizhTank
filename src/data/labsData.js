@@ -1,84 +1,84 @@
-// ── Labs Data: Planned & In-Progress Learning Roadmap ──
-// Kejujuran konten: status diset 'planned' karena lab belum selesai dikerjakan secara nyata.
-// Placeholders [ISI DI SINI: ...] dipertahankan untuk diisi saat project telah selesai.
+// Rencana lab. Semua berstatus 'planned' karena belum dikerjakan; write-up lengkap
+// ditambahkan setelah lab selesai. Isi repoUrl / reportUrl / topologyImage jika sudah ada
+// (tombol dan gambar hanya tampil jika terisi).
+//
+// status: 'planned' | 'in-progress' | 'complete'
+// Untuk lab 'complete', tambahkan writeup.commands (string) dan writeup.verification (array string).
 
 export const labsData = [
   {
     id: 1,
-    title: 'Enterprise Multi-VLAN Segmentation',
-    category: 'Network Design',
-    status: 'planned', // 'planned' | 'in-progress' | 'complete'
+    title: 'Segmentasi Multi-VLAN untuk Jaringan Enterprise',
+    category: 'Desain jaringan',
+    status: 'planned',
     description:
-      'Merencanakan simulasi topologi enterprise dengan segmentasi VLAN multi-departemen — IT, HR, Finance, dan Management — menggunakan Inter-VLAN Routing via Layer 3 Switch dan pengujian ACL antar segmen.',
+      'Merancang topologi enterprise dengan beberapa VLAN departemen (IT, HR, Finance, Management), inter-VLAN routing lewat Layer 3 switch, dan ACL untuk membatasi akses antar segmen.',
     tags: ['Cisco Packet Tracer', 'Inter-VLAN', 'ACL', 'STP', 'OSPF'],
-    accentColor: 'blue',
-    repoUrl: '[ISI DI SINI: Link GitHub Repo / Packet Tracer PKT Lab 1]',
+    repoUrl: '',
     topologyImage: '',
     topologyAlt:
-      'Diagram rencana topologi enterprise memperlihatkan rencana Core Switch Layer 3 terhubung ke 3 Access Switch untuk segmen IT, HR, dan Finance.',
+      'Diagram rencana topologi: core switch Layer 3 terhubung ke tiga access switch untuk segmen IT, HR, dan Finance.',
     reportUrl: '',
     writeup: {
       objective:
-        'Mempelajari perancangan topologi jaringan enterprise dengan minimal 4 VLAN berbeda, merencanakan konfigurasi inter-VLAN routing via Layer 3 Switch (SVI), dan membatasi akses antar departemen menggunakan Extended ACL.',
+        'Belajar merancang jaringan enterprise dengan minimal 4 VLAN, mengatur inter-VLAN routing lewat SVI di Layer 3 switch, dan membatasi akses antar departemen dengan Extended ACL.',
       plannedSteps: [
-        '1. Perancangan skema pengalamatan IP VLSM untuk 4 segmen (IT, HR, Finance, Management).',
-        '2. Pembuatan topologi perangkat di Cisco Packet Tracer (Core L3 Switch & Access Switches).',
-        '3. Konfigurasi 802.1Q trunking dan penetapan port access per VLAN.',
-        '4. Konfigurasi SVI (Switch Virtual Interface) pada Core Switch untuk routing antar VLAN.',
-        '5. Penyusunan Extended ACL untuk memblokir akses HR ke Finance.',
-        '6. Pengujian konektivitas end-to-end dan validasi isolasi traffic.',
+        'Rancang skema alamat IP VLSM untuk 4 segmen (IT, HR, Finance, Management).',
+        'Bangun topologi di Cisco Packet Tracer: core L3 switch dan access switch.',
+        'Konfigurasi trunking 802.1Q dan tetapkan port access untuk tiap VLAN.',
+        'Buat SVI di core switch untuk routing antar VLAN.',
+        'Susun Extended ACL yang memblokir akses HR ke Finance.',
+        'Uji konektivitas end-to-end dan pastikan traffic antar segmen terisolasi sesuai aturan.',
       ],
     },
   },
   {
     id: 2,
-    title: 'Packet Stream & Credential Inspection',
-    category: 'Security Analysis',
+    title: 'Membaca Paket: Plaintext vs TLS',
+    category: 'Analisis keamanan',
     status: 'planned',
     description:
-      'Mempelajari analisis aliran paket jaringan menggunakan Wireshark. Membandingkan transmisi credential plaintext pada protokol HTTP/FTP vs enkripsi payload TLS pada HTTPS/SFTP.',
-    tags: ['Wireshark', 'TLS Analysis', 'HTTP/FTP', 'Display Filters', 'pcapng'],
-    accentColor: 'violet',
-    repoUrl: '[ISI DI SINI: Link GitHub Repo / Sample PCAP File Lab 2]',
+      'Menganalisis aliran paket dengan Wireshark untuk membandingkan credential yang terkirim dalam plaintext (HTTP/FTP) dengan payload yang terenkripsi TLS (HTTPS).',
+    tags: ['Wireshark', 'TLS', 'HTTP/FTP', 'Display filter', 'pcapng'],
+    repoUrl: '',
     topologyImage: '',
     topologyAlt:
-      'Diagram rencana tap Wireshark untuk observasi traffic dari client HTTP dan HTTPS ke gateway server.',
+      'Diagram rencana pengamatan: Wireshark menangkap traffic HTTP dan HTTPS dari client ke server.',
     reportUrl: '',
     writeup: {
       objective:
-        'Mempelajari risiko keamanan transmisi data tanpa enkripsi, memahami cara kerja TCP 3-way handshake, dan menganalisis proteksi payload pada sesi TLS 1.3 melalui packet capture.',
+        'Memahami risiko mengirim data tanpa enkripsi, cara kerja TCP 3-way handshake, dan bagaimana TLS 1.3 melindungi payload, lewat packet capture langsung.',
       plannedSteps: [
-        '1. Persiapan environment lab virtual dengan client HTTP dan HTTPS.',
-        '2. Pengambilan sampel traffic login cleartext HTTP POST dan FTP menggunakan Wireshark.',
-        '3. Analisis TCP stream reassembly untuk mengidentifikasi eksposur username dan password.',
-        '4. Pengambilan sampel traffic HTTPS pada port 443 dan observasi TLS handshake record.',
-        '5. Dokumentasi perbandingan keamanan payload antara HTTP vs HTTPS.',
+        'Siapkan lab virtual dengan client dan server yang melayani HTTP dan HTTPS.',
+        'Tangkap traffic login HTTP POST dan FTP dengan Wireshark.',
+        'Gunakan TCP stream reassembly untuk melihat username dan password yang terekspos.',
+        'Tangkap traffic HTTPS di port 443 dan amati TLS handshake.',
+        'Dokumentasikan perbedaan keamanan payload antara HTTP dan HTTPS.',
       ],
     },
   },
   {
     id: 3,
-    title: 'Linux Network Firewall & Homelab Service',
-    category: 'Linux & Homelab',
+    title: 'Firewall Linux dan Layanan Homelab',
+    category: 'Linux dan homelab',
     status: 'planned',
     description:
-      'Merencanakan setup homelab berbasis Arch Linux dengan konfigurasi firewall stateful UFW/iptables, local DNS sinkhole dengan Pi-hole, dan evaluasi port filtering.',
-    tags: ['Arch Linux', 'UFW', 'iptables', 'Pi-hole', 'Local DNS', 'Hardening'],
-    accentColor: 'green',
-    repoUrl: '[ISI DI SINI: Link GitHub Repo / Dotfiles Homelab Lab 3]',
+      'Menyiapkan homelab berbasis Arch Linux dengan firewall stateful UFW/iptables, DNS sinkhole Pi-hole, dan pengecekan port yang terbuka.',
+    tags: ['Arch Linux', 'UFW', 'iptables', 'Pi-hole', 'DNS lokal', 'Hardening'],
+    repoUrl: '',
     topologyImage: '',
     topologyAlt:
-      'Diagram rencana homelab dengan gateway Arch Linux yang menghubungkan WAN ke LAN client.',
+      'Diagram rencana homelab: gateway Arch Linux menghubungkan WAN ke LAN client.',
     reportUrl: '',
     writeup: {
       objective:
-        'Mempelajari dasar administrasi jaringan Linux dengan membangun gateway homelab mandiri, menerapkan aturan default-deny firewall, dan memblokir domain iklan via DNS resolver lokal.',
+        'Belajar dasar administrasi jaringan Linux: membangun gateway homelab, menerapkan firewall default deny, dan memblokir domain iklan lewat DNS resolver lokal.',
       plannedSteps: [
-        '1. Instalasi dan konfigurasi dasar Arch Linux pada perangkat homelab/VM.',
-        '2. Konfigurasi firewall UFW dengan kebijakan default deny incoming dan allow outgoing.',
-        '3. Setup Pi-hole FTL untuk local DNS filtering pada port 53.',
-        '4. Pengujian akses remote SSH menggunakan autentikasi key-pair.',
-        '5. Verifikasi port eksposur menggunakan Nmap dari mesin lain dalam jaringan lokal.',
+        'Pasang dan konfigurasi dasar Arch Linux di perangkat homelab atau VM.',
+        'Atur UFW dengan kebijakan deny incoming dan allow outgoing.',
+        'Pasang Pi-hole untuk filter DNS lokal di port 53.',
+        'Uji akses SSH dari jarak jauh memakai autentikasi key-pair.',
+        'Periksa port yang terbuka dengan Nmap dari mesin lain di jaringan lokal.',
       ],
     },
   },

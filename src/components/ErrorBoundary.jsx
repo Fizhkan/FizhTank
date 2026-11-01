@@ -4,15 +4,15 @@ import { AlertTriangle, RefreshCw } from 'lucide-react'
 export default class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props)
-    this.state = { hasError: false, error: null }
+    this.state = { hasError: false }
   }
 
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error }
+  static getDerivedStateFromError() {
+    return { hasError: true }
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error('ErrorBoundary captured error:', error, errorInfo)
+    console.error('ErrorBoundary menangkap error:', error, errorInfo)
   }
 
   handleReload = () => {
@@ -22,23 +22,18 @@ export default class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-[#010712] text-slate-100 flex items-center justify-center p-6">
-          <div className="max-w-md w-full p-8 rounded-3xl apple-glass text-center space-y-4 shadow-[0_20px_50px_rgba(0,0,0,0.85)]">
-            <div className="w-14 h-14 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center mx-auto text-rose-400">
-              <AlertTriangle size={28} />
+        <div className="flex min-h-screen items-center justify-center bg-deep p-6 text-foam">
+          <div className="glass w-full max-w-md space-y-4 p-8 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-coral/40 bg-coral/10 text-coral">
+              <AlertTriangle size={26} aria-hidden="true" />
             </div>
-            <h2 className="text-xl font-bold font-display text-white">
-              Telemetry Signal Interrupted
-            </h2>
-            <p className="text-sm text-slate-300 leading-relaxed font-sans">
-              Terjadi anomali pada antarmuka sistem akuarium. Silakan muat ulang halaman untuk membangun kembali koneksi stream.
+            <h2 className="text-2xl text-white">Tank-nya sedang bermasalah</h2>
+            <p className="text-[0.9375rem] leading-relaxed text-mist">
+              Ada error saat menampilkan halaman ini. Muat ulang untuk mengisi ulang airnya.
             </p>
-            <button
-              onClick={this.handleReload}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-cyan-400 hover:bg-cyan-300 text-slate-950 rounded-full text-sm font-bold transition-all cursor-pointer shadow-lg shadow-cyan-400/25 active:scale-95"
-            >
-              <RefreshCw size={15} />
-              <span>Muat Ulang Halaman</span>
+            <button type="button" onClick={this.handleReload} className="btn btn-primary">
+              <RefreshCw size={16} aria-hidden="true" />
+              <span>Muat ulang halaman</span>
             </button>
           </div>
         </div>

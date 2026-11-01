@@ -9,6 +9,8 @@ const templatePath = path.resolve(projectRoot, 'dist/index.html')
 const serverEntryPath = path.resolve(projectRoot, 'dist-ssr/entry-server.js')
 const distSsrDir = path.resolve(projectRoot, 'dist-ssr')
 
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')
+
 async function prerender() {
   try {
     if (!fs.existsSync(templatePath)) {
@@ -31,14 +33,14 @@ async function prerender() {
 
     // Synchronize <title> from site.js
     if (site.title) {
-      finalHtml = finalHtml.replace(/<title>[\s\S]*?<\/title>/, `<title>${site.title}</title>`)
+      finalHtml = finalHtml.replace(/<title>[\s\S]*?<\/title>/, `<title>${esc(site.title)}</title>`)
     }
 
     // Synchronize meta description from site.js
     if (site.description) {
       finalHtml = finalHtml.replace(
         /<meta\s+name="description"\s+content="[^"]*"/,
-        `<meta name="description" content="${site.description}"`
+        `<meta name="description" content="${esc(site.description)}"`
       )
     }
 
@@ -46,21 +48,21 @@ async function prerender() {
     if (site.title) {
       finalHtml = finalHtml.replace(
         /<meta\s+property="og:title"\s+content="[^"]*"/,
-        `<meta property="og:title" content="${site.title}"`
+        `<meta property="og:title" content="${esc(site.title)}"`
       )
       finalHtml = finalHtml.replace(
         /<meta\s+name="twitter:title"\s+content="[^"]*"/,
-        `<meta name="twitter:title" content="${site.title}"`
+        `<meta name="twitter:title" content="${esc(site.title)}"`
       )
     }
     if (site.description) {
       finalHtml = finalHtml.replace(
         /<meta\s+property="og:description"\s+content="[^"]*"/,
-        `<meta property="og:description" content="${site.description}"`
+        `<meta property="og:description" content="${esc(site.description)}"`
       )
       finalHtml = finalHtml.replace(
         /<meta\s+name="twitter:description"\s+content="[^"]*"/,
-        `<meta name="twitter:description" content="${site.description}"`
+        `<meta name="twitter:description" content="${esc(site.description)}"`
       )
     }
 

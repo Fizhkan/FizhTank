@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Screenshot hasil cdp-shots.mjs
+s-d-*.png
+s-m-*.png
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

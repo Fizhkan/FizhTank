@@ -1,122 +1,128 @@
-// ── Skills Data: Honest Learning & Exploration Status ──
-// Tidak menggunakan persentase semu atau klaim produksi.
-// Level: 'Belajar' | 'Dasar' | 'Rencana Lab'
+// Level skill ditulis apa adanya, tanpa persentase:
+//   'Dasar'       sudah cukup nyaman dipakai
+//   'Belajar'     masih berlatih
+//   'Rencana Lab' belum dipraktikkan, sudah masuk rencana
+
+export const levelNotes = {
+  Dasar: 'Sudah cukup nyaman dipakai',
+  Belajar: 'Masih berlatih',
+  'Rencana Lab': 'Belum dipraktikkan, sudah ada di rencana lab',
+}
 
 export const skillGroups = [
   {
     id: 'networking',
-    label: 'Networking Core & Protocols',
-    accent: { text: '#60a5fa', bg: 'rgba(37,99,235,0.08)', border: 'rgba(59,130,246,0.25)' },
-    description: 'Konsep dasar routing paket, segmentasi VLAN, dan switching Layer 2/3',
+    short: 'Jaringan',
+    label: 'Jaringan',
+    description: 'Dasar routing paket, segmentasi VLAN, dan switching Layer 2/3.',
     skills: [
       {
-        name: 'IPv4 Subnetting & CIDR',
+        name: 'IPv4 Subnetting dan CIDR',
         level: 'Dasar',
-        context: 'Perhitungan VLSM, pembagian blok subnet /24 hingga /30 untuk kebutuhan alokasi host.',
+        context: 'Menghitung VLSM dan membagi blok subnet dari /24 sampai /30 sesuai kebutuhan host.',
       },
       {
-        name: 'Routing Protocols (OSPF, Static)',
+        name: 'Routing (OSPF dan static)',
         level: 'Belajar',
-        context: 'Eksplorasi single-area OSPF dan penentuan rute statis pada simulasi Cisco IOS.',
+        context: 'Mencoba OSPF single-area dan rute statis di simulasi Cisco IOS.',
       },
       {
-        name: 'VLAN & Trunking (802.1Q)',
+        name: 'VLAN dan trunking 802.1Q',
         level: 'Belajar',
-        context: 'Pemisahan segmen jaringan, trunking 802.1Q, dan konfigurasi SVI inter-VLAN.',
+        context: 'Memisahkan segmen jaringan, mengatur trunk 802.1Q, dan konfigurasi SVI untuk inter-VLAN.',
       },
       {
-        name: 'DHCP & DNS Core Services',
+        name: 'DHCP dan DNS',
         level: 'Dasar',
-        context: 'Pengaturan relay DHCP serta pengujian local DNS server pada jaringan lab.',
+        context: 'Mengatur DHCP relay dan mencoba DNS server lokal di jaringan lab.',
       },
       {
-        name: 'Cisco IOS CLI & Packet Tracer',
+        name: 'Cisco IOS CLI dan Packet Tracer',
         level: 'Belajar',
-        context: 'Latihan perancangan topologi, eksekusi command dasar show/debug di simulator.',
+        context: 'Merancang topologi dan memakai perintah show/debug dasar di simulator.',
       },
     ],
     tags: ['IPv4', 'VLAN 802.1Q', 'OSPF', 'STP', 'Inter-VLAN', 'NAT/PAT'],
   },
   {
     id: 'linux',
-    label: 'Linux & Systems Engineering',
-    accent: { text: '#34d399', bg: 'rgba(5,150,105,0.08)', border: 'rgba(16,185,129,0.25)' },
-    description: 'Penggunaan harian sistem operasi Linux, eksplorasi shell script, dan manajemen servis',
+    short: 'Linux',
+    label: 'Linux dan sistem',
+    description: 'Pemakaian harian Linux, shell script, dan pengelolaan service.',
     skills: [
       {
-        name: 'Arch Linux & EndeavourOS',
+        name: 'Arch Linux dan EndeavourOS',
         level: 'Dasar',
-        context: 'Penggunaan sistem operasi berbasis Arch untuk workstation belajar dan eksplorasi terminal.',
+        context: 'Dipakai sebagai workstation belajar dan tempat berlatih terminal.',
       },
       {
-        name: 'Bash Scripting & Automation',
+        name: 'Bash scripting',
         level: 'Belajar',
-        context: 'Latihan pembuatan skrip automasi sederhana dan pemrosesan teks via bash.',
+        context: 'Membuat skrip otomasi sederhana dan mengolah teks lewat bash.',
       },
       {
-        name: 'Systemd & Service Management',
+        name: 'systemd dan service',
         level: 'Dasar',
-        context: 'Memahami pengelolaan daemon servis, status inspeksi journalctl, dan startup unit.',
+        context: 'Mengelola daemon, membaca log dengan journalctl, dan mengatur unit startup.',
       },
       {
-        name: 'Package Management (pacman)',
+        name: 'Package management (pacman)',
         level: 'Dasar',
-        context: 'Operasi instalasi paket, pemeliharaan dependensi, dan manajemen repositori sistem.',
+        context: 'Memasang paket, merawat dependensi, dan mengelola repositori.',
       },
       {
-        name: 'SSH & Remote Access',
+        name: 'SSH dan akses remote',
         level: 'Dasar',
-        context: 'Konfigurasi koneksi remote berbasis key-pair Ed25519 dan pengaturan port server.',
+        context: 'Koneksi remote dengan key-pair Ed25519 dan pengaturan port server.',
       },
     ],
     tags: ['Arch Linux', 'Bash', 'systemd', 'pacman', 'SSH', 'cron'],
   },
   {
     id: 'security',
-    label: 'Security & Traffic Analysis',
-    accent: { text: '#a78bfa', bg: 'rgba(109,40,217,0.1)', border: 'rgba(139,92,246,0.25)' },
-    description: 'Eksplorasi analisis aliran paket, inspeksi protokol, dan dasar filtering traffic',
+    short: 'Keamanan',
+    label: 'Keamanan dan analisis traffic',
+    description: 'Membaca aliran paket, memeriksa protokol, dan dasar penyaringan traffic.',
     skills: [
       {
-        name: 'Wireshark & Packet Inspection',
+        name: 'Wireshark dan inspeksi paket',
         level: 'Belajar',
-        context: 'Eksplorasi pembacaan capture paket, analisis TCP stream, dan pengenalan handshake protokol.',
+        context: 'Membaca capture paket, menelusuri TCP stream, dan mengenali handshake protokol.',
       },
       {
-        name: 'Nmap Network Scanning',
+        name: 'Pemindaian dengan Nmap',
         level: 'Belajar',
-        context: 'Latihan scanning port dasar (-sT, -sS) untuk identifikasi servis yang berjalan di lab.',
+        context: 'Latihan scan port dasar (-sT, -sS) untuk melihat service yang berjalan di lab.',
       },
       {
-        name: 'Firewall (UFW & iptables)',
+        name: 'Firewall (UFW dan iptables)',
         level: 'Belajar',
-        context: 'Pengaturan rule penyaringan paket dasar, penutupan port tidak terpakai, dan policy default.',
+        context: 'Menulis aturan filter dasar, menutup port yang tidak dipakai, dan mengatur policy default.',
       },
       {
-        name: 'Plaintext vs TLS Analysis',
+        name: 'Plaintext vs TLS',
         level: 'Belajar',
-        context: 'Mempelajari perbedaan visibilitas payload pada protokol HTTP/FTP vs enkripsi TLS.',
+        context: 'Membandingkan apa yang terlihat di payload HTTP/FTP dengan yang terenkripsi TLS.',
       },
       {
-        name: 'Network Access Control (ACL)',
+        name: 'Access Control List (ACL)',
         level: 'Rencana Lab',
-        context: 'Rencana implementasi Standard dan Extended ACL untuk memfilter traffic antar VLAN.',
+        context: 'Rencana memakai Standard dan Extended ACL untuk menyaring traffic antar VLAN.',
       },
     ],
     tags: ['Wireshark', 'Nmap', 'iptables', 'UFW', 'ACL', 'TLS'],
   },
 ]
 
-// ── Tools & Ecosystem: Tandai used: false untuk tool yang belum dipakai ──
-// Hanya Cisco Packet Tracer, Wireshark, Nmap, dan UFW / iptables yang diset used: true
+// Tool yang sudah dipakai (used: true) dan yang masih rencana (used: false)
 export const toolsData = [
-  { label: 'Cisco Packet Tracer', used: true, iconKey: 'Globe' },
-  { label: 'Wireshark', used: true, iconKey: 'Eye' },
-  { label: 'Nmap', used: true, iconKey: 'Wifi' },
-  { label: 'UFW / iptables', used: true, iconKey: 'Lock' },
-  { label: 'Pi-hole', used: false, iconKey: 'Database' },
-  { label: 'pfSense', used: false, iconKey: 'Database' },
-  { label: 'VirtualBox', used: false, iconKey: 'Layers' },
-  { label: 'Arch Linux', used: true, iconKey: 'Cpu' },
-  { label: 'Proxmox', used: false, iconKey: 'HardDrive' },
+  { label: 'Cisco Packet Tracer', used: true },
+  { label: 'Wireshark', used: true },
+  { label: 'Nmap', used: true },
+  { label: 'UFW / iptables', used: true },
+  { label: 'Arch Linux', used: true },
+  { label: 'Pi-hole', used: false },
+  { label: 'pfSense', used: false },
+  { label: 'VirtualBox', used: false },
+  { label: 'Proxmox', used: false },
 ]

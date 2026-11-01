@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import AquariumCanvas from './components/AquariumCanvas'
-import CustomCursor from './components/CustomCursor'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import Labs from './components/Labs'
@@ -9,7 +8,7 @@ import Certifications from './components/Certifications'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
 import ScrollToTop from './components/ScrollToTop'
-import DepthMeter from './components/DepthMeter'
+import TankInfo from './components/TankInfo'
 import ErrorBoundary from './components/ErrorBoundary'
 import { site } from './data/site'
 
@@ -22,59 +21,32 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <div className="relative min-h-screen bg-[#010712] text-slate-100 overflow-x-hidden selection:bg-cyan-400 selection:text-slate-950">
-        {/* ── Magnetic Awwwards Custom Cursor ── */}
-        <CustomCursor />
-
-        {/* ── 60/120 FPS Pristine Aquarium Tank Canvas (No Scroll Reset) ── */}
+      <div className="relative min-h-screen overflow-x-hidden bg-deep text-foam selection:bg-aqua/40 selection:text-white">
         <AquariumCanvas />
 
-        {/* ── Accessible Skip Link ── */}
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-cyan-400 focus:text-slate-950 focus:font-mono focus:font-bold focus:rounded-lg focus:shadow-xl focus:outline-none"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[60] focus:rounded-full focus:bg-coral focus:px-4 focus:py-2 focus:font-semibold focus:text-[#2a1204] focus:outline-none"
         >
           Lewati ke konten utama
         </a>
 
-        {/* ── Foreground Layout Layers ── */}
-        <div className="relative z-10 flex flex-col justify-between min-h-screen">
+        <div className="relative z-10 flex min-h-screen flex-col justify-between">
           <Navbar />
 
           <main id="main-content" tabIndex={-1} className="outline-none">
             <Hero />
-
-            {/* Architectural Section Divider */}
-            <div className="max-w-7xl mx-auto px-6" aria-hidden="true">
-              <div className="w-full h-px bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent" />
-            </div>
-
             <Labs />
-
-            <div className="max-w-7xl mx-auto px-6" aria-hidden="true">
-              <div className="w-full h-px bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent" />
-            </div>
-
             <Skills />
-
-            <div className="max-w-7xl mx-auto px-6" aria-hidden="true">
-              <div className="w-full h-px bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent" />
-            </div>
-
             <Certifications />
-
-            <div className="max-w-7xl mx-auto px-6" aria-hidden="true">
-              <div className="w-full h-px bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent" />
-            </div>
-
             <Contact />
           </main>
 
           <Footer />
         </div>
 
-        {/* ── Aquarium Tank Telemetry HUD ── */}
-        <DepthMeter />
+        <div className="tank-frame" aria-hidden="true" />
+        <TankInfo />
         <ScrollToTop />
       </div>
     </ErrorBoundary>

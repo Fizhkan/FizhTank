@@ -1,790 +1,1124 @@
 import { useEffect, useRef } from 'react'
-import { playWaterBubble } from '../utils/audio'
+import { playFeedSplash } from '../utils/audio'
 
 /**
- * ══════════════════════════════════════════════════════════════════════════════
- * FIZHTANK — PRISTINE AQUARIUM TANK CANVAS ENGINE (AWWWARDS & APPLE CALIBER)
- * ══════════════════════════════════════════════════════════════════════════════
- * Authentic Aquarium Ecosystem:
- *  1. Tropical Clownfish (Amphiprion ocellaris) with 3 iconic banded stripes & fin flutter
- *  2. Royal Blue Tang (Paracanthurus hepatus) with canary-yellow caudal fin
- *  3. School of Iridescent Neon Tetras with glowing lateral cyan & crimson bars
- *  4. Majestic Freshwater Angelfish (Pterophyllum scalare) with elongated trailing fins
- *  5. Continuous Aerator Bubble Streams rising from airstone with buoyant surface wobble
- *  6. Aquascape Aquatic Flora rooted at bottom corners gently swaying in water current
- *  7. Volumetric Caustic Sunbeams refracting through crystalline water
- *  8. STABILITY: 100% decoupled from scroll — animations NEVER reset when scrolling!
- * ══════════════════════════════════════════════════════════════════════════════
+ * Tank akuarium yang menjadi latar seluruh halaman.
+ *
+ * Isi tank:
+ *  - air dengan permukaan bergelombang dan berkas cahaya dari atas
+ *  - pasir, batu, tanaman, dan airstone yang mengeluarkan gelembung
+ *  - clownfish, blue tang, angelfish, sekawanan neon tetra, dan corydoras di dasar
+ *  - makanan ikan: klik area air kosong (atau tombol "Beri makan") dan ikan akan mengejarnya
+ *
+ * Animasi sepenuhnya terpisah dari scroll, jadi tidak ter-reset saat halaman digulir.
  */
 
+const rand = (a, b) => a + Math.random() * (b - a)
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v))
+
+function mulberry32(seed) {
+  let a = seed
+  return () => {
+    a |= 0
+    a = (a + 0x6d2b79f5) | 0
+    let t = Math.imul(a ^ (a >>> 15), 1 | a)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+const OUTLINE = 'rgba(3, 22, 30, 0.7)'
+
+// Ikan selalu digambar tegak (tidak pernah terbalik): arah kiri/kanan lewat cermin horizontal,
+// naik/turun lewat kemiringan hidung.
+const pitchOf = (angle) => clamp(Math.atan2(Math.sin(angle), Math.abs(Math.cos(angle))), -1, 1) * 0.85
+const SURFACE_Y = 15
+
+// Tinggi permukaan pasir di posisi x (dipakai bersama oleh pasir, batu, tanaman, dan ikan dasar)
+const sandSurface = (x, top) => top + Math.sin(x * 0.006 + 1) * 6 + Math.sin(x * 0.017) * 3
+
+// ── Gambar ikan (koordinat lokal, kepala menghadap +x) ─────────────────────
+
+function drawClownfish(ctx, L, wag, fin) {
+  const H = L * 0.52
+
+  ctx.beginPath()
+  ctx.moveTo(-L * 0.45, 0)
+  ctx.quadraticCurveTo(-L * 0.7, -H * 0.55 + wag, -L * 0.82, -H * 0.5 + wag)
+  ctx.quadraticCurveTo(-L * 0.72, wag, -L * 0.82, H * 0.5 + wag)
+  ctx.quadraticCurveTo(-L * 0.7, H * 0.55 + wag, -L * 0.45, 0)
+  ctx.closePath()
+  ctx.fillStyle = '#ea580c'
+  ctx.strokeStyle = OUTLINE
+  ctx.lineWidth = 1.2
+  ctx.fill()
+  ctx.stroke()
+
+  ctx.beginPath()
+  ctx.arc(-L * 0.78, wag, H * 0.35, -Math.PI * 0.5, Math.PI * 0.5)
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)'
+  ctx.lineWidth = 2
+  ctx.stroke()
+
+  ctx.beginPath()
+  ctx.moveTo(L * 0.5, 0)
+  ctx.bezierCurveTo(L * 0.35, -H * 0.65, -L * 0.2, -H * 0.65, -L * 0.45, 0)
+  ctx.bezierCurveTo(-L * 0.2, H * 0.65, L * 0.35, H * 0.65, L * 0.5, 0)
+  ctx.closePath()
+  const body = ctx.createLinearGradient(0, -H * 0.6, 0, H * 0.6)
+  body.addColorStop(0, '#fdba74')
+  body.addColorStop(0.4, '#f97316')
+  body.addColorStop(1, '#c2410c')
+  ctx.fillStyle = body
+  ctx.strokeStyle = OUTLINE
+  ctx.lineWidth = 1.2
+  ctx.fill()
+  ctx.stroke()
+
+  const stripe = (cx, topW, botW, curve) => {
+    ctx.beginPath()
+    ctx.moveTo(cx - topW * 0.5, -H * 0.55)
+    ctx.quadraticCurveTo(cx + curve, 0, cx - botW * 0.5, H * 0.55)
+    ctx.lineTo(cx + botW * 0.5, H * 0.55)
+    ctx.quadraticCurveTo(cx + curve + topW * 0.5, 0, cx + topW * 0.5, -H * 0.55)
+    ctx.closePath()
+    ctx.fillStyle = '#ffffff'
+    ctx.strokeStyle = OUTLINE
+    ctx.lineWidth = 1.4
+    ctx.fill()
+    ctx.stroke()
+  }
+  stripe(L * 0.22, L * 0.14, L * 0.12, L * 0.04)
+  stripe(-L * 0.05, L * 0.16, L * 0.14, L * 0.08)
+  stripe(-L * 0.35, L * 0.1, L * 0.08, 0)
+
+  ctx.beginPath()
+  ctx.moveTo(L * 0.15, -H * 0.5)
+  ctx.quadraticCurveTo(-L * 0.05, -H * 0.95, -L * 0.25, -H * 0.45)
+  ctx.fillStyle = '#f97316'
+  ctx.strokeStyle = OUTLINE
+  ctx.lineWidth = 1.2
+  ctx.fill()
+  ctx.stroke()
+
+  ctx.save()
+  ctx.translate(L * 0.08, H * 0.1)
+  ctx.rotate(Math.sin(fin * 1.5) * 0.3)
+  ctx.beginPath()
+  ctx.ellipse(0, 0, L * 0.16, H * 0.25, 0.4, 0, Math.PI * 2)
+  ctx.fillStyle = 'rgba(251, 146, 60, 0.85)'
+  ctx.lineWidth = 1
+  ctx.fill()
+  ctx.stroke()
+  ctx.restore()
+
+  ctx.beginPath()
+  ctx.arc(L * 0.36, -H * 0.12, L * 0.07, 0, Math.PI * 2)
+  ctx.fillStyle = '#0f172a'
+  ctx.fill()
+  ctx.beginPath()
+  ctx.arc(L * 0.38, -H * 0.14, L * 0.025, 0, Math.PI * 2)
+  ctx.fillStyle = '#ffffff'
+  ctx.fill()
+}
+
+function drawTang(ctx, L, wag) {
+  const H = L * 0.56
+
+  ctx.beginPath()
+  ctx.moveTo(-L * 0.42, 0)
+  ctx.lineTo(-L * 0.8, -H * 0.45 + wag)
+  ctx.lineTo(-L * 0.72, wag)
+  ctx.lineTo(-L * 0.8, H * 0.45 + wag)
+  ctx.closePath()
+  ctx.fillStyle = '#facc15'
+  ctx.strokeStyle = OUTLINE
+  ctx.lineWidth = 1.2
+  ctx.fill()
+  ctx.stroke()
+
+  ctx.beginPath()
+  ctx.moveTo(L * 0.48, 0)
+  ctx.bezierCurveTo(L * 0.3, -H * 0.65, -L * 0.25, -H * 0.65, -L * 0.45, 0)
+  ctx.bezierCurveTo(-L * 0.25, H * 0.65, L * 0.3, H * 0.65, L * 0.48, 0)
+  ctx.closePath()
+  const body = ctx.createLinearGradient(0, -H * 0.6, 0, H * 0.6)
+  body.addColorStop(0, '#60a5fa')
+  body.addColorStop(0.5, '#2563eb')
+  body.addColorStop(1, '#1e3a8a')
+  ctx.fillStyle = body
+  ctx.fill()
+  ctx.stroke()
+
+  ctx.beginPath()
+  ctx.moveTo(L * 0.1, -H * 0.4)
+  ctx.bezierCurveTo(-L * 0.25, -H * 0.5, -L * 0.4, -H * 0.2, -L * 0.42, 0)
+  ctx.bezierCurveTo(-L * 0.4, H * 0.2, -L * 0.25, H * 0.5, L * 0.1, H * 0.4)
+  ctx.bezierCurveTo(-L * 0.05, H * 0.2, -L * 0.15, 0, -L * 0.05, -H * 0.2)
+  ctx.closePath()
+  ctx.fillStyle = '#0a1220'
+  ctx.fill()
+
+  ctx.beginPath()
+  ctx.moveTo(-L * 0.12, 0)
+  ctx.lineTo(-L * 0.38, -H * 0.15)
+  ctx.lineTo(-L * 0.38, H * 0.15)
+  ctx.closePath()
+  ctx.fillStyle = '#facc15'
+  ctx.fill()
+
+  ctx.beginPath()
+  ctx.arc(L * 0.32, -H * 0.14, L * 0.065, 0, Math.PI * 2)
+  ctx.fillStyle = '#0f172a'
+  ctx.fill()
+  ctx.beginPath()
+  ctx.arc(L * 0.34, -H * 0.16, L * 0.025, 0, Math.PI * 2)
+  ctx.fillStyle = '#ffffff'
+  ctx.fill()
+}
+
+function drawAngel(ctx, S, sway) {
+  ctx.beginPath()
+  ctx.moveTo(S * 0.45, 0)
+  ctx.lineTo(-S * 0.3, -S * 0.4)
+  ctx.lineTo(-S * 0.45, 0)
+  ctx.lineTo(-S * 0.3, S * 0.4)
+  ctx.closePath()
+  const body = ctx.createLinearGradient(0, -S * 0.4, 0, S * 0.4)
+  body.addColorStop(0, '#f1f5f9')
+  body.addColorStop(0.5, '#a5b4c3')
+  body.addColorStop(1, '#dbe4ec')
+  ctx.fillStyle = body
+  ctx.strokeStyle = OUTLINE
+  ctx.lineWidth = 1
+  ctx.fill()
+  ctx.stroke()
+
+  ctx.beginPath()
+  ctx.moveTo(S * 0.15, -S * 0.32)
+  ctx.lineTo(S * 0.15, S * 0.32)
+  ctx.moveTo(-S * 0.1, -S * 0.38)
+  ctx.lineTo(-S * 0.1, S * 0.38)
+  ctx.strokeStyle = 'rgba(15, 23, 42, 0.7)'
+  ctx.lineWidth = 2.5
+  ctx.stroke()
+
+  ctx.fillStyle = 'rgba(226, 232, 240, 0.7)'
+  ctx.strokeStyle = OUTLINE
+  ctx.lineWidth = 1
+
+  ctx.beginPath()
+  ctx.moveTo(S * 0.05, -S * 0.35)
+  ctx.quadraticCurveTo(-S * 0.1, -S * 1.3 + sway, -S * 0.4, -S * 0.8)
+  ctx.lineTo(-S * 0.25, -S * 0.38)
+  ctx.closePath()
+  ctx.fill()
+  ctx.stroke()
+
+  ctx.beginPath()
+  ctx.moveTo(S * 0.05, S * 0.35)
+  ctx.quadraticCurveTo(-S * 0.1, S * 1.3 - sway, -S * 0.4, S * 0.8)
+  ctx.lineTo(-S * 0.25, S * 0.38)
+  ctx.closePath()
+  ctx.fill()
+  ctx.stroke()
+
+  ctx.beginPath()
+  ctx.moveTo(S * 0.15, S * 0.25)
+  ctx.quadraticCurveTo(0, S * 0.9, -S * 0.2, S * 1.2 + sway)
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)'
+  ctx.stroke()
+
+  ctx.beginPath()
+  ctx.arc(S * 0.3, -S * 0.08, S * 0.055, 0, Math.PI * 2)
+  ctx.fillStyle = '#dc2626'
+  ctx.fill()
+  ctx.beginPath()
+  ctx.arc(S * 0.31, -S * 0.08, S * 0.025, 0, Math.PI * 2)
+  ctx.fillStyle = '#0f172a'
+  ctx.fill()
+}
+
+function drawTetra(ctx, S, wag) {
+  ctx.beginPath()
+  ctx.moveTo(-S * 0.38, 0)
+  ctx.lineTo(-S * 0.64, -S * 0.17 + wag * 0.6)
+  ctx.lineTo(-S * 0.64, S * 0.17 + wag * 0.6)
+  ctx.closePath()
+  ctx.fillStyle = 'rgba(210, 235, 240, 0.45)'
+  ctx.fill()
+
+  ctx.beginPath()
+  ctx.moveTo(S * 0.5, 0)
+  ctx.quadraticCurveTo(S * 0.1, -S * 0.25, -S * 0.4, wag * 0.3)
+  ctx.quadraticCurveTo(S * 0.1, S * 0.25, S * 0.5, 0)
+  ctx.closePath()
+  const body = ctx.createLinearGradient(0, -S * 0.25, 0, S * 0.25)
+  body.addColorStop(0, '#49708a')
+  body.addColorStop(0.5, '#a3c6d6')
+  body.addColorStop(1, '#eaf5f7')
+  ctx.fillStyle = body
+  ctx.fill()
+
+  ctx.beginPath()
+  ctx.moveTo(S * 0.15, S * 0.03)
+  ctx.quadraticCurveTo(-S * 0.1, S * 0.23, -S * 0.38, wag * 0.3)
+  ctx.lineTo(-S * 0.38, wag * 0.3 - S * 0.02)
+  ctx.lineTo(S * 0.15, S * 0.03)
+  ctx.closePath()
+  ctx.fillStyle = '#ff5252'
+  ctx.fill()
+
+  ctx.beginPath()
+  ctx.moveTo(S * 0.42, -S * 0.03)
+  ctx.lineTo(-S * 0.34, wag * 0.25 - S * 0.01)
+  ctx.strokeStyle = 'rgba(56, 232, 255, 0.35)'
+  ctx.lineWidth = 3.4
+  ctx.stroke()
+  ctx.strokeStyle = '#3de8ff'
+  ctx.lineWidth = 1.4
+  ctx.stroke()
+
+  ctx.beginPath()
+  ctx.arc(S * 0.37, -S * 0.04, S * 0.055, 0, Math.PI * 2)
+  ctx.fillStyle = '#ffffff'
+  ctx.fill()
+  ctx.beginPath()
+  ctx.arc(S * 0.385, -S * 0.04, S * 0.028, 0, Math.PI * 2)
+  ctx.fillStyle = '#0f172a'
+  ctx.fill()
+}
+
+function drawCory(ctx, L, step) {
+  const H = L * 0.42
+  ctx.beginPath()
+  ctx.ellipse(0, H * 0.7, L * 0.5, H * 0.18, 0, 0, Math.PI * 2)
+  ctx.fillStyle = 'rgba(40, 30, 15, 0.28)'
+  ctx.fill()
+
+  ctx.beginPath()
+  ctx.moveTo(-L * 0.42, 0)
+  ctx.lineTo(-L * 0.68, -H * 0.4 + step)
+  ctx.lineTo(-L * 0.68, H * 0.4 - step)
+  ctx.closePath()
+  ctx.fillStyle = '#b08a52'
+  ctx.fill()
+
+  ctx.beginPath()
+  ctx.moveTo(L * 0.2, -H * 0.4)
+  ctx.quadraticCurveTo(-L * 0.02, -H * 1.05, -L * 0.2, -H * 0.4)
+  ctx.fillStyle = '#9c7a46'
+  ctx.fill()
+
+  ctx.beginPath()
+  ctx.moveTo(L * 0.5, H * 0.1)
+  ctx.bezierCurveTo(L * 0.4, -H * 0.62, -L * 0.2, -H * 0.62, -L * 0.45, 0)
+  ctx.bezierCurveTo(-L * 0.2, H * 0.5, L * 0.35, H * 0.5, L * 0.5, H * 0.1)
+  ctx.closePath()
+  const body = ctx.createLinearGradient(0, -H * 0.6, 0, H * 0.5)
+  body.addColorStop(0, '#9b7a47')
+  body.addColorStop(0.5, '#d9bb83')
+  body.addColorStop(1, '#efe0b8')
+  ctx.fillStyle = body
+  ctx.strokeStyle = 'rgba(60, 40, 15, 0.55)'
+  ctx.lineWidth = 1
+  ctx.fill()
+  ctx.stroke()
+
+  ctx.fillStyle = 'rgba(70, 48, 22, 0.5)'
+  ;[
+    [0.05, -0.2, 0.14, 0.1],
+    [-0.18, -0.12, 0.1, 0.08],
+    [0.25, -0.05, 0.07, 0.06],
+  ].forEach(([x, y, rx, ry]) => {
+    ctx.beginPath()
+    ctx.ellipse(L * x, H * y, L * rx, H * ry * 2, 0, 0, Math.PI * 2)
+    ctx.fill()
+  })
+
+  ctx.beginPath()
+  ctx.moveTo(L * 0.48, H * 0.12)
+  ctx.lineTo(L * 0.62, H * 0.3)
+  ctx.moveTo(L * 0.46, H * 0.16)
+  ctx.lineTo(L * 0.56, H * 0.4)
+  ctx.strokeStyle = 'rgba(240, 225, 190, 0.85)'
+  ctx.lineWidth = 0.9
+  ctx.stroke()
+
+  ctx.beginPath()
+  ctx.arc(L * 0.36, -H * 0.12, L * 0.045, 0, Math.PI * 2)
+  ctx.fillStyle = '#1b1208'
+  ctx.fill()
+}
+
+// ── Lapisan statis: pasir, batu, dan airstone digambar sekali per resize ──
+
+function drawRock(c, x, baseY, w, h, rng) {
+  const pts = 9
+  const poly = []
+  for (let i = 0; i < pts; i++) {
+    const a = (i / pts) * Math.PI * 2
+    const jitter = 0.82 + rng() * 0.3
+    poly.push([x + Math.cos(a) * w * 0.5 * jitter, baseY - h * 0.5 + Math.sin(a) * h * 0.5 * jitter])
+  }
+  c.beginPath()
+  for (let i = 0; i < pts; i++) {
+    const p = poly[i]
+    const n = poly[(i + 1) % pts]
+    const mx = (p[0] + n[0]) / 2
+    const my = (p[1] + n[1]) / 2
+    if (i === 0) c.moveTo(mx, my)
+    else c.quadraticCurveTo(p[0], p[1], mx, my)
+  }
+  c.closePath()
+  const g = c.createLinearGradient(x - w * 0.3, baseY - h, x + w * 0.4, baseY)
+  g.addColorStop(0, '#8aa4a8')
+  g.addColorStop(0.55, '#4b6268')
+  g.addColorStop(1, '#27393f')
+  c.fillStyle = g
+  c.fill()
+  c.strokeStyle = 'rgba(2, 16, 22, 0.5)'
+  c.lineWidth = 1.2
+  c.stroke()
+
+  // Lumut tipis di bagian atas
+  c.beginPath()
+  c.ellipse(x - w * 0.08, baseY - h * 0.82, w * 0.22, h * 0.1, -0.2, 0, Math.PI * 2)
+  c.fillStyle = 'rgba(96, 160, 110, 0.45)'
+  c.fill()
+
+  // Kilau
+  c.beginPath()
+  c.ellipse(x - w * 0.18, baseY - h * 0.7, w * 0.12, h * 0.07, -0.5, 0, Math.PI * 2)
+  c.fillStyle = 'rgba(255, 255, 255, 0.16)'
+  c.fill()
+}
+
+function buildSubstrate(w, h, dpr) {
+  const off = document.createElement('canvas')
+  off.width = Math.floor(w * dpr)
+  off.height = Math.floor(h * dpr)
+  const c = off.getContext('2d')
+  c.scale(dpr, dpr)
+
+  const rng = mulberry32(11)
+  const sandH = clamp(h * 0.1, 60, 100)
+  const top = h - sandH
+
+  c.beginPath()
+  c.moveTo(0, h)
+  for (let x = 0; x <= w + 12; x += 12) c.lineTo(x, sandSurface(x, top))
+  c.lineTo(w, h)
+  c.closePath()
+  const sand = c.createLinearGradient(0, top - 8, 0, h)
+  sand.addColorStop(0, '#c4b182')
+  sand.addColorStop(0.2, '#8f7e57')
+  sand.addColorStop(0.65, '#54462e')
+  sand.addColorStop(1, '#2f2618')
+  c.fillStyle = sand
+  c.fill()
+
+  const grains = Math.floor((w * sandH) / 70)
+  for (let i = 0; i < grains; i++) {
+    const x = rng() * w
+    const y = sandSurface(x, top) + rng() * (h - sandSurface(x, top))
+    c.beginPath()
+    c.arc(x, y, 0.5 + rng() * 1.2, 0, Math.PI * 2)
+    c.fillStyle = rng() > 0.5 ? 'rgba(255, 240, 205, 0.22)' : 'rgba(20, 14, 6, 0.3)'
+    c.fill()
+  }
+
+  const mobile = w < 768
+  const rocks = mobile
+    ? [{ x: 0.1, w: 74, h: 46 }, { x: 0.86, w: 58, h: 36 }]
+    : [
+        { x: 0.12, w: 130, h: 82 },
+        { x: 0.19, w: 74, h: 48 },
+        { x: 0.77, w: 108, h: 70 },
+      ]
+  rocks.forEach((r) => {
+    const x = r.x * w
+    const base = sandSurface(x, top) + r.h * 0.22
+    drawRock(c, x, base, r.w, r.h, rng)
+    c.beginPath()
+    c.ellipse(x, base - 1, r.w * 0.48, 6, 0, 0, Math.PI)
+    c.fillStyle = 'rgba(170, 150, 108, 0.9)'
+    c.fill()
+  })
+
+  // Airstone
+  const ax = mobile ? w * 0.9 : w * 0.88
+  const ay = sandSurface(ax, top) + 5
+  const stone = c.createLinearGradient(ax, ay - 8, ax, ay + 6)
+  stone.addColorStop(0, '#9aa7ab')
+  stone.addColorStop(1, '#4d5a5e')
+  c.beginPath()
+  c.ellipse(ax, ay, 14, 6, 0, 0, Math.PI * 2)
+  c.fillStyle = stone
+  c.fill()
+
+  return { canvas: off, sandTop: top, sandH, airX: ax, airY: ay - 4 }
+}
+
 export default function AquariumCanvas() {
+  const wrapRef = useRef(null)
   const canvasRef = useRef(null)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
+    const wrap = wrapRef.current
     const canvas = canvasRef.current
-    if (!canvas) return
-
+    if (!wrap || !canvas) return
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    let animationFrameId
-    let isRunning = true
-    let width = (canvas.width = window.innerWidth)
-    let height = (canvas.height = window.innerHeight)
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const timeScale = reduceMotion ? 0.35 : 1
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 2)
-    const resize = () => {
-      width = window.innerWidth
-      height = window.innerHeight
-      canvas.width = width * dpr
-      canvas.height = height * dpr
-      ctx.scale(dpr, dpr)
+    const env = { w: 0, h: 0, dpr: 1, mobile: false, sandTop: 0, sandH: 0, airX: 0, airY: 0 }
+    let substrate = null
+    let backPlants = []
+    let frontPlants = []
+    let motes = []
+    const bubbles = []
+    const ripples = []
+    const food = []
+    let fedCount = 0
+    let airTimer = 0
+    let running = true
+    let rafId = 0
+    let lastT = performance.now()
+
+    // ── Ikan ────────────────────────────────────────────────────────────
+    const swimTop = () => 90
+    const swimBottom = () => env.sandTop - 50
+
+    const nearestFood = (x, y, range, landedOnly = false) => {
+      let best = null
+      let bestD = range
+      for (const f of food) {
+        if (f.eaten) continue
+        if (landedOnly ? !f.landed : f.landed) continue
+        const d = Math.hypot(f.x - x, f.y - y)
+        if (d < bestD) {
+          bestD = d
+          best = f
+        }
+      }
+      return best
     }
-    resize()
-    window.addEventListener('resize', resize)
 
-    // Interactive pointer state (Only active on deliberate mouse moves, NOT touch scroll swipes)
-    const pointer = {
-      x: width * 0.5,
-      y: height * 0.4,
-      targetX: width * 0.5,
-      targetY: height * 0.4,
-      active: false,
+    const eat = (f, x, y) => {
+      f.eaten = true
+      bubbles.push({ x, y, r: rand(1.2, 2.2), vy: rand(0.6, 1), wob: rand(0, 6), amp: 0.3, air: false })
     }
 
-    const onMouseMove = (e) => {
-      pointer.targetX = e.clientX
-      pointer.targetY = e.clientY
-      pointer.active = true
-    }
-    window.addEventListener('mousemove', onMouseMove, { passive: true })
+    class Swimmer {
+      constructor(kind, x, y, speed, size, turn) {
+        this.kind = kind
+        this.x = x
+        this.y = y
+        this.speed = speed
+        this.size = size
+        this.turn = turn
+        this.angle = rand(-0.4, 0.4)
+        this.dir = 1
+        this.sx = 1
+        this.phase = rand(0, 100)
+        this.gulp = 0
+        this.pickTarget()
+      }
 
-    // Water Surface Ripple Rings (Spawned on intentional click)
-    const waterRipples = []
-    const triggerRipple = (x, y) => {
-      playWaterBubble()
-      waterRipples.push({
-        x: x ?? pointer.targetX,
-        y: y ?? pointer.targetY,
-        radius: 8,
-        maxRadius: Math.min(width, height) * 0.45,
-        alpha: 0.75,
-        speed: 2.8,
+      pickTarget() {
+        this.tx = rand(90, Math.max(160, env.w - 90))
+        this.ty = rand(swimTop(), Math.max(swimTop() + 40, swimBottom()))
+      }
+
+      update(dt) {
+        this.phase += 0.18 * dt
+        let tx = this.tx
+        let ty = this.ty
+        let boost = 1
+
+        const f = nearestFood(this.x, this.y, 560)
+        if (f) {
+          tx = f.x
+          ty = f.y
+          boost = 1.75
+          if (this.kind !== 'leader' && Math.hypot(f.x - this.x, f.y - this.y) < this.size * 0.5 + 6) {
+            eat(f, this.x + Math.cos(this.angle) * this.size * 0.5, this.y)
+            this.gulp = 1
+          }
+        } else if (Math.hypot(this.tx - this.x, this.ty - this.y) < 70) {
+          this.pickTarget()
+        }
+
+        let diff = Math.atan2(ty - this.y, tx - this.x) - this.angle
+        while (diff < -Math.PI) diff += Math.PI * 2
+        while (diff > Math.PI) diff -= Math.PI * 2
+        this.angle += diff * this.turn * dt
+
+        const burst = this.kind === 'clown' ? 0.85 + Math.sin(this.phase * 0.7) * 0.3 : 1
+        const v = this.speed * boost * burst * dt
+        this.x += Math.cos(this.angle) * v
+        this.y += Math.sin(this.angle) * v
+
+        if (this.y < swimTop() - 30) this.y = swimTop() - 30
+        if (this.y > swimBottom() + 30) this.y = swimBottom() + 30
+        this.x = clamp(this.x, -30, env.w + 30)
+
+        const c = Math.cos(this.angle)
+        if (c > 0.15) this.dir = 1
+        else if (c < -0.15) this.dir = -1
+        this.sx += (this.dir - this.sx) * Math.min(1, 0.12 * dt)
+        this.gulp = Math.max(0, this.gulp - 0.06 * dt)
+      }
+
+      draw() {
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        const g = 1 + this.gulp * 0.1
+        ctx.scale(this.sx * g, g)
+        ctx.rotate(pitchOf(this.angle))
+        const wag = Math.sin(this.phase) * 4
+        if (this.kind === 'clown') drawClownfish(ctx, this.size, wag, this.phase)
+        else if (this.kind === 'tang') drawTang(ctx, this.size, wag * 0.9)
+        else drawAngel(ctx, this.size, Math.sin(this.phase * 0.12) * 2)
+        ctx.restore()
+      }
+    }
+
+    let clown
+    let tang
+    let angel
+    let leader
+    let tetras = []
+    let cory
+
+    const buildFish = () => {
+      const m = env.mobile
+      clown = new Swimmer('clown', env.w * 0.22, env.h * 0.5, m ? 0.95 : 1.2, m ? 38 : 50, 0.035)
+      tang = new Swimmer('tang', env.w * 0.75, env.h * 0.4, m ? 1.05 : 1.3, m ? 42 : 56, 0.032)
+      angel = new Swimmer('angel', env.w * 0.5, env.h * 0.6, 0.65, m ? 44 : 62, 0.02)
+      leader = new Swimmer('leader', env.w * 0.4, env.h * 0.3, 1.45, 10, 0.03)
+      leader.vx = 0
+      leader.vy = 0
+      const count = m ? 8 : 15
+      tetras = Array.from({ length: count }, (_, i) => ({
+        x: leader.x + rand(-80, 40),
+        y: leader.y + rand(-40, 40),
+        vx: 1,
+        vy: 0,
+        angle: 0,
+        dir: 1,
+        sx: 1,
+        ox: rand(-130, 10),
+        oy: rand(-52, 52),
+        phase: (i / count) * Math.PI * 2,
+        size: m ? 15 : 20,
+      }))
+      cory = {
+        x: env.w * 0.45,
+        dir: 1,
+        tx: env.w * 0.6,
+        pause: 0,
+        step: 0,
+        size: m ? 24 : 30,
+      }
+    }
+
+    const updateTetras = (dt, t) => {
+      // Pemimpin kawanan: berenang seperti ikan lain, ikut mengejar makanan
+      leader.update(dt)
+      const lvx = Math.cos(leader.angle) * leader.speed
+      const lvy = Math.sin(leader.angle) * leader.speed
+      const cosA = Math.cos(leader.angle)
+      const sinA = Math.sin(leader.angle)
+
+      tetras.forEach((s, i) => {
+        s.phase += 0.3 * dt
+        const ox = s.ox + Math.sin(t * 0.0008 + i) * 8
+        const oy = s.oy + Math.cos(t * 0.0011 + i * 1.7) * 6
+        let dx = leader.x + cosA * ox - sinA * oy
+        let dy = leader.y + sinA * ox + cosA * oy
+
+        const f = nearestFood(s.x, s.y, 240)
+        if (f) {
+          dx = f.x
+          dy = f.y
+          if (Math.hypot(f.x - s.x, f.y - s.y) < 12) eat(f, s.x, s.y)
+        }
+
+        s.vx += ((dx - s.x) * 0.012 + (lvx - s.vx) * 0.03) * dt
+        s.vy += ((dy - s.y) * 0.012 + (lvy - s.vy) * 0.03) * dt
+
+        for (let j = 0; j < tetras.length; j++) {
+          if (j === i) continue
+          const o = tetras[j]
+          const ddx = s.x - o.x
+          const ddy = s.y - o.y
+          const d2 = ddx * ddx + ddy * ddy
+          if (d2 > 0 && d2 < 361) {
+            const d = Math.sqrt(d2)
+            s.vx += (ddx / d) * 0.05 * dt
+            s.vy += (ddy / d) * 0.05 * dt
+          }
+        }
+
+        const sp = Math.hypot(s.vx, s.vy)
+        const max = f ? 3.4 : leader.speed * 1.6
+        if (sp > max) {
+          s.vx = (s.vx / sp) * max
+          s.vy = (s.vy / sp) * max
+        }
+
+        s.x += s.vx * dt
+        s.y += s.vy * dt
+        s.y = clamp(s.y, swimTop() - 30, swimBottom() + 20)
+
+        let diff = Math.atan2(s.vy, s.vx) - s.angle
+        while (diff < -Math.PI) diff += Math.PI * 2
+        while (diff > Math.PI) diff -= Math.PI * 2
+        s.angle += diff * Math.min(1, 0.18 * dt)
+        const c = Math.cos(s.angle)
+        if (c > 0.15) s.dir = 1
+        else if (c < -0.15) s.dir = -1
+        s.sx += (s.dir - s.sx) * Math.min(1, 0.14 * dt)
       })
     }
 
-    const onPointerDown = (e) => {
-      // Avoid triggering on buttons, links, or form inputs
-      const target = e.target
-      if (target && target.closest && target.closest('button, a, input, textarea, [role="button"]')) {
-        return
-      }
-      triggerRipple(e.clientX, e.clientY)
+    const drawTetras = () => {
+      tetras.forEach((s) => {
+        ctx.save()
+        ctx.translate(s.x, s.y)
+        ctx.scale(s.sx, 1)
+        ctx.rotate(pitchOf(s.angle))
+        drawTetra(ctx, s.size, Math.sin(s.phase) * 2.4)
+        ctx.restore()
+      })
     }
-    window.addEventListener('pointerdown', onPointerDown)
 
-    const onCustomFeed = () => triggerRipple(width * 0.5, height * 0.3)
-    window.addEventListener('fizhtank-feed', onCustomFeed)
-
-    // ── 1. Aerator Bubble Column ────────────────────────────────────
-    const isMobile = width < 768
-    const BUBBLE_COUNT = isMobile ? 22 : 45
-    const bubbles = Array.from({ length: BUBBLE_COUNT }, () => ({
-      x: width * 0.08 + Math.random() * (width * 0.84),
-      y: height + Math.random() * height,
-      size: 1.8 + Math.random() * 4.5,
-      speed: 0.7 + Math.random() * 1.4,
-      wobbleSpeed: 0.02 + Math.random() * 0.04,
-      wobbleOffset: Math.random() * Math.PI * 2,
-      wobbleAmp: 0.4 + Math.random() * 0.9,
-      alpha: 0.25 + Math.random() * 0.4,
-    }))
-
-    // ── 2. Aquascape Grass Flora (Rooted at bottom) ─────────────────
-    const BLADE_COUNT = isMobile ? 14 : 26
-    const plantBlades = Array.from({ length: BLADE_COUNT }, (_, i) => {
-      const isLeft = i < BLADE_COUNT / 2
-      const baseX = isLeft
-        ? (i / (BLADE_COUNT / 2)) * (width * 0.16)
-        : width - ((i - BLADE_COUNT / 2) / (BLADE_COUNT / 2)) * (width * 0.16)
-      return {
-        baseX,
-        baseY: height + 10,
-        height: 120 + Math.random() * 140,
-        width: 6 + Math.random() * 8,
-        swaySpeed: 0.0012 + Math.random() * 0.001,
-        swayPhase: Math.random() * Math.PI * 2,
-        swayAmp: 18 + Math.random() * 22,
-        hue: 152 + Math.random() * 18, // Emerald to sea-green
+    const updateCory = (dt) => {
+      const c = cory
+      const f = nearestFood(c.x, env.sandTop + 20, 380, true)
+      if (f) {
+        c.pause = 0
+        c.tx = f.x
+        if (Math.abs(f.x - c.x) < 14) eat(f, c.x, sandSurface(c.x, env.sandTop) + 14)
+      } else if (c.pause > 0) {
+        c.pause -= dt
+      } else if (Math.abs(c.tx - c.x) < 8) {
+        c.pause = rand(40, 150)
+        c.tx = rand(60, Math.max(120, env.w - 60))
       }
-    })
-
-    // ── 3. Tropical Clownfish (Amphiprion ocellaris) ────────────────
-    class Clownfish {
-      constructor(startX, startY, speed = 1.1) {
-        this.x = startX
-        this.y = startY
-        this.speed = speed
-        this.angle = 0
-        this.targetAngle = 0
-        this.targetX = width * 0.6
-        this.targetY = height * 0.45
-        this.swimTimer = Math.random() * 10
-        this.finCycle = 0
-        this.bodyLength = isMobile ? 38 : 50
-        this.bodyHeight = this.bodyLength * 0.52
-      }
-
-      update() {
-        this.swimTimer += 0.025
-        this.finCycle += 0.18
-
-        const dist = Math.hypot(this.targetX - this.x, this.targetY - this.y)
-        if (dist < 80) {
-          this.targetX = Math.random() * (width - 160) + 80
-          this.targetY = Math.random() * (height - 200) + 100
+      if (c.pause <= 0 || f) {
+        const dir = Math.sign(c.tx - c.x)
+        if (dir !== 0 && Math.abs(c.tx - c.x) > 4) {
+          c.dir = dir
+          c.x += dir * (f ? 1.1 : 0.55) * dt
+          c.step += 0.25 * dt
         }
-
-        const dx = this.targetX - this.x
-        const dy = this.targetY - this.y
-        this.targetAngle = Math.atan2(dy, dx)
-
-        let diff = this.targetAngle - this.angle
-        while (diff < -Math.PI) diff += Math.PI * 2
-        while (diff > Math.PI) diff -= Math.PI * 2
-        this.angle += diff * 0.035
-
-        // Lifelike fish burst-and-glide propulsion
-        const burst = 0.8 + Math.sin(this.swimTimer * 2) * 0.35
-        this.x += Math.cos(this.angle) * this.speed * burst
-        this.y += Math.sin(this.angle) * this.speed * burst
-
-        // Boundary wrap
-        if (this.x < -100) this.x = width + 100
-        if (this.x > width + 100) this.x = -100
-        if (this.y < -60) this.y = height + 60
-        if (this.y > height + 60) this.y = -60
-      }
-
-      draw(ctx) {
-        ctx.save()
-        ctx.translate(this.x, this.y)
-        ctx.rotate(this.angle)
-
-        // If swimming to the left, flip vertically for upright posture
-        if (Math.cos(this.angle) < 0) {
-          ctx.scale(1, -1)
-        }
-
-        const wag = Math.sin(this.finCycle) * 4
-        const L = this.bodyLength
-        const H = this.bodyHeight
-
-        // Subtle ambient bioluminescent halo around clownfish
-        const halo = ctx.createRadialGradient(0, 0, 5, 0, 0, L * 0.9)
-        halo.addColorStop(0, 'rgba(249, 115, 22, 0.2)')
-        halo.addColorStop(0.7, 'rgba(234, 88, 12, 0.05)')
-        halo.addColorStop(1, 'rgba(0, 0, 0, 0)')
-        ctx.fillStyle = halo
-        ctx.beginPath()
-        ctx.arc(0, 0, L * 0.9, 0, Math.PI * 2)
-        ctx.fill()
-
-        // 1. Caudal Fin (Tail) with wave
-        ctx.beginPath()
-        ctx.moveTo(-L * 0.45, 0)
-        ctx.quadraticCurveTo(-L * 0.7, -H * 0.55 + wag, -L * 0.82, -H * 0.5 + wag)
-        ctx.quadraticCurveTo(-L * 0.72, wag, -L * 0.82, H * 0.5 + wag)
-        ctx.quadraticCurveTo(-L * 0.7, H * 0.55 + wag, -L * 0.45, 0)
-        ctx.closePath()
-        ctx.fillStyle = '#ea580c'
-        ctx.strokeStyle = '#0f172a'
-        ctx.lineWidth = 1.2
-        ctx.fill()
-        ctx.stroke()
-
-        // White border on tail tip
-        ctx.beginPath()
-        ctx.arc(-L * 0.78, wag, H * 0.35, -Math.PI * 0.5, Math.PI * 0.5)
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)'
-        ctx.lineWidth = 2
-        ctx.stroke()
-
-        // 2. Main Orange Body
-        ctx.beginPath()
-        ctx.moveTo(L * 0.5, 0)
-        ctx.bezierCurveTo(L * 0.35, -H * 0.65, -L * 0.2, -H * 0.65, -L * 0.45, 0)
-        ctx.bezierCurveTo(-L * 0.2, H * 0.65, L * 0.35, H * 0.65, L * 0.5, 0)
-        ctx.closePath()
-
-        const bodyGrad = ctx.createLinearGradient(0, -H * 0.6, 0, H * 0.6)
-        bodyGrad.addColorStop(0, '#fb923c')
-        bodyGrad.addColorStop(0.4, '#f97316')
-        bodyGrad.addColorStop(1, '#c2410c')
-        ctx.fillStyle = bodyGrad
-        ctx.strokeStyle = '#0f172a'
-        ctx.lineWidth = 1.2
-        ctx.fill()
-        ctx.stroke()
-
-        // 3. Three Iconic White Stripes with black outlines
-        const drawStripe = (cx, topW, botW, curveX) => {
-          ctx.beginPath()
-          ctx.moveTo(cx - topW * 0.5, -H * 0.55)
-          ctx.quadraticCurveTo(cx + curveX, 0, cx - botW * 0.5, H * 0.55)
-          ctx.lineTo(cx + botW * 0.5, H * 0.55)
-          ctx.quadraticCurveTo(cx + curveX + topW * 0.5, 0, cx + topW * 0.5, -H * 0.55)
-          ctx.closePath()
-          ctx.fillStyle = '#ffffff'
-          ctx.strokeStyle = '#0f172a'
-          ctx.lineWidth = 1.5
-          ctx.fill()
-          ctx.stroke()
-        }
-
-        // Head stripe
-        drawStripe(L * 0.22, L * 0.14, L * 0.12, L * 0.04)
-        // Mid-body stripe (with characteristic forward curve)
-        drawStripe(-L * 0.05, L * 0.16, L * 0.14, L * 0.08)
-        // Tail peduncle stripe
-        drawStripe(-L * 0.35, L * 0.1, L * 0.08, 0)
-
-        // 4. Dorsal Fin (Top)
-        ctx.beginPath()
-        ctx.moveTo(L * 0.15, -H * 0.5)
-        ctx.quadraticCurveTo(-L * 0.05, -H * 0.95, -L * 0.25, -H * 0.45)
-        ctx.strokeStyle = '#0f172a'
-        ctx.fillStyle = '#f97316'
-        ctx.lineWidth = 1.2
-        ctx.fill()
-        ctx.stroke()
-
-        // 5. Pectoral Fin with rhythmic flutter
-        const finWag = Math.sin(this.finCycle * 1.5) * 0.3
-        ctx.save()
-        ctx.translate(L * 0.08, H * 0.1)
-        ctx.rotate(finWag)
-        ctx.beginPath()
-        ctx.ellipse(0, 0, L * 0.16, H * 0.25, 0.4, 0, Math.PI * 2)
-        ctx.fillStyle = 'rgba(251, 146, 60, 0.85)'
-        ctx.strokeStyle = '#0f172a'
-        ctx.lineWidth = 1
-        ctx.fill()
-        ctx.stroke()
-        ctx.restore()
-
-        // 6. Eye
-        ctx.beginPath()
-        ctx.arc(L * 0.36, -H * 0.12, L * 0.07, 0, Math.PI * 2)
-        ctx.fillStyle = '#0f172a'
-        ctx.fill()
-        ctx.beginPath()
-        ctx.arc(L * 0.38, -H * 0.14, L * 0.025, 0, Math.PI * 2)
-        ctx.fillStyle = '#ffffff'
-        ctx.fill()
-
-        ctx.restore()
       }
     }
 
-    // ── 4. Royal Blue Tang (Paracanthurus hepatus - Dory) ────────────
-    class BlueTang {
-      constructor(startX, startY, speed = 1.25) {
-        this.x = startX
-        this.y = startY
-        this.speed = speed
-        this.angle = 0
-        this.targetAngle = 0
-        this.targetX = width * 0.3
-        this.targetY = height * 0.6
-        this.swimTimer = Math.random() * 10
-        this.finCycle = 0
-        this.bodyLength = isMobile ? 42 : 56
-        this.bodyHeight = this.bodyLength * 0.56
-      }
-
-      update() {
-        this.swimTimer += 0.028
-        this.finCycle += 0.2
-
-        const dist = Math.hypot(this.targetX - this.x, this.targetY - this.y)
-        if (dist < 90) {
-          this.targetX = Math.random() * (width - 180) + 90
-          this.targetY = Math.random() * (height - 220) + 110
-        }
-
-        const dx = this.targetX - this.x
-        const dy = this.targetY - this.y
-        this.targetAngle = Math.atan2(dy, dx)
-
-        let diff = this.targetAngle - this.angle
-        while (diff < -Math.PI) diff += Math.PI * 2
-        while (diff > Math.PI) diff -= Math.PI * 2
-        this.angle += diff * 0.032
-
-        this.x += Math.cos(this.angle) * this.speed
-        this.y += Math.sin(this.angle) * this.speed
-
-        if (this.x < -120) this.x = width + 120
-        if (this.x > width + 120) this.x = -120
-        if (this.y < -70) this.y = height + 70
-        if (this.y > height + 70) this.y = -70
-      }
-
-      draw(ctx) {
-        ctx.save()
-        ctx.translate(this.x, this.y)
-        ctx.rotate(this.angle)
-
-        if (Math.cos(this.angle) < 0) {
-          ctx.scale(1, -1)
-        }
-
-        const wag = Math.sin(this.finCycle) * 3.5
-        const L = this.bodyLength
-        const H = this.bodyHeight
-
-        // Glow aura
-        const halo = ctx.createRadialGradient(0, 0, 5, 0, 0, L)
-        halo.addColorStop(0, 'rgba(37, 99, 235, 0.25)')
-        halo.addColorStop(0.7, 'rgba(6, 182, 212, 0.08)')
-        halo.addColorStop(1, 'rgba(0, 0, 0, 0)')
-        ctx.fillStyle = halo
-        ctx.beginPath()
-        ctx.arc(0, 0, L, 0, Math.PI * 2)
-        ctx.fill()
-
-        // 1. Triangular Canary Yellow Caudal Tail
-        ctx.beginPath()
-        ctx.moveTo(-L * 0.42, 0)
-        ctx.lineTo(-L * 0.8, -H * 0.45 + wag)
-        ctx.lineTo(-L * 0.72, wag)
-        ctx.lineTo(-L * 0.8, H * 0.45 + wag)
-        ctx.closePath()
-        ctx.fillStyle = '#facc15'
-        ctx.strokeStyle = '#0f172a'
-        ctx.lineWidth = 1.2
-        ctx.fill()
-        ctx.stroke()
-
-        // 2. Oval Royal Cobalt Blue Body
-        ctx.beginPath()
-        ctx.moveTo(L * 0.48, 0)
-        ctx.bezierCurveTo(L * 0.3, -H * 0.65, -L * 0.25, -H * 0.65, -L * 0.45, 0)
-        ctx.bezierCurveTo(-L * 0.25, H * 0.65, L * 0.3, H * 0.65, L * 0.48, 0)
-        ctx.closePath()
-
-        const blueGrad = ctx.createLinearGradient(0, -H * 0.6, 0, H * 0.6)
-        blueGrad.addColorStop(0, '#3b82f6')
-        blueGrad.addColorStop(0.5, '#1d4ed8')
-        blueGrad.addColorStop(1, '#172554')
-        ctx.fillStyle = blueGrad
-        ctx.strokeStyle = '#0f172a'
-        ctx.lineWidth = 1.2
-        ctx.fill()
-        ctx.stroke()
-
-        // 3. Black Palette Swirl Pattern on flank
-        ctx.beginPath()
-        ctx.moveTo(L * 0.1, -H * 0.4)
-        ctx.bezierCurveTo(-L * 0.25, -H * 0.5, -L * 0.4, -H * 0.2, -L * 0.42, 0)
-        ctx.bezierCurveTo(-L * 0.4, H * 0.2, -L * 0.25, H * 0.5, L * 0.1, H * 0.4)
-        ctx.bezierCurveTo(-L * 0.05, H * 0.2, -L * 0.15, 0, -L * 0.05, -H * 0.2)
-        ctx.closePath()
-        ctx.fillStyle = '#090d16'
-        ctx.fill()
-
-        // Yellow wedge in the black flank
-        ctx.beginPath()
-        ctx.moveTo(-L * 0.12, 0)
-        ctx.lineTo(-L * 0.38, -H * 0.15)
-        ctx.lineTo(-L * 0.38, H * 0.15)
-        ctx.closePath()
-        ctx.fillStyle = '#facc15'
-        ctx.fill()
-
-        // 4. Eye
-        ctx.beginPath()
-        ctx.arc(L * 0.32, -H * 0.14, L * 0.065, 0, Math.PI * 2)
-        ctx.fillStyle = '#0f172a'
-        ctx.fill()
-        ctx.beginPath()
-        ctx.arc(L * 0.34, -H * 0.16, L * 0.025, 0, Math.PI * 2)
-        ctx.fillStyle = '#ffffff'
-        ctx.fill()
-
-        ctx.restore()
-      }
+    const drawCoryFish = () => {
+      const c = cory
+      const y = sandSurface(c.x, env.sandTop) + env.sandH * 0.32
+      ctx.save()
+      ctx.translate(c.x, y)
+      ctx.scale(c.dir, 1)
+      drawCory(ctx, c.size, Math.sin(c.step) * 1.4)
+      ctx.restore()
     }
 
-    // ── 5. School of Iridescent Neon Tetras (Cardinal Tetras) ───────
-    const TETRA_COUNT = isMobile ? 8 : 16
-    const tetras = Array.from({ length: TETRA_COUNT }, (_, i) => ({
-      x: width * 0.45 + (Math.random() - 0.5) * 220,
-      y: height * 0.28 + (Math.random() - 0.5) * 140,
-      speed: 1.35 + Math.random() * 0.6,
-      angle: 0.1 + (Math.random() - 0.5) * 0.2,
-      size: isMobile ? 16 : 22,
-      wagPhase: (i / TETRA_COUNT) * Math.PI * 2,
-    }))
-
-    // ── 6. Majestic Freshwater Angelfish (Pterophyllum scalare) ─────
-    class Angelfish {
-      constructor(startX, startY) {
-        this.x = startX
-        this.y = startY
-        this.speed = 0.65
-        this.angle = 0
-        this.targetAngle = 0
-        this.targetX = width * 0.75
-        this.targetY = height * 0.35
-        this.cycle = 0
-        this.size = isMobile ? 44 : 62
-      }
-
-      update() {
-        this.cycle += 0.02
-
-        const dist = Math.hypot(this.targetX - this.x, this.targetY - this.y)
-        if (dist < 100) {
-          this.targetX = Math.random() * (width - 240) + 120
-          this.targetY = Math.random() * (height - 300) + 150
-        }
-
-        const dx = this.targetX - this.x
-        const dy = this.targetY - this.y
-        this.targetAngle = Math.atan2(dy, dx)
-
-        let diff = this.targetAngle - this.angle
-        while (diff < -Math.PI) diff += Math.PI * 2
-        while (diff > Math.PI) diff -= Math.PI * 2
-        this.angle += diff * 0.02
-
-        this.x += Math.cos(this.angle) * this.speed
-        this.y += Math.sin(this.angle) * this.speed
-
-        if (this.x < -140) this.x = width + 140
-        if (this.x > width + 140) this.x = -140
-        if (this.y < -100) this.y = height + 100
-        if (this.y > height + 100) this.y = -100
-      }
-
-      draw(ctx) {
-        ctx.save()
-        ctx.translate(this.x, this.y)
-        ctx.rotate(this.angle)
-
-        if (Math.cos(this.angle) < 0) {
-          ctx.scale(1, -1)
-        }
-
-        const S = this.size
-        const sway = Math.sin(this.cycle) * 2
-
-        // Tall triangular silver & black striped body
-        ctx.beginPath()
-        ctx.moveTo(S * 0.45, 0)
-        ctx.lineTo(-S * 0.3, -S * 0.4)
-        ctx.lineTo(-S * 0.45, 0)
-        ctx.lineTo(-S * 0.3, S * 0.4)
-        ctx.closePath()
-
-        const grad = ctx.createLinearGradient(0, -S * 0.4, 0, S * 0.4)
-        grad.addColorStop(0, '#e2e8f0')
-        grad.addColorStop(0.5, '#94a3b8')
-        grad.addColorStop(1, '#cbd5e1')
-        ctx.fillStyle = grad
-        ctx.strokeStyle = '#0f172a'
-        ctx.lineWidth = 1
-        ctx.fill()
-        ctx.stroke()
-
-        // Iconic vertical stripes
-        ctx.beginPath()
-        ctx.moveTo(S * 0.15, -S * 0.32)
-        ctx.lineTo(S * 0.15, S * 0.32)
-        ctx.moveTo(-S * 0.1, -S * 0.38)
-        ctx.lineTo(-S * 0.1, S * 0.38)
-        ctx.strokeStyle = 'rgba(15, 23, 42, 0.75)'
-        ctx.lineWidth = 2.5
-        ctx.stroke()
-
-        // Majestic tall dorsal fin (pointing high up)
-        ctx.beginPath()
-        ctx.moveTo(S * 0.05, -S * 0.35)
-        ctx.quadraticCurveTo(-S * 0.1, -S * 1.3 + sway, -S * 0.4, -S * 0.8)
-        ctx.lineTo(-S * 0.25, -S * 0.38)
-        ctx.closePath()
-        ctx.fillStyle = 'rgba(226, 232, 240, 0.75)'
-        ctx.strokeStyle = '#0f172a'
-        ctx.lineWidth = 1
-        ctx.fill()
-        ctx.stroke()
-
-        // Long trailing ventral fin (pointing far down)
-        ctx.beginPath()
-        ctx.moveTo(S * 0.05, S * 0.35)
-        ctx.quadraticCurveTo(-S * 0.1, S * 1.3 - sway, -S * 0.4, S * 0.8)
-        ctx.lineTo(-S * 0.25, S * 0.38)
-        ctx.closePath()
-        ctx.fillStyle = 'rgba(226, 232, 240, 0.75)'
-        ctx.strokeStyle = '#0f172a'
-        ctx.lineWidth = 1
-        ctx.fill()
-        ctx.stroke()
-
-        // Delicate thread-like feeler fins
-        ctx.beginPath()
-        ctx.moveTo(S * 0.15, S * 0.25)
-        ctx.quadraticCurveTo(0, S * 0.9, -S * 0.2, S * 1.2 + sway)
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)'
-        ctx.lineWidth = 1
-        ctx.stroke()
-
-        // Eye
-        ctx.beginPath()
-        ctx.arc(S * 0.3, -S * 0.08, S * 0.055, 0, Math.PI * 2)
-        ctx.fillStyle = '#dc2626'
-        ctx.fill()
-        ctx.beginPath()
-        ctx.arc(S * 0.31, -S * 0.08, S * 0.025, 0, Math.PI * 2)
-        ctx.fillStyle = '#0f172a'
-        ctx.fill()
-
-        ctx.restore()
-      }
+    // ── Tanaman, partikel, dan gelembung ─────────────────────────────────
+    const buildPlants = () => {
+      const m = env.mobile
+      const makeBlades = (count, minH, maxH, wMin, wMax, hue, light) =>
+        Array.from({ length: count }, (_, i) => {
+          const left = i % 2 === 0
+          const span = env.w * (m ? 0.22 : 0.18)
+          const bx = left ? rand(-10, span) : env.w - rand(-10, span)
+          return {
+            x: bx,
+            y: sandSurface(clamp(bx, 0, env.w), env.sandTop) + 8,
+            height: rand(minH, maxH),
+            width: rand(wMin, wMax),
+            speed: rand(0.0009, 0.0017),
+            phase: rand(0, Math.PI * 2),
+            amp: rand(14, 30),
+            hue: hue + rand(-8, 8),
+            light,
+          }
+        })
+      backPlants = makeBlades(m ? 7 : 14, env.h * 0.28, env.h * 0.58, 6, 11, 150, 24)
+      frontPlants = makeBlades(m ? 9 : 18, env.h * 0.1, env.h * 0.3, 5, 9, 140, 36)
     }
 
-    // Instantiate aquarium specimens
-    const clownfish = new Clownfish(width * 0.22, height * 0.52, isMobile ? 0.95 : 1.2)
-    const blueTang = new BlueTang(width * 0.75, height * 0.42, isMobile ? 1.05 : 1.3)
-    const angelfish = new Angelfish(width * 0.5, height * 0.65)
+    const buildMotes = () => {
+      const n = env.mobile ? 18 : 42
+      motes = Array.from({ length: n }, () => ({
+        x: rand(0, env.w),
+        y: rand(0, env.h),
+        r: rand(0.6, 1.7),
+        vx: rand(-0.08, 0.08),
+        vy: rand(-0.05, 0.06),
+        a: rand(0.12, 0.38),
+      }))
+    }
 
-    // ── 7. Render Loop (Independent 60 FPS Engine) ──────────────────
-    const render = (currentTime) => {
-      if (!isRunning) return
+    const drawBlades = (list, t) => {
+      list.forEach((b) => {
+        const sway = Math.sin(t * b.speed + b.phase) * b.amp
+        ctx.beginPath()
+        ctx.moveTo(b.x - b.width * 0.5, b.y)
+        ctx.bezierCurveTo(
+          b.x - b.width * 0.3 + sway * 0.2,
+          b.y - b.height * 0.35,
+          b.x + sway * 0.7,
+          b.y - b.height * 0.7,
+          b.x + sway,
+          b.y - b.height
+        )
+        ctx.bezierCurveTo(
+          b.x + sway * 0.7 + b.width * 0.4,
+          b.y - b.height * 0.7,
+          b.x + b.width * 0.3 + sway * 0.2,
+          b.y - b.height * 0.35,
+          b.x + b.width * 0.5,
+          b.y
+        )
+        ctx.closePath()
+        const g = ctx.createLinearGradient(0, b.y, 0, b.y - b.height)
+        g.addColorStop(0, `hsla(${b.hue}, 62%, ${b.light - 14}%, 0.95)`)
+        g.addColorStop(1, `hsla(${b.hue}, 66%, ${b.light + 14}%, 0.85)`)
+        ctx.fillStyle = g
+        ctx.fill()
+      })
+    }
 
-      // Clear with crystal-clear aquarium backdrop
-      ctx.clearRect(0, 0, width, height)
-
-      // ── Layer A: Volumetric Caustic Sunlit Water Column ──
+    const drawRays = (t) => {
       ctx.save()
       ctx.globalCompositeOperation = 'screen'
-      const rayCount = isMobile ? 3 : 6
-      for (let i = 0; i < rayCount; i++) {
-        const offset = (currentTime * 0.00035 + (i * Math.PI) / 3) % (Math.PI * 2)
-        const sway = Math.sin(offset) * 38
-        const rayX = (width / (rayCount + 1)) * (i + 1) + sway
-
-        const rayGrad = ctx.createLinearGradient(rayX, 0, rayX + sway * 1.6, height * 0.9)
-        rayGrad.addColorStop(0, 'rgba(34, 211, 238, 0.09)')
-        rayGrad.addColorStop(0.4, 'rgba(56, 189, 248, 0.04)')
-        rayGrad.addColorStop(1, 'rgba(0, 0, 0, 0)')
-
-        ctx.fillStyle = rayGrad
+      const n = env.mobile ? 3 : 6
+      for (let i = 0; i < n; i++) {
+        const phase = (t * 0.00028 + (i * Math.PI) / 3) % (Math.PI * 2)
+        const sway = Math.sin(phase) * 42
+        const x = (env.w / (n + 1)) * (i + 1) + sway
+        const g = ctx.createLinearGradient(x, 0, x + sway, env.h * 0.85)
+        g.addColorStop(0, 'rgba(255, 255, 235, 0.085)')
+        g.addColorStop(0.45, 'rgba(180, 250, 245, 0.03)')
+        g.addColorStop(1, 'rgba(0, 0, 0, 0)')
+        ctx.fillStyle = g
         ctx.beginPath()
-        ctx.moveTo(rayX - 40, 0)
-        ctx.lineTo(rayX + 40, 0)
-        ctx.lineTo(rayX + 90 + sway, height * 0.9)
-        ctx.lineTo(rayX - 90 + sway, height * 0.9)
+        ctx.moveTo(x - 26, 0)
+        ctx.lineTo(x + 26, 0)
+        ctx.lineTo(x + 80 + sway, env.h * 0.85)
+        ctx.lineTo(x - 80 + sway, env.h * 0.85)
         ctx.closePath()
         ctx.fill()
       }
       ctx.restore()
+    }
 
-      // ── Layer B: Aerator Air Bubbles Rising from Bottom ──
-      bubbles.forEach((b) => {
-        b.wobbleOffset += b.wobbleSpeed
-        b.y -= b.speed
-        b.x += Math.sin(b.wobbleOffset) * b.wobbleAmp
-
-        if (b.y < -10) {
-          b.y = height + Math.random() * 20
-          b.x = width * 0.05 + Math.random() * (width * 0.9)
-        }
-
-        ctx.save()
+    const drawMotes = (dt) => {
+      motes.forEach((m) => {
+        m.x += m.vx * dt
+        m.y += m.vy * dt
+        if (m.x < -5) m.x = env.w + 5
+        if (m.x > env.w + 5) m.x = -5
+        if (m.y < -5) m.y = env.h + 5
+        if (m.y > env.h + 5) m.y = -5
         ctx.beginPath()
-        ctx.arc(b.x, b.y, b.size, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(186, 230, 253, ${b.alpha * 0.6})`
-        ctx.strokeStyle = `rgba(255, 255, 255, ${b.alpha * 0.8})`
-        ctx.lineWidth = 0.8
+        ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(230, 255, 250, ${m.a})`
         ctx.fill()
-        ctx.stroke()
-
-        // Shimmer specular highlight
-        ctx.beginPath()
-        ctx.arc(b.x - b.size * 0.3, b.y - b.size * 0.3, b.size * 0.3, 0, Math.PI * 2)
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.85)'
-        ctx.fill()
-        ctx.restore()
       })
+    }
 
-      // ── Layer C: Swaying Aquascape Plant Flora (Bottom) ──
-      plantBlades.forEach((blade) => {
-        const sway = Math.sin(currentTime * blade.swaySpeed + blade.swayPhase) * blade.swayAmp
-        ctx.save()
-        ctx.beginPath()
-        ctx.moveTo(blade.baseX - blade.width * 0.5, blade.baseY)
-        ctx.quadraticCurveTo(
-          blade.baseX + sway * 0.5,
-          blade.baseY - blade.height * 0.55,
-          blade.baseX + sway,
-          blade.baseY - blade.height
-        )
-        ctx.quadraticCurveTo(
-          blade.baseX + sway * 0.5 + blade.width * 0.3,
-          blade.baseY - blade.height * 0.55,
-          blade.baseX + blade.width * 0.5,
-          blade.baseY
-        )
-        ctx.closePath()
+    const updateBubbles = (dt) => {
+      airTimer -= dt
+      if (airTimer <= 0 && bubbles.length < 90) {
+        bubbles.push({
+          x: env.airX + rand(-3, 3),
+          y: env.airY,
+          r: rand(1.4, 3.6),
+          vy: rand(0.9, 1.7),
+          wob: rand(0, 6),
+          amp: rand(0.25, 0.6),
+          air: true,
+        })
+        airTimer = rand(5, 12)
+      }
 
-        const plantGrad = ctx.createLinearGradient(0, blade.baseY, 0, blade.baseY - blade.height)
-        plantGrad.addColorStop(0, 'rgba(4, 120, 87, 0.6)')
-        plantGrad.addColorStop(0.6, 'rgba(16, 185, 129, 0.4)')
-        plantGrad.addColorStop(1, 'rgba(52, 211, 153, 0.25)')
-        ctx.fillStyle = plantGrad
-        ctx.fill()
-        ctx.restore()
-      })
-
-      // ── Layer D: School of Neon Tetras ──
-      tetras.forEach((t) => {
-        t.wagPhase += 0.22
-        t.x += t.speed
-        t.y += Math.sin(t.wagPhase * 0.5) * 0.4
-
-        if (t.x > width + 40) {
-          t.x = -40
-          t.y = height * 0.22 + Math.random() * (height * 0.25)
-        }
-
-        ctx.save()
-        ctx.translate(t.x, t.y)
-
-        const wag = Math.sin(t.wagPhase) * 2.5
-        const S = t.size
-
-        // Slender fish body
-        ctx.beginPath()
-        ctx.moveTo(S * 0.5, 0)
-        ctx.quadraticCurveTo(0, -S * 0.22, -S * 0.4, wag)
-        ctx.lineTo(-S * 0.6, wag * 1.5)
-        ctx.lineTo(-S * 0.4, wag)
-        ctx.quadraticCurveTo(0, S * 0.22, S * 0.5, 0)
-        ctx.closePath()
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)'
-        ctx.fill()
-
-        // Glowing electric blue upper lateral stripe
-        ctx.beginPath()
-        ctx.moveTo(S * 0.4, -S * 0.05)
-        ctx.lineTo(-S * 0.35, wag * 0.6 - S * 0.04)
-        ctx.strokeStyle = '#00f0ff'
-        ctx.lineWidth = 1.4
-        ctx.shadowColor = '#00f0ff'
-        ctx.shadowBlur = 4
-        ctx.stroke()
-        ctx.shadowBlur = 0
-
-        // Vivid crimson belly stripe
-        ctx.beginPath()
-        ctx.moveTo(0, S * 0.05)
-        ctx.lineTo(-S * 0.35, wag * 0.6 + S * 0.04)
-        ctx.strokeStyle = '#ef4444'
-        ctx.lineWidth = 1.3
-        ctx.stroke()
-
-        ctx.restore()
-      })
-
-      // ── Layer E: Royal Blue Tang (Dory) ──
-      blueTang.update()
-      blueTang.draw(ctx)
-
-      // ── Layer F: Tropical Clownfish (Nemo) ──
-      clownfish.update()
-      clownfish.draw(ctx)
-
-      // ── Layer G: Freshwater Angelfish (Manfish) ──
-      angelfish.update()
-      angelfish.draw(ctx)
-
-      // ── Layer H: Water Surface Ripple Waves ──
-      for (let i = waterRipples.length - 1; i >= 0; i--) {
-        const rip = waterRipples[i]
-        rip.radius += rip.speed
-        rip.alpha -= 0.012
-
-        if (rip.alpha <= 0 || rip.radius >= rip.maxRadius) {
-          waterRipples.splice(i, 1)
+      for (let i = bubbles.length - 1; i >= 0; i--) {
+        const b = bubbles[i]
+        b.wob += 0.05 * dt
+        b.y -= b.vy * dt
+        b.x += Math.sin(b.wob) * b.amp * dt
+        if (b.air) b.r += 0.0035 * dt
+        if (b.y < SURFACE_Y) {
+          ripples.push({ x: b.x, r: 3, max: 22, a: 0.4 })
+          bubbles.splice(i, 1)
           continue
         }
+        ctx.beginPath()
+        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2)
+        ctx.fillStyle = 'rgba(220, 250, 255, 0.12)'
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)'
+        ctx.lineWidth = 0.9
+        ctx.fill()
+        ctx.stroke()
+        ctx.beginPath()
+        ctx.arc(b.x - b.r * 0.3, b.y - b.r * 0.3, b.r * 0.28, 0, Math.PI * 2)
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.85)'
+        ctx.fill()
+      }
+    }
 
+    // ── Makanan ikan ─────────────────────────────────────────────────────
+    const feed = (x) => {
+      if (food.filter((f) => !f.eaten).length > 40) return
+      const cx = x ?? rand(env.w * 0.2, env.w * 0.8)
+      for (let i = 0; i < 8; i++) {
+        food.push({
+          x: cx + rand(-28, 28),
+          y: SURFACE_Y + rand(2, 16),
+          vy: rand(0.35, 0.65),
+          phase: rand(0, Math.PI * 2),
+          size: rand(2.2, 3.6),
+          hue: rand(18, 46),
+          landed: false,
+          life: 0,
+          eaten: false,
+        })
+      }
+      ripples.push({ x: cx, r: 4, max: 52, a: 0.55 })
+      playFeedSplash()
+      fedCount += 1
+      window.dispatchEvent(new CustomEvent('fizhtank-fed', { detail: { count: fedCount } }))
+    }
+
+    const updateFood = (dt, t) => {
+      for (let i = food.length - 1; i >= 0; i--) {
+        const f = food[i]
+        if (f.eaten) {
+          food.splice(i, 1)
+          continue
+        }
+        if (!f.landed) {
+          f.y += f.vy * dt
+          f.x += Math.sin(f.phase + t * 0.002) * 0.25 * dt
+          if (f.y >= sandSurface(f.x, env.sandTop) + env.sandH * 0.28) f.landed = true
+        } else {
+          f.life += dt
+          if (f.life > 900) {
+            food.splice(i, 1)
+            continue
+          }
+        }
+        const alpha = f.landed ? clamp(1 - (f.life - 600) / 300, 0, 1) : 1
         ctx.save()
+        ctx.translate(f.x, f.y)
+        ctx.rotate(f.phase + t * 0.001)
+        ctx.fillStyle = `hsla(${f.hue}, 85%, 62%, ${alpha})`
         ctx.beginPath()
-        ctx.arc(rip.x, rip.y, rip.radius, 0, Math.PI * 2)
-        ctx.strokeStyle = `rgba(34, 211, 238, ${rip.alpha * 0.6})`
-        ctx.lineWidth = 1.6
-        ctx.stroke()
-
-        ctx.beginPath()
-        ctx.arc(rip.x, rip.y, Math.max(0, rip.radius - 16), 0, Math.PI * 2)
-        ctx.strokeStyle = `rgba(56, 189, 248, ${rip.alpha * 0.35})`
-        ctx.lineWidth = 1
-        ctx.stroke()
+        ctx.ellipse(0, 0, f.size, f.size * 0.6, 0, 0, Math.PI * 2)
+        ctx.fill()
         ctx.restore()
       }
-
-      animationFrameId = requestAnimationFrame(render)
     }
 
-    const handleVisibility = () => {
-      if (document.hidden) {
-        isRunning = false
-        cancelAnimationFrame(animationFrameId)
-      } else if (!isRunning) {
-        isRunning = true
-        animationFrameId = requestAnimationFrame(render)
+    // ── Permukaan air dan cahaya di pasir ────────────────────────────────
+    const drawSurface = (t) => {
+      const g = ctx.createLinearGradient(0, 0, 0, 52)
+      g.addColorStop(0, 'rgba(235, 255, 255, 0.42)')
+      g.addColorStop(0.35, 'rgba(170, 245, 240, 0.14)')
+      g.addColorStop(1, 'rgba(170, 245, 240, 0)')
+      ctx.fillStyle = g
+      ctx.fillRect(0, 0, env.w, 52)
+
+      ctx.beginPath()
+      for (let x = 0; x <= env.w + 8; x += 8) {
+        const y = SURFACE_Y + Math.sin(x * 0.02 + t * 0.0015) * 2 + Math.sin(x * 0.05 - t * 0.0021) * 1.2
+        if (x === 0) ctx.moveTo(x, y)
+        else ctx.lineTo(x, y)
+      }
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)'
+      ctx.lineWidth = 1.5
+      ctx.stroke()
+    }
+
+    const drawSandLight = (t) => {
+      ctx.save()
+      ctx.globalCompositeOperation = 'screen'
+      const n = env.mobile ? 8 : 16
+      for (let i = 0; i < n; i++) {
+        const dir = i % 2 ? 1 : -1
+        const x = (((i * env.w) / n + t * 0.014 * dir) % env.w + env.w) % env.w
+        const y = env.sandTop + 12 + ((i * 37) % Math.max(20, env.sandH * 0.7))
+        const a = 0.05 + (Math.sin(t * 0.0012 + i) + 1) * 0.04
+        ctx.beginPath()
+        ctx.ellipse(x, y, 34 + (i % 3) * 10, 4, 0, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(255, 255, 225, ${a})`
+        ctx.fill()
+      }
+      ctx.restore()
+    }
+
+    const drawRipples = (dt) => {
+      for (let i = ripples.length - 1; i >= 0; i--) {
+        const r = ripples[i]
+        r.r += 1.5 * dt
+        r.a -= 0.012 * dt
+        if (r.a <= 0 || r.r >= r.max) {
+          ripples.splice(i, 1)
+          continue
+        }
+        ctx.beginPath()
+        ctx.ellipse(r.x, SURFACE_Y + 2, r.r, r.r * 0.16, 0, 0, Math.PI * 2)
+        ctx.strokeStyle = `rgba(255, 255, 255, ${r.a})`
+        ctx.lineWidth = 1.2
+        ctx.stroke()
       }
     }
-    document.addEventListener('visibilitychange', handleVisibility)
 
-    animationFrameId = requestAnimationFrame(render)
+    // ── Ukuran dan siklus render ─────────────────────────────────────────
+    const build = (first) => {
+      env.w = wrap.clientWidth || window.innerWidth
+      env.h = wrap.clientHeight || window.innerHeight
+      env.mobile = env.w < 768
+      env.dpr = Math.min(window.devicePixelRatio || 1, env.mobile ? 1.5 : 2)
+      canvas.width = Math.floor(env.w * env.dpr)
+      canvas.height = Math.floor(env.h * env.dpr)
+      ctx.setTransform(env.dpr, 0, 0, env.dpr, 0, 0)
+
+      substrate = buildSubstrate(env.w, env.h, env.dpr)
+      env.sandTop = substrate.sandTop
+      env.sandH = substrate.sandH
+      env.airX = substrate.airX
+      env.airY = substrate.airY
+
+      buildPlants()
+      buildMotes()
+      if (first) buildFish()
+      else {
+        ;[clown, tang, angel, leader].forEach((f) => {
+          f.x = clamp(f.x, 0, env.w)
+          f.pickTarget()
+        })
+        tetras.forEach((s) => {
+          s.x = clamp(s.x, 0, env.w)
+        })
+        cory.x = clamp(cory.x, 40, env.w - 40)
+      }
+    }
+
+    build(true)
+
+    let resizeTimer
+    let lastW = env.w
+    const onResize = () => {
+      clearTimeout(resizeTimer)
+      resizeTimer = setTimeout(() => {
+        const w = wrap.clientWidth
+        if (Math.abs(w - lastW) < 2 && Math.abs(wrap.clientHeight - env.h) < 2) return
+        lastW = w
+        build(false)
+      }, 150)
+    }
+    window.addEventListener('resize', onResize)
+
+    const onPointerDown = (e) => {
+      if (e.button !== undefined && e.button !== 0) return
+      const target = e.target
+      if (
+        target &&
+        target.closest &&
+        target.closest('button, a, input, textarea, select, label, summary, header, footer, [data-no-feed], .glass, .glass-inset')
+      ) {
+        return
+      }
+      feed(e.clientX)
+    }
+    window.addEventListener('pointerdown', onPointerDown)
+
+    const onFeedEvent = (e) => feed(e.detail?.x)
+    window.addEventListener('fizhtank-feed', onFeedEvent)
+
+    const render = (now) => {
+      if (!running) return
+      const dt = Math.min((now - lastT) / 16.667, 3) * timeScale
+      lastT = now
+
+      ctx.clearRect(0, 0, env.w, env.h)
+
+      drawRays(now)
+      drawMotes(dt)
+      drawBlades(backPlants, now)
+
+      ctx.drawImage(substrate.canvas, 0, 0, env.w, env.h)
+
+      updateCory(dt)
+      drawCoryFish()
+
+      angel.update(dt)
+      angel.draw()
+      tang.update(dt)
+      tang.draw()
+      clown.update(dt)
+      clown.draw()
+      updateTetras(dt, now)
+      drawTetras()
+
+      drawBlades(frontPlants, now)
+      updateFood(dt, now)
+      updateBubbles(dt)
+      drawSandLight(now)
+      drawSurface(now)
+      drawRipples(dt)
+
+      rafId = requestAnimationFrame(render)
+    }
+
+    const onVisibility = () => {
+      if (document.hidden) {
+        running = false
+        cancelAnimationFrame(rafId)
+      } else if (!running) {
+        running = true
+        lastT = performance.now()
+        rafId = requestAnimationFrame(render)
+      }
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+
+    rafId = requestAnimationFrame(render)
 
     return () => {
-      isRunning = false
-      cancelAnimationFrame(animationFrameId)
-      window.removeEventListener('resize', resize)
-      window.removeEventListener('mousemove', onMouseMove)
+      running = false
+      cancelAnimationFrame(rafId)
+      clearTimeout(resizeTimer)
+      window.removeEventListener('resize', onResize)
       window.removeEventListener('pointerdown', onPointerDown)
-      window.removeEventListener('fizhtank-feed', onCustomFeed)
-      document.removeEventListener('visibilitychange', handleVisibility)
+      window.removeEventListener('fizhtank-feed', onFeedEvent)
+      document.removeEventListener('visibilitychange', onVisibility)
     }
   }, [])
 
   return (
     <div
-      className="fixed inset-0 pointer-events-none z-0 select-none overflow-hidden"
-      style={{
-        // Crystal-clear planted aquarium gradient (clean aqua-navy water column)
-        background: 'radial-gradient(ellipse 120% 90% at 50% 10%, #06223e 0%, #031326 50%, #010712 100%)',
-      }}
+      ref={wrapRef}
       aria-hidden="true"
+      className="pointer-events-none fixed top-0 left-0 z-0 h-lvh w-full select-none overflow-hidden"
+      style={{
+        background:
+          'radial-gradient(ellipse 90% 45% at 50% 0%, rgba(130, 240, 235, 0.3), transparent 70%), linear-gradient(180deg, #0c6274 0%, #0a4c5e 30%, #063a4a 62%, #042a35 100%)',
+      }}
     >
-      {/* 60/120 FPS High-Performance HTML5 Canvas */}
-      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-auto cursor-crosshair" />
-
-      {/* Aquarium Glass Rim Refraction Reflection */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          boxShadow: 'inset 0 0 100px rgba(0, 0, 0, 0.7)',
-          background: 'radial-gradient(circle at 50% 40%, transparent 65%, rgba(1, 7, 18, 0.6) 100%)',
-        }}
-      />
+      <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
+      {/* Bayangan di dasar tank agar teks yang melewati area pasir tetap terbaca */}
+      <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-deep/70 to-transparent" />
     </div>
   )
 }

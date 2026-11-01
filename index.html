@@ -2,14 +2,14 @@
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FizhTank | Aspiring Network &amp; Security Engineer</title>
-    
-    <!-- Meta dasar & SEO -->
-    <meta name="description" content="Portfolio Siraj (FizhTank): mahasiswa D3 Teknik Informatika yang belajar jaringan dan keamanan. Catatan belajar dan lab yang sedang dikerjakan." />
-    <meta name="keywords" content="network engineer, security engineer, cisco, wireshark, nmap, pfsense, vlan, arch linux, portfolio" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>FizhTank | Portofolio Siraj, Aspiring Network &amp; Security Engineer</title>
+
+    <!-- Meta dasar & SEO (title dan description disinkronkan dari src/data/site.js saat build) -->
+    <meta name="description" content="Portofolio Siraj (Hafidz Sirajuddin), mahasiswa D3 Teknik Informatika yang belajar jaringan, keamanan, dan Linux. Berisi rencana lab, catatan skill, dan akuarium yang bisa diberi makan." />
+    <meta name="keywords" content="network engineer, security engineer, cisco, wireshark, nmap, vlan, arch linux, portofolio" />
     <meta name="author" content="Siraj (Fizhkan)" />
-    <meta name="theme-color" content="#010205" />
+    <meta name="theme-color" content="#031c26" />
     <meta name="color-scheme" content="dark" />
     <link rel="canonical" href="https://fizhtank.vercel.app/" />
 
@@ -17,26 +17,26 @@
     <link rel="icon" type="image/svg+xml" href="/fish.svg" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 
-    <!-- Open Graph / Facebook / LinkedIn / WhatsApp -->
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="id_ID" />
     <meta property="og:url" content="https://fizhtank.vercel.app/" />
     <meta property="og:site_name" content="FizhTank" />
-    <meta property="og:title" content="FizhTank | Aspiring Network &amp; Security Engineer" />
-    <meta property="og:description" content="Portfolio Siraj (FizhTank): mahasiswa D3 Teknik Informatika yang belajar jaringan dan keamanan. Catatan belajar dan lab yang sedang dikerjakan." />
+    <meta property="og:title" content="FizhTank | Portofolio Siraj, Aspiring Network &amp; Security Engineer" />
+    <meta property="og:description" content="Portofolio Siraj (Hafidz Sirajuddin), mahasiswa D3 Teknik Informatika yang belajar jaringan, keamanan, dan Linux. Berisi rencana lab, catatan skill, dan akuarium yang bisa diberi makan." />
     <meta property="og:image" content="https://fizhtank.vercel.app/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="FizhTank — Aspiring Network &amp; Security Engineer Portfolio Preview" />
+    <meta property="og:image:alt" content="FizhTank: portofolio Siraj dengan latar akuarium berisi ikan clownfish" />
 
     <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:url" content="https://fizhtank.vercel.app/" />
-    <meta name="twitter:title" content="FizhTank | Aspiring Network &amp; Security Engineer" />
-    <meta name="twitter:description" content="Portfolio Siraj (FizhTank): mahasiswa D3 Teknik Informatika yang belajar jaringan dan keamanan. Catatan belajar dan lab yang sedang dikerjakan." />
+    <meta name="twitter:title" content="FizhTank | Portofolio Siraj, Aspiring Network &amp; Security Engineer" />
+    <meta name="twitter:description" content="Portofolio Siraj (Hafidz Sirajuddin), mahasiswa D3 Teknik Informatika yang belajar jaringan, keamanan, dan Linux. Berisi rencana lab, catatan skill, dan akuarium yang bisa diberi makan." />
     <meta name="twitter:image" content="https://fizhtank.vercel.app/og-image.png" />
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data (JSON-LD, disinkronkan dari site.js saat build) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -44,31 +44,21 @@
       "name": "Siraj",
       "alternateName": "Fizhkan",
       "url": "https://fizhtank.vercel.app/",
-      "email": "hafidzsirajuddin99@gmail.com",
       "jobTitle": "Aspiring Network & Security Engineer",
-      "description": "Portfolio Siraj (FizhTank): mahasiswa D3 Teknik Informatika yang belajar jaringan dan keamanan. Catatan belajar dan lab yang sedang dikerjakan.",
-      "knowsAbout": [
-        "Computer Networking",
-        "VLAN Segmentation",
-        "Wireshark",
-        "Linux Administration",
-        "Network Security"
-      ],
-      "sameAs": [
-        "https://github.com/Fizhkan"
-      ]
+      "sameAs": ["https://github.com/Fizhkan"]
     }
     </script>
 
-    <!-- Google Fonts Preconnect & Stylesheet -->
+    <!-- Google Fonts: Fraunces (judul), DM Sans (isi), JetBrains Mono (kode dan terminal) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..700&family=JetBrains+Mono:wght@400..700&family=Plus+Jakarta+Sans:wght@400..800&display=swap" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..700&family=JetBrains+Mono:wght@400..700&family=Plus+Jakarta+Sans:wght@400..800&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..700&family=Fraunces:opsz,wght@9..144,500..700&family=JetBrains+Mono:wght@400;500;600&display=swap" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..700&family=Fraunces:opsz,wght@9..144,500..700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
     <noscript>
-      <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..700&family=JetBrains+Mono:wght@400..700&family=Plus+Jakarta+Sans:wght@400..800&display=swap" rel="stylesheet" />
+      <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..700&family=Fraunces:opsz,wght@9..144,500..700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
     </noscript>
-    
-    <!-- Fallback if JavaScript is disabled: ensure all prerendered elements are visible -->
+
+    <!-- Jika JavaScript mati, tampilkan semua elemen hasil prerender -->
     <noscript>
       <style>
         [style*="opacity: 0"], [style*="opacity:0"] {
