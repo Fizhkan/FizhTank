@@ -177,66 +177,167 @@ function drawTang(ctx, L, wag) {
   ctx.fill()
 }
 
-function drawAngel(ctx, S, sway) {
+function drawAngel(ctx, S, sway, phase = 0) {
+  const L = S
+  const H = S * 0.7
+  const wag = Math.sin(phase * 0.9) * 2.8
+
+  // 1. Ekor (Caudal Fin) - Melebar anggun seperti kipas sutra transparan
+  ctx.save()
   ctx.beginPath()
-  ctx.moveTo(S * 0.45, 0)
-  ctx.lineTo(-S * 0.3, -S * 0.4)
-  ctx.lineTo(-S * 0.45, 0)
-  ctx.lineTo(-S * 0.3, S * 0.4)
+  ctx.moveTo(-L * 0.36, 0)
+  ctx.bezierCurveTo(-L * 0.54, -H * 0.44 + wag, -L * 0.72, -H * 0.54 + wag, -L * 0.8, -H * 0.46 + wag)
+  ctx.quadraticCurveTo(-L * 0.66, wag * 0.4, -L * 0.8, H * 0.46 + wag)
+  ctx.bezierCurveTo(-L * 0.72, H * 0.54 + wag, -L * 0.54, H * 0.44 + wag, -L * 0.36, 0)
   ctx.closePath()
-  const body = ctx.createLinearGradient(0, -S * 0.4, 0, S * 0.4)
-  body.addColorStop(0, '#f1f5f9')
-  body.addColorStop(0.5, '#a5b4c3')
-  body.addColorStop(1, '#dbe4ec')
-  ctx.fillStyle = body
+  const tailGrad = ctx.createLinearGradient(-L * 0.36, 0, -L * 0.8, 0)
+  tailGrad.addColorStop(0, 'rgba(255, 255, 255, 0.9)')
+  tailGrad.addColorStop(0.5, 'rgba(226, 232, 240, 0.65)')
+  tailGrad.addColorStop(1, 'rgba(203, 213, 225, 0.35)')
+  ctx.fillStyle = tailGrad
   ctx.strokeStyle = OUTLINE
-  ctx.lineWidth = 1
+  ctx.lineWidth = 1.1
   ctx.fill()
   ctx.stroke()
 
+  // Garis-garis halus sirip ekor (fin rays)
   ctx.beginPath()
-  ctx.moveTo(S * 0.15, -S * 0.32)
-  ctx.lineTo(S * 0.15, S * 0.32)
-  ctx.moveTo(-S * 0.1, -S * 0.38)
-  ctx.lineTo(-S * 0.1, S * 0.38)
-  ctx.strokeStyle = 'rgba(15, 23, 42, 0.7)'
-  ctx.lineWidth = 2.5
+  ctx.moveTo(-L * 0.38, 0)
+  ctx.lineTo(-L * 0.76, -H * 0.28 + wag)
+  ctx.moveTo(-L * 0.38, 0)
+  ctx.lineTo(-L * 0.7, wag * 0.4)
+  ctx.moveTo(-L * 0.38, 0)
+  ctx.lineTo(-L * 0.76, H * 0.28 + wag)
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.65)'
+  ctx.lineWidth = 0.8
   ctx.stroke()
+  ctx.restore()
 
-  ctx.fillStyle = 'rgba(226, 232, 240, 0.7)'
+  // 2. Sirip Punggung Atas (Dorsal Fin) - Menjulang tinggi melengkung lembut ke belakang
+  ctx.save()
+  ctx.beginPath()
+  ctx.moveTo(L * 0.08, -H * 0.46)
+  ctx.bezierCurveTo(-L * 0.02, -H * 1.35 + sway, -L * 0.16, -H * 1.6 + sway, -L * 0.32, -H * 1.55 + sway)
+  ctx.quadraticCurveTo(-L * 0.22, -H * 0.95, -L * 0.32, -H * 0.25)
+  ctx.closePath()
+  const dorsalGrad = ctx.createLinearGradient(0, -H * 0.3, -L * 0.2, -H * 1.5)
+  dorsalGrad.addColorStop(0, 'rgba(254, 240, 138, 0.9)')
+  dorsalGrad.addColorStop(0.35, 'rgba(241, 245, 249, 0.82)')
+  dorsalGrad.addColorStop(1, 'rgba(203, 213, 225, 0.35)')
+  ctx.fillStyle = dorsalGrad
   ctx.strokeStyle = OUTLINE
-  ctx.lineWidth = 1
+  ctx.lineWidth = 1.1
+  ctx.fill()
+  ctx.stroke()
+  ctx.restore()
 
+  // 3. Sirip Perut Bawah (Anal Fin) - Menjulang panjang ke bawah
+  ctx.save()
   ctx.beginPath()
-  ctx.moveTo(S * 0.05, -S * 0.35)
-  ctx.quadraticCurveTo(-S * 0.1, -S * 1.3 + sway, -S * 0.4, -S * 0.8)
-  ctx.lineTo(-S * 0.25, -S * 0.38)
+  ctx.moveTo(L * 0.04, H * 0.46)
+  ctx.bezierCurveTo(-L * 0.04, H * 1.35 - sway, -L * 0.16, H * 1.6 - sway, -L * 0.32, H * 1.5 - sway)
+  ctx.quadraticCurveTo(-L * 0.22, H * 0.95, -L * 0.32, H * 0.22)
   ctx.closePath()
+  const analGrad = ctx.createLinearGradient(0, H * 0.3, -L * 0.2, H * 1.5)
+  analGrad.addColorStop(0, 'rgba(254, 240, 138, 0.88)')
+  analGrad.addColorStop(0.35, 'rgba(241, 245, 249, 0.82)')
+  analGrad.addColorStop(1, 'rgba(203, 213, 225, 0.35)')
+  ctx.fillStyle = analGrad
+  ctx.strokeStyle = OUTLINE
+  ctx.lineWidth = 1.1
+  ctx.fill()
+  ctx.stroke()
+  ctx.restore()
+
+  // 4. Badan Ikan (Body Disc) - Oval bulat pipih organik khas ikan manfish
+  ctx.beginPath()
+  ctx.moveTo(L * 0.48, 0)
+  ctx.bezierCurveTo(L * 0.38, -H * 0.48, -L * 0.08, -H * 0.55, -L * 0.36, 0)
+  ctx.bezierCurveTo(-L * 0.08, H * 0.55, L * 0.38, H * 0.48, L * 0.48, 0)
+  ctx.closePath()
+  const bodyGrad = ctx.createRadialGradient(L * 0.2, -H * 0.12, L * 0.05, 0, 0, L * 0.55)
+  bodyGrad.addColorStop(0, '#fef08a')
+  bodyGrad.addColorStop(0.32, '#f8fafc')
+  bodyGrad.addColorStop(0.78, '#cbd5e1')
+  bodyGrad.addColorStop(1, '#94a3b8')
+  ctx.fillStyle = bodyGrad
+  ctx.strokeStyle = OUTLINE
+  ctx.lineWidth = 1.2
   ctx.fill()
   ctx.stroke()
 
+  // 5. Belang Alami Manfish (3 Garis Vertikal Halus)
+  const drawStripe = (x1, y1, x2, y2, bend) => {
+    ctx.beginPath()
+    ctx.moveTo(x1, y1)
+    ctx.quadraticCurveTo(x1 + bend, (y1 + y2) * 0.5, x2, y2)
+    ctx.strokeStyle = 'rgba(30, 41, 59, 0.42)'
+    ctx.lineWidth = L * 0.042
+    ctx.lineCap = 'round'
+    ctx.stroke()
+  }
+  drawStripe(L * 0.28, -H * 0.36, L * 0.24, H * 0.34, -L * 0.03)
+  drawStripe(L * 0.04, -H * 0.51, L * 0.01, H * 0.51, -L * 0.035)
+  drawStripe(-L * 0.2, -H * 0.3, -L * 0.22, H * 0.3, -L * 0.02)
+
+  // 6. Sungut / Antena Dada (Pelvic Filaments) - Mengayun anggun di air
+  ctx.save()
+  const finFlutter = Math.sin(phase * 0.6) * 3.5
   ctx.beginPath()
-  ctx.moveTo(S * 0.05, S * 0.35)
-  ctx.quadraticCurveTo(-S * 0.1, S * 1.3 - sway, -S * 0.4, S * 0.8)
-  ctx.lineTo(-S * 0.25, S * 0.38)
-  ctx.closePath()
-  ctx.fill()
+  ctx.moveTo(L * 0.18, H * 0.38)
+  ctx.bezierCurveTo(L * 0.05, H * 1.1, -L * 0.06, H * 1.55 + finFlutter, -L * 0.16, H * 1.85 + finFlutter)
+  ctx.strokeStyle = 'rgba(254, 240, 138, 0.95)'
+  ctx.lineWidth = 1.6
   ctx.stroke()
 
   ctx.beginPath()
-  ctx.moveTo(S * 0.15, S * 0.25)
-  ctx.quadraticCurveTo(0, S * 0.9, -S * 0.2, S * 1.2 + sway)
+  ctx.moveTo(L * 0.14, H * 0.38)
+  ctx.bezierCurveTo(L * 0.02, H * 1.05, -L * 0.1, H * 1.45 - finFlutter, -L * 0.2, H * 1.7 - finFlutter)
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)'
+  ctx.lineWidth = 1.3
+  ctx.stroke()
+  ctx.restore()
+
+  // 7. Sirip Dayung Dada (Pectoral Fin)
+  ctx.save()
+  ctx.translate(L * 0.14, H * 0.06)
+  ctx.rotate(Math.sin(phase * 1.4) * 0.25 + 0.2)
+  ctx.beginPath()
+  ctx.ellipse(0, 0, L * 0.12, H * 0.22, 0.3, 0, Math.PI * 2)
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.65)'
+  ctx.strokeStyle = 'rgba(3, 22, 30, 0.35)'
+  ctx.lineWidth = 0.8
+  ctx.fill()
+  ctx.stroke()
+  ctx.restore()
+
+  // 8. Mata Ikan Alami (Amber Gold Ring + Pupil Hitam + Catchlight Hidup)
+  const eyeX = L * 0.3
+  const eyeY = -H * 0.14
+  ctx.beginPath()
+  ctx.arc(eyeX, eyeY, L * 0.065, 0, Math.PI * 2)
+  ctx.fillStyle = '#f59e0b'
+  ctx.fill()
+  ctx.strokeStyle = OUTLINE
+  ctx.lineWidth = 0.8
   ctx.stroke()
 
   ctx.beginPath()
-  ctx.arc(S * 0.3, -S * 0.08, S * 0.055, 0, Math.PI * 2)
-  ctx.fillStyle = '#dc2626'
-  ctx.fill()
-  ctx.beginPath()
-  ctx.arc(S * 0.31, -S * 0.08, S * 0.025, 0, Math.PI * 2)
+  ctx.arc(eyeX, eyeY, L * 0.042, 0, Math.PI * 2)
   ctx.fillStyle = '#0f172a'
   ctx.fill()
+
+  ctx.beginPath()
+  ctx.arc(eyeX + L * 0.015, eyeY - H * 0.025, L * 0.016, 0, Math.PI * 2)
+  ctx.fillStyle = '#ffffff'
+  ctx.fill()
+
+  // Mulut ikan kecil
+  ctx.beginPath()
+  ctx.arc(L * 0.48, H * 0.02, L * 0.025, Math.PI * 0.6, Math.PI * 1.4)
+  ctx.strokeStyle = OUTLINE
+  ctx.lineWidth = 1
+  ctx.stroke()
 }
 
 function drawTetra(ctx, S, wag) {
@@ -583,7 +684,7 @@ export default function AquariumCanvas() {
         const wag = Math.sin(this.phase) * 4
         if (this.kind === 'clown') drawClownfish(ctx, this.size, wag, this.phase)
         else if (this.kind === 'tang') drawTang(ctx, this.size, wag * 0.9)
-        else drawAngel(ctx, this.size, Math.sin(this.phase * 0.12) * 2)
+        else drawAngel(ctx, this.size, Math.sin(this.phase * 0.12) * 2, this.phase)
         ctx.restore()
       }
     }
