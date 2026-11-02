@@ -5,7 +5,7 @@ Portofolio Siraj (Hafidz Sirajuddin), mahasiswa D3 Teknik Informatika yang belaj
 [![CI](https://github.com/Fizhkan/FizhTank/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/Fizhkan/FizhTank/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald)](LICENSE)
 
-**[Lihat demo](https://fizhtank.vercel.app/)**
+**[Lihat demo](https://fizhtank.vercel.app/)** • **[Buka FizhWiki](https://fizhwiki.vercel.app/)**
 
 ## Isi situs
 
