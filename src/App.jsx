@@ -21,7 +21,7 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <div className="relative min-h-screen overflow-x-hidden bg-deep text-foam selection:bg-aqua/40 selection:text-white">
+      <div className="relative min-h-screen overflow-x-clip bg-deep text-foam selection:bg-aqua/40 selection:text-white">
         <AquariumCanvas />
 
         <a
