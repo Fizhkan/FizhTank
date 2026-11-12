@@ -63,7 +63,6 @@ export default function Hero() {
   const [cliInput, setCliInput] = useState('')
   const terminalBodyRef = useRef(null)
 
-  const [headerRef, headerVisible] = useScrollReveal({ threshold: 0.1 })
   const [benchRef, benchVisible] = useScrollReveal({ threshold: 0.08 })
 
   // Foto hanya ditampilkan jika file-nya ada; jika tidak, kartu menampilkan inisial
@@ -170,26 +169,27 @@ export default function Hero() {
 
   return (
     <section id="hero" className="relative mx-auto max-w-7xl px-5 pt-32 pb-20 sm:px-8 sm:pt-40">
-      <div
-        ref={headerRef}
-        className="grid grid-cols-1 items-end gap-12 lg:grid-cols-12"
-        style={reveal(headerVisible)}
-      >
+      <div className="grid grid-cols-1 items-end gap-12 lg:grid-cols-12">
         {/* Editorial Typography Lead — Dibuka lapang di atas air */}
         <div className="lg:col-span-8">
-          <p className="eyebrow">Log 00 // Permukaan — Surabaya, Indonesia</p>
+          <p className="eyebrow hero-stagger" style={{ '--stagger': 0 }}>
+            Log 00 // Permukaan — Surabaya, Indonesia
+          </p>
 
-          <h1 className="on-water mt-5 font-display text-[3.15rem] leading-[0.98] tracking-[-0.025em] text-white sm:text-[4.5rem] lg:text-[5.5rem]">
+          <h1
+            className="on-water hero-stagger mt-5 font-display text-[3.15rem] leading-[0.98] tracking-[-0.025em] text-white sm:text-[4.5rem] lg:text-[5.5rem]"
+            style={{ '--stagger': 1 }}
+          >
             Belajar membangun <em className="italic text-aqua">&amp; mengamankan</em> jaringan.
           </h1>
 
-          <p className="lede on-water mt-7 max-w-xl text-[1.0625rem]">
+          <p className="lede on-water hero-stagger mt-7 max-w-xl text-[1.0625rem]" style={{ '--stagger': 2 }}>
             Halo, saya <strong className="font-semibold text-white">Siraj</strong>, mahasiswa D3 Teknik Informatika.
             Situs ini adalah catatan lab jaringan, keamanan, dan Linux—dirancang seperti jendela observasi akuarium:
             klik area air yang kosong untuk memberi makan ikan.
           </p>
 
-          <div className="mt-9 flex flex-wrap items-center gap-3">
+          <div className="hero-stagger mt-9 flex flex-wrap items-center gap-3" style={{ '--stagger': 3 }}>
             <a href="#labs" className="btn btn-primary">
               <span>Lihat rencana lab</span>
               <ArrowUpRight size={16} aria-hidden="true" />
@@ -203,7 +203,7 @@ export default function Hero() {
             </button>
           </div>
 
-          <div className="mt-10 border-t border-aqua/15 pt-5">
+          <div className="hero-stagger mt-10 border-t border-aqua/15 pt-5" style={{ '--stagger': 4 }}>
             <p className="mb-2.5 font-mono text-[0.6875rem] tracking-widest text-mist/85 uppercase">
               Perangkat yang sedang dipelajari
             </p>
@@ -218,12 +218,15 @@ export default function Hero() {
         </div>
 
         {/* Field Specimen Dossier — Menggantikan kartu foto bulat generik */}
-        <div className="flex justify-start lg:col-span-4 lg:justify-end">
+        <div className="hero-stagger flex justify-start lg:col-span-4 lg:justify-end" style={{ '--stagger': 3 }}>
           <figure className="specimen-panel reticle w-full max-w-[20rem] overflow-hidden">
             <div className="flex items-center justify-between border-b border-aqua/15 px-3.5 py-2 font-mono text-[0.6875rem] tracking-wider">
               <span className="text-aqua">SPECIMEN // 001</span>
               <span className="flex items-center gap-1.5 text-kelp">
-                <span className="h-1.5 w-1.5 rounded-full bg-kelp" aria-hidden="true" />
+                <span className="relative flex h-2 w-2" aria-hidden="true">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-kelp opacity-65" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-kelp" />
+                </span>
                 AKTIF
               </span>
             </div>
@@ -308,7 +311,7 @@ export default function Hero() {
           </div>
 
           {activeTab === 'topology' && (
-            <div role="tabpanel" className="grid grid-cols-1 items-center gap-8 p-5 sm:p-8 lg:grid-cols-12">
+            <div key="topology" role="tabpanel" className="panel-enter grid grid-cols-1 items-center gap-8 p-5 sm:p-8 lg:grid-cols-12">
               <div className="lg:col-span-7">
                 <div className="specimen-inset relative mx-auto aspect-[4/3] w-full max-w-[34rem]">
                   <svg
@@ -322,17 +325,32 @@ export default function Hero() {
                       const to = byId[b]
                       const hot = selectedId === a || selectedId === b
                       return (
-                        <line
-                          key={`${a}-${b}`}
-                          x1={from.x}
-                          y1={from.y}
-                          x2={to.x}
-                          y2={to.y}
-                          stroke={hot ? '#5eead4' : 'rgba(165, 205, 210, 0.35)'}
-                          strokeWidth={hot ? 0.8 : 0.5}
-                          vectorEffect="non-scaling-stroke"
-                          strokeDasharray={hot ? undefined : '3 3'}
-                        />
+                        <g key={`${a}-${b}`}>
+                          <line
+                            x1={from.x}
+                            y1={from.y}
+                            x2={to.x}
+                            y2={to.y}
+                            stroke={hot ? 'rgba(94, 234, 212, 0.32)' : 'rgba(165, 205, 210, 0.28)'}
+                            strokeWidth={hot ? 0.75 : 0.45}
+                            vectorEffect="non-scaling-stroke"
+                            strokeDasharray={hot ? undefined : '3 3'}
+                          />
+                          {hot && (
+                            <line
+                              x1={from.x}
+                              y1={from.y}
+                              x2={to.x}
+                              y2={to.y}
+                              stroke="#5eead4"
+                              strokeWidth={1.15}
+                              strokeLinecap="round"
+                              vectorEffect="non-scaling-stroke"
+                              strokeDasharray="4 8"
+                              className="packet-flow"
+                            />
+                          )}
+                        </g>
                       )
                     })}
                   </svg>
@@ -376,7 +394,7 @@ export default function Hero() {
               </div>
 
               <div className="lg:col-span-5">
-                <div className="specimen-inset divide-y divide-aqua/12" aria-live="polite">
+                <div key={selected.id} className="specimen-inset panel-enter divide-y divide-aqua/12" aria-live="polite">
                   <div className="p-5">
                     <p className="font-mono text-[0.6875rem] tracking-wider text-aqua uppercase">
                       Rancangan topologi homelab
@@ -417,7 +435,7 @@ export default function Hero() {
           )}
 
           {activeTab === 'subnet' && (
-            <div role="tabpanel" className="grid grid-cols-1 items-start gap-8 p-5 sm:p-8 lg:grid-cols-12">
+            <div key="subnet" role="tabpanel" className="panel-enter grid grid-cols-1 items-start gap-8 p-5 sm:p-8 lg:grid-cols-12">
               <div className="lg:col-span-5">
                 <p className="text-[0.9375rem] leading-relaxed text-mist">
                   Hitung blok network, netmask, rentang host, dan broadcast dari alamat IPv4 dengan prefix CIDR.
@@ -500,7 +518,7 @@ export default function Hero() {
           )}
 
           {activeTab === 'cli' && (
-            <div role="tabpanel" className="flex h-[26rem] flex-col p-5 sm:p-7">
+            <div key="cli" role="tabpanel" className="panel-enter flex h-[26rem] flex-col p-5 sm:p-7">
               <div
                 ref={terminalBodyRef}
                 className="terminal-scroll kbd-line flex-1 space-y-2 overflow-y-auto pr-2 leading-relaxed"

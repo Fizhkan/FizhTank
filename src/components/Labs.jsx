@@ -191,62 +191,64 @@ export default function Labs() {
 
         {/* Detail Blueprint Lab */}
         <article className="specimen-panel reticle p-6 sm:p-8 lg:col-span-7" aria-live="polite">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-aqua/15 pb-5">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="chip text-aqua">BERKAS // LAB 0{currentLab.id}</span>
-              <span className="chip">{currentLab.category}</span>
+          <div key={currentLab.id} className="panel-enter">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-aqua/15 pb-5">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="chip text-aqua">BERKAS // LAB 0{currentLab.id}</span>
+                <span className="chip">{currentLab.category}</span>
+              </div>
+              <span className="chip border-aqua/40 text-sand">
+                {STATUS_LABEL[currentLab.status] || currentLab.status}
+              </span>
             </div>
-            <span className="chip border-aqua/40 text-sand">
-              {STATUS_LABEL[currentLab.status] || currentLab.status}
-            </span>
-          </div>
 
-          <h3 className="mt-6 text-3xl text-white sm:text-4xl">{currentLab.title}</h3>
-          <p className="mt-3 text-[1.0625rem] leading-relaxed text-mist">{currentLab.description}</p>
+            <h3 className="mt-6 text-3xl text-white sm:text-4xl">{currentLab.title}</h3>
+            <p className="mt-3 text-[1.0625rem] leading-relaxed text-mist">{currentLab.description}</p>
 
-          <div className="mt-6">
-            <Diagram labId={currentLab.id} />
-          </div>
+            <div className="mt-6">
+              <Diagram labId={currentLab.id} />
+            </div>
 
-          <div className="mt-6 border-t border-aqua/12 pt-5">
-            <h4 className="font-mono text-xs tracking-widest text-aqua uppercase">Tujuan Pengujian</h4>
-            <p className="mt-2 leading-relaxed text-foam">{currentLab.writeup.objective}</p>
-          </div>
+            <div className="mt-6 border-t border-aqua/12 pt-5">
+              <h4 className="font-mono text-xs tracking-widest text-aqua uppercase">Tujuan Pengujian</h4>
+              <p className="mt-2 leading-relaxed text-foam">{currentLab.writeup.objective}</p>
+            </div>
 
-          <div className="mt-6 border-t border-aqua/12 pt-5">
-            <h4 className="font-mono text-xs tracking-widest text-aqua uppercase">Langkah Awal</h4>
-            <ol className="mt-3 space-y-2.5">
-              {currentLab.writeup.plannedSteps.slice(0, 3).map((step, idx) => (
-                <li key={step} className="flex items-start gap-3 text-mist">
-                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-[2px] border border-aqua/40 font-mono text-[0.6875rem] font-semibold text-aqua">
-                    0{idx + 1}
-                  </span>
-                  <span className="leading-relaxed">{step}</span>
-                </li>
-              ))}
-            </ol>
-          </div>
+            <div className="mt-6 border-t border-aqua/12 pt-5">
+              <h4 className="font-mono text-xs tracking-widest text-aqua uppercase">Langkah Awal</h4>
+              <ol className="mt-3 space-y-2.5">
+                {currentLab.writeup.plannedSteps.slice(0, 3).map((step, idx) => (
+                  <li key={step} className="flex items-start gap-3 text-mist">
+                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-[2px] border border-aqua/40 font-mono text-[0.6875rem] font-semibold text-aqua">
+                      0{idx + 1}
+                    </span>
+                    <span className="leading-relaxed">{step}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
 
-          <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-aqua/15 pt-6">
-            <ul className="flex flex-wrap gap-2">
-              {currentLab.tags.map((tag) => (
-                <li key={tag} className="chip">
-                  {tag}
-                </li>
-              ))}
-            </ul>
+            <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-aqua/15 pt-6">
+              <ul className="flex flex-wrap gap-2">
+                {currentLab.tags.map((tag) => (
+                  <li key={tag} className="chip">
+                    {tag}
+                  </li>
+                ))}
+              </ul>
 
-            <button
-              type="button"
-              onClick={() => {
-                playWaterBubble()
-                setModalLab(currentLab)
-              }}
-              className="btn btn-primary"
-            >
-              <span>Lihat semua langkah</span>
-              <ArrowUpRight size={16} aria-hidden="true" />
-            </button>
+              <button
+                type="button"
+                onClick={() => {
+                  playWaterBubble()
+                  setModalLab(currentLab)
+                }}
+                className="btn btn-primary"
+              >
+                <span>Lihat semua langkah</span>
+                <ArrowUpRight size={16} aria-hidden="true" />
+              </button>
+            </div>
           </div>
         </article>
       </div>

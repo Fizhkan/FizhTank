@@ -126,7 +126,7 @@ export default function Skills() {
 
         {/* Matriks Hairline (Menggantikan Grid Kartu Bulat Seragam) */}
         {currentGroup && activeTab !== 'osi' && (
-          <div role="tabpanel" className="p-5 sm:p-8">
+          <div key={activeTab} role="tabpanel" className="panel-enter p-5 sm:p-8">
             <div className="flex flex-col justify-between gap-4 border-b border-aqua/15 pb-6 sm:flex-row sm:items-end">
               <div>
                 <h3 className="text-3xl text-white sm:text-4xl">{currentGroup.label}</h3>
@@ -143,7 +143,7 @@ export default function Skills() {
 
             <ul className="mt-7 grid grid-cols-1 gap-px border border-aqua/15 bg-aqua/15 sm:grid-cols-2 lg:grid-cols-3">
               {currentGroup.skills.map((skill, idx) => (
-                <li key={skill.name} className="flex flex-col justify-between bg-[#021721]/95 p-5 sm:p-6">
+                <li key={skill.name} className="specimen-hover flex flex-col justify-between bg-[#021721]/95 p-5 sm:p-6">
                   <div>
                     <div className="flex items-center justify-between gap-3 border-b border-aqua/10 pb-3">
                       <span className="font-mono text-[0.6875rem] text-aqua/80">
@@ -169,7 +169,7 @@ export default function Skills() {
 
         {/* Bedah Layer OSI */}
         {activeTab === 'osi' && (
-          <div role="tabpanel" className="p-5 sm:p-8">
+          <div key="osi" role="tabpanel" className="panel-enter p-5 sm:p-8">
             <div className="border-b border-aqua/15 pb-6">
               <h3 className="text-3xl text-white sm:text-4xl">Dari aplikasi sampai kabel</h3>
               <p className="mt-1.5 max-w-xl text-mist">
@@ -211,7 +211,7 @@ export default function Skills() {
                 })}
               </div>
 
-              <div className="specimen-inset p-5 sm:p-6 lg:col-span-7" aria-live="polite">
+              <div key={osi.code} className="specimen-inset panel-enter p-5 sm:p-6 lg:col-span-7" aria-live="polite">
                 <span className="font-mono text-[0.6875rem] tracking-widest text-aqua uppercase">
                   Inspeksi // {osi.code}
                 </span>

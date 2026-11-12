@@ -564,6 +564,7 @@ function buildSubstrate(w, h, dpr) {
 export default function AquariumCanvas() {
   const wrapRef = useRef(null)
   const canvasRef = useRef(null)
+  const depthVeilRef = useRef(null)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -1136,7 +1137,7 @@ export default function AquariumCanvas() {
       if (
         target &&
         target.closest &&
-        target.closest('button, a, input, textarea, select, label, summary, header, footer, [data-no-feed], .glass, .glass-inset')
+        target.closest('button, a, input, textarea, select, label, summary, header, footer, [data-no-feed], .glass, .glass-inset, .specimen-panel, .specimen-inset')
       ) {
         return
       }
@@ -1194,15 +1195,36 @@ export default function AquariumCanvas() {
     }
     document.addEventListener('visibilitychange', onVisibility)
 
+    // Kedalaman air bertahap mengikuti posisi scroll (Permukaan 0m -> Abisal 500m) via GPU opacity
+    let depthRaf = null
+    const syncDepthVeil = () => {
+      depthRaf = null
+      if (!depthVeilRef.current) return
+      const doc = document.documentElement
+      const maxScroll = Math.max(1, doc.scrollHeight - window.innerHeight)
+      const ratio = Math.max(0, Math.min(1, window.scrollY / maxScroll))
+      depthVeilRef.current.style.opacity = (ratio * 0.68).toFixed(3)
+    }
+    const onScrollDepth = () => {
+      if (depthRaf) return
+      depthRaf = requestAnimationFrame(syncDepthVeil)
+    }
+    syncDepthVeil()
+    window.addEventListener('scroll', onScrollDepth, { passive: true })
+    window.addEventListener('resize', onScrollDepth, { passive: true })
+
     rafId = requestAnimationFrame(render)
 
     return () => {
       running = false
       cancelAnimationFrame(rafId)
+      if (depthRaf) cancelAnimationFrame(depthRaf)
       clearTimeout(resizeTimer)
       window.removeEventListener('resize', onResize)
       window.removeEventListener('pointerdown', onPointerDown)
       window.removeEventListener('fizhtank-feed', onFeedEvent)
+      window.removeEventListener('scroll', onScrollDepth)
+      window.removeEventListener('resize', onScrollDepth)
       document.removeEventListener('visibilitychange', onVisibility)
     }
   }, [])
@@ -1218,6 +1240,16 @@ export default function AquariumCanvas() {
       }}
     >
       <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
+      {/* Lapisan kedalaman abisal saat user menyelam ke bagian bawah halaman */}
+      <div
+        ref={depthVeilRef}
+        className="pointer-events-none absolute inset-0"
+        style={{
+          opacity: 0,
+          background:
+            'radial-gradient(ellipse 100% 70% at 50% 25%, rgba(2, 19, 27, 0.45), rgba(1, 10, 16, 0.96))',
+        }}
+      />
       {/* Bayangan di dasar tank agar teks yang melewati area pasir tetap terbaca */}
       <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-deep/70 to-transparent" />
     </div>
