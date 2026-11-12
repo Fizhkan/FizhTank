@@ -4,10 +4,10 @@ import { AnimatePresence, motion } from 'motion/react'
 import FishMark from './FishMark'
 
 const NAV_LINKS = [
-  { num: '01', label: 'Lab', href: '#labs', id: 'labs' },
-  { num: '02', label: 'Skill', href: '#skills', id: 'skills' },
-  { num: '03', label: 'Target', href: '#certifications', id: 'certifications' },
-  { num: '04', label: 'Kontak', href: '#contact', id: 'contact' },
+  { num: '01', label: 'Labs', href: '#labs', id: 'labs' },
+  { num: '02', label: 'Skills', href: '#skills', id: 'skills' },
+  { num: '03', label: 'Targets', href: '#certifications', id: 'certifications' },
+  { num: '04', label: 'Contact', href: '#contact', id: 'contact' },
 ]
 
 export default function Navbar() {
@@ -66,18 +66,18 @@ export default function Navbar() {
         <a
           href="#hero"
           className="group flex items-center gap-3 transition-transform duration-100 active:scale-[0.97]"
-          aria-label="FizhTank, kembali ke atas"
+          aria-label="FizhTank, back to top"
         >
           <FishMark size={34} />
           <span className="flex flex-col leading-none">
             <span className="font-display text-2xl tracking-tight text-white">FizhTank</span>
             <span className="mt-0.5 font-mono text-[0.6875rem] tracking-wider text-mist uppercase">
-              Log // Siraj
+              Portfolio // Hafidz
             </span>
           </span>
         </a>
 
-        <nav className="hidden items-center gap-1 md:flex" aria-label="Navigasi utama">
+        <nav className="hidden items-center gap-1 md:flex" aria-label="Primary navigation">
           {NAV_LINKS.map((link) => {
             const isActive = activeSection === link.id
             return (
@@ -132,7 +132,7 @@ export default function Navbar() {
             onClick={() => setMobileOpen((open) => !open)}
             aria-expanded={mobileOpen}
             aria-controls="mobile-menu"
-            aria-label={mobileOpen ? 'Tutup menu' : 'Buka menu'}
+            aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}
             className="flex h-11 w-11 items-center justify-center rounded-[2px] border border-aqua/25 text-foam transition-transform duration-100 active:scale-[0.95]"
           >
             {mobileOpen ? <X size={20} /> : <Menu size={20} />}
@@ -159,7 +159,7 @@ export default function Navbar() {
             }}
             className="border-b border-aqua/20 bg-deep/95 px-5 pt-2 pb-5 backdrop-blur-xl md:hidden"
           >
-            <nav className="flex flex-col divide-y divide-aqua/12" aria-label="Navigasi seluler">
+            <nav className="flex flex-col divide-y divide-aqua/12" aria-label="Mobile navigation">
               {NAV_LINKS.map((link) => (
                 <a
                   key={link.id}

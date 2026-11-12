@@ -1,46 +1,45 @@
 /**
- * Pusat teks, profil, dan metadata FizhTank.
- * Judul dan deskripsi di sini otomatis disinkronkan ke <title>, meta, Open Graph,
- * dan JSON-LD oleh scripts/prerender.js saat build.
+ * Central site profile and metadata for FizhTank.
+ * Synced to <title>, meta, Open Graph, and JSON-LD by scripts/prerender.js on build.
  */
 
 export const site = {
-  title: 'FizhTank | Portofolio Siraj, Aspiring Network & Security Engineer',
+  title: 'FizhTank | Hafidz — Network & Security Engineering Portfolio',
 
   jobTitle: 'Aspiring Network & Security Engineer',
 
-  subtitle: 'Mahasiswa D3 Teknik Informatika',
+  subtitle: 'Informatics Engineering (D3)',
 
-  tagline: 'Belajar membangun dan mengamankan jaringan, satu lab dalam satu waktu.',
+  tagline: 'Engineering resilient networks and practical security, one lab at a time.',
 
-  // Foto profil: taruh file di public/profile.jpg. Jika belum ada, kartu profil menampilkan inisial.
+  // Profile image path in public/profile.jpg; falls back to monogram initial if absent.
   avatarUrl: '/profile.jpg',
 
   description:
-    'Portofolio Siraj (Hafidz Sirajuddin), mahasiswa D3 Teknik Informatika yang belajar jaringan, keamanan, dan Linux. Berisi rencana lab, catatan skill, dan akuarium yang bisa diberi makan.',
+    'Portfolio of Hafidz (Hafidz Sirajuddin), Informatics Engineering student focusing on network architecture, Linux infrastructure, and packet security.',
 
-  availability: 'Terbuka untuk diskusi teknis dan magang',
+  availability: 'Open to technical collaborations & internships',
 
   location: 'Surabaya, Indonesia',
 
-  // Kosongkan jika belum ada; tombol CV hanya tampil jika terisi
+  // Optional CV download path
   cvUrl: '',
 
-  // Kosongkan jika belum ada; kartu LinkedIn hanya tampil jika terisi
+  // Optional LinkedIn URL
   linkedinUrl: '',
 
   email: 'hafidzsirajuddin99@gmail.com',
 
-  // Endpoint formulir kontak (Formspree)
+  // Contact form endpoint (Formspree)
   formspreeEndpoint: 'https://formspree.io/f/mrpegvge',
 
-  // Sertifikasi. Kartu hanya tampil jika 'name' terisi; jika kosong, roadmap bawaan dipakai.
+  // Certifications list; uses default roadmap in Certifications.jsx when empty.
   certifications: [
     {
       name: '',
       issuer: '',
       date: '',
-      status: 'Planned', // 'Completed' | 'In Progress' | 'Planned'
+      status: 'Planned',
     },
   ],
 }

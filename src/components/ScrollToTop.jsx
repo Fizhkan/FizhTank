@@ -22,7 +22,7 @@ export default function ScrollToTop() {
     <button
       type="button"
       onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-      aria-label="Kembali ke atas"
+      aria-label="Back to top"
       tabIndex={show ? 0 : -1}
       className="specimen-panel fixed right-5 bottom-5 z-40 flex h-11 w-11 items-center justify-center rounded-[2px] text-aqua transition-[opacity,transform,border-color,color] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-aqua/60 hover:text-foam active:scale-[0.97] sm:right-7 sm:bottom-6"
       style={{

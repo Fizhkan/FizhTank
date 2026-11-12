@@ -31,7 +31,7 @@ function App() {
             href="#main-content"
             className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[60] focus:rounded-full focus:bg-coral focus:px-4 focus:py-2 focus:font-semibold focus:text-[#2a1204] focus:outline-none"
           >
-            Lewati ke konten utama
+            Skip to main content
           </a>
 
           <div className="relative z-10 flex min-h-screen flex-col justify-between">

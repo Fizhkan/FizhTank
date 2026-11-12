@@ -3,9 +3,9 @@ import { motion, useMotionValue, animate } from 'motion/react'
 import { X, Target, ListOrdered, ExternalLink, ShieldCheck, Network, Cpu, Info, FileText, CheckCircle2 } from 'lucide-react'
 
 const STATUS_LABEL = {
-  planned: 'Direncanakan',
-  'in-progress': 'Sedang dikerjakan',
-  complete: 'Selesai',
+  planned: 'Planned',
+  'in-progress': 'In Progress',
+  complete: 'Completed',
 }
 
 const hasValue = (v) => Boolean(v && v.trim() !== '' && !v.includes('[ISI'))
@@ -219,7 +219,7 @@ export default function LabModal({ lab, onClose }) {
               ref={closeButtonRef}
               type="button"
               onClick={handleClose}
-              aria-label="Tutup detail lab"
+              aria-label="Close lab blueprint"
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[2px] border border-aqua/25 text-mist transition-[border-color,color,transform] duration-100 hover:border-aqua/60 hover:text-foam active:scale-[0.95]"
             >
               <X size={18} aria-hidden="true" />
@@ -228,12 +228,12 @@ export default function LabModal({ lab, onClose }) {
         </div>
 
         <div className="space-y-7 p-5 sm:p-6">
-          <Section icon={Target} title="Tujuan" delay={0}>
+          <Section icon={Target} title="Objective" delay={0}>
             <p className="leading-relaxed text-mist">{lab.writeup?.objective}</p>
           </Section>
 
           {lab.writeup?.plannedSteps && (
-            <Section icon={ListOrdered} title="Rencana langkah" delay={1}>
+            <Section icon={ListOrdered} title="Execution Plan" delay={1}>
               <ol className="space-y-2.5">
                 {lab.writeup.plannedSteps.map((step, i) => (
                   <li key={step} className="specimen-inset flex items-start gap-3 p-3.5">
@@ -248,10 +248,10 @@ export default function LabModal({ lab, onClose }) {
           )}
 
           {topologyImage && (
-            <Section icon={Network} title="Topologi" delay={2}>
+            <Section icon={Network} title="Topology" delay={2}>
               <img
                 src={topologyImage}
-                alt={lab.topologyAlt || `Topologi untuk ${lab.title}`}
+                alt={lab.topologyAlt || `Topology diagram for ${lab.title}`}
                 className="w-full rounded-[2px] border border-aqua/20"
               />
             </Section>
@@ -260,12 +260,12 @@ export default function LabModal({ lab, onClose }) {
           {isPlanned && (
             <div className="flex items-center gap-3 rounded-[2px] border border-aqua/25 bg-aqua/8 p-4 text-[0.9375rem] text-foam">
               <Info size={18} className="shrink-0 text-aqua" aria-hidden="true" />
-              <p>Write-up hasil lab ditambahkan setelah lab selesai dikerjakan.</p>
+              <p>Verification logs and full configuration write-up will be published upon completion.</p>
             </div>
           )}
 
           {isComplete && lab.writeup?.commands && (
-            <Section icon={Target} title="Perintah kunci" delay={2}>
+            <Section icon={Target} title="Key Commands" delay={2}>
               <pre className="specimen-inset overflow-x-auto p-4 font-mono text-[0.8125rem] leading-relaxed whitespace-pre-wrap text-foam">
                 {lab.writeup.commands}
               </pre>
@@ -273,7 +273,7 @@ export default function LabModal({ lab, onClose }) {
           )}
 
           {isComplete && lab.writeup?.verification && (
-            <Section icon={CheckCircle2} title="Hasil verifikasi" delay={3}>
+            <Section icon={CheckCircle2} title="Verification Results" delay={3}>
               <ul className="space-y-2 text-mist">
                 {lab.writeup.verification.map((v) => (
                   <li key={v} className="flex items-start gap-2">
@@ -298,13 +298,13 @@ export default function LabModal({ lab, onClose }) {
               {reportUrl && (
                 <a href={reportUrl} target="_blank" rel="noopener noreferrer" className="btn btn-ghost min-h-10! px-4! py-2! text-sm">
                   <FileText size={15} aria-hidden="true" />
-                  <span>Laporan</span>
+                  <span>Report</span>
                 </a>
               )}
               {repoUrl && (
                 <a href={repoUrl} target="_blank" rel="noopener noreferrer" className="btn btn-ghost min-h-10! px-4! py-2! text-sm">
                   <ExternalLink size={15} aria-hidden="true" />
-                  <span>Repositori</span>
+                  <span>Repository</span>
                 </a>
               )}
             </div>

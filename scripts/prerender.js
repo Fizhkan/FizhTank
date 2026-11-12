@@ -75,7 +75,7 @@ async function prerender() {
     const jsonLdData = {
       '@context': 'https://schema.org',
       '@type': 'Person',
-      name: 'Siraj',
+      name: 'Hafidz',
       alternateName: 'Fizhkan',
       url: 'https://fizhtank.vercel.app/',
       email: site.email || undefined,

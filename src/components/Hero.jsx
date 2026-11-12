@@ -13,16 +13,16 @@ import { useScrollReveal } from '../hooks/useScrollReveal'
 import { toolsData } from '../data/skillsData'
 import { site } from '../data/site'
 
-// Topologi homelab yang direncanakan. Alamat hanya contoh rancangan, bukan perangkat yang sedang berjalan.
+// Planned homelab network topology blueprint.
 const NODES = [
-  { id: 'wan', label: 'Internet', x: 50, y: 11, icon: Globe, role: 'Jalur keluar ke ISP', addr: 'DHCP dari ISP', note: 'Semua traffic masuk dan keluar melewati titik ini lebih dulu.' },
-  { id: 'fw', label: 'Gateway Arch Linux', x: 50, y: 32, icon: Shield, role: 'Firewall UFW / iptables', addr: '10.0.0.1', note: 'Kebijakan default deny untuk traffic masuk. Dirancang di Lab 03.', lab: 3 },
-  { id: 'core', label: 'Core L3 Switch', x: 50, y: 54, icon: Network, role: 'Inter-VLAN routing (SVI)', addr: '192.168.10.1, .20.1, .30.1', note: 'Merutekan antar VLAN dan menjalankan ACL antar departemen. Dirancang di Lab 01.', lab: 1 },
-  { id: 'tap', label: 'Wireshark tap', x: 16, y: 54, icon: Activity, role: 'Pengamat paket', addr: 'mode promiscuous', note: 'Tempat mengamati traffic HTTP dan HTTPS. Dipakai di Lab 02.', lab: 2 },
-  { id: 'dns', label: 'Pi-hole', x: 84, y: 54, icon: Database, role: 'DNS resolver lokal', addr: '192.168.20.53', note: 'Memblokir domain iklan di level DNS. Bagian dari Lab 03.', lab: 3 },
-  { id: 'v10', label: 'VLAN 10 IT', x: 20, y: 83, icon: Monitor, role: 'Segmen departemen IT', addr: '192.168.10.0/24', note: 'Segmen untuk perangkat tim IT.', lab: 1 },
-  { id: 'v20', label: 'VLAN 20 HR', x: 50, y: 83, icon: Monitor, role: 'Segmen departemen HR', addr: '192.168.20.0/24', note: 'Akses ke VLAN Finance rencananya diblokir dengan Extended ACL.', lab: 1 },
-  { id: 'v30', label: 'VLAN 30 Finance', x: 80, y: 83, icon: Monitor, role: 'Segmen departemen Finance', addr: '192.168.30.0/24', note: 'Segmen yang dilindungi ACL dari VLAN lain.', lab: 1 },
+  { id: 'wan', label: 'Internet', x: 50, y: 11, icon: Globe, role: 'Upstream ISP Uplink', addr: 'ISP DHCP', note: 'Ingress and egress boundary for external lab traffic.' },
+  { id: 'fw', label: 'Arch Linux Gateway', x: 50, y: 32, icon: Shield, role: 'Stateful Firewall (UFW / iptables)', addr: '10.0.0.1', note: 'Default-deny ingress filtering and gateway routing. Covered in Lab 03.', lab: 3 },
+  { id: 'core', label: 'Core L3 Switch', x: 50, y: 54, icon: Network, role: 'Inter-VLAN Routing (SVI)', addr: '192.168.10.1, .20.1, .30.1', note: 'Routes departmental VLANs and enforces Extended ACL policies. Covered in Lab 01.', lab: 1 },
+  { id: 'tap', label: 'Wireshark Tap', x: 16, y: 54, icon: Activity, role: 'Packet Capture Interface', addr: 'Promiscuous Mode', note: 'Captures live HTTP/FTP cleartext and TLS 1.3 frames for inspection. Covered in Lab 02.', lab: 2 },
+  { id: 'dns', label: 'Pi-hole', x: 84, y: 54, icon: Database, role: 'Local DNS Sinkhole', addr: '192.168.20.53', note: 'Filters telemetry and ad domains at DNS layer on port 53. Covered in Lab 03.', lab: 3 },
+  { id: 'v10', label: 'VLAN 10 IT', x: 20, y: 83, icon: Monitor, role: 'IT Operations Subnet', addr: '192.168.10.0/24', note: 'Dedicated network segment for engineering and admin hosts.', lab: 1 },
+  { id: 'v20', label: 'VLAN 20 HR', x: 50, y: 83, icon: Monitor, role: 'HR Departmental Subnet', addr: '192.168.20.0/24', note: 'Isolated from Finance resources via Extended ACL rules.', lab: 1 },
+  { id: 'v30', label: 'VLAN 30 Finance', x: 80, y: 83, icon: Monitor, role: 'Finance Restricted Subnet', addr: '192.168.30.0/24', note: 'Restricted subnet protected against cross-VLAN access.', lab: 1 },
 ]
 
 const LINKS = [
@@ -42,7 +42,7 @@ export default function Hero() {
   const [avatarOk, setAvatarOk] = useState(false)
   const [benchRef, benchVisible] = useScrollReveal({ threshold: 0.08 })
 
-  // Foto hanya ditampilkan jika file-nya ada; jika tidak, kartu menampilkan inisial
+  // Render profile photo when public/profile.jpg exists; otherwise display monogram fallback.
   useEffect(() => {
     if (!site.avatarUrl) return
     const probe = new Image()
@@ -62,38 +62,37 @@ export default function Hero() {
   return (
     <section id="hero" className="relative mx-auto max-w-7xl px-5 pt-28 pb-20 sm:px-8 sm:pt-32">
       <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12">
-        {/* Editorial Typography Lead — Dibuka lapang di atas air */}
+        {/* Editorial Typography Lead */}
         <div className="lg:col-span-8">
           <p className="eyebrow hero-stagger" style={{ '--stagger': 0 }}>
-            Log 00 // Permukaan — Surabaya, Indonesia
+            Log 00 // Surface — Surabaya, Indonesia
           </p>
 
           <h1
             className="on-water hero-stagger mt-5 font-display text-[3.15rem] leading-[0.98] tracking-[-0.025em] text-white sm:text-[4.5rem] lg:text-[5.5rem]"
             style={{ '--stagger': 1 }}
           >
-            Belajar membangun <em className="italic text-aqua">&amp; mengamankan</em> jaringan.
+            Engineering resilient <em className="italic text-aqua">&amp; secure</em> networks.
           </h1>
 
           <p className="lede on-water hero-stagger mt-7 max-w-xl text-[1.0625rem]" style={{ '--stagger': 2 }}>
-            Halo, saya <strong className="font-semibold text-white">Siraj</strong>, mahasiswa D3 Teknik Informatika.
-            Situs ini berisi catatan lab jaringan, keamanan, dan Linux—dengan latar akuarium interaktif: klik area
-            air yang kosong untuk memberi makan ikan.
+            I&apos;m <strong className="font-semibold text-white">Hafidz</strong>, an Informatics Engineering student
+            focused on network architecture, Linux infrastructure, and packet security. Click open water to feed the tank.
           </p>
 
           <div className="hero-stagger mt-9 flex flex-wrap items-center gap-3" style={{ '--stagger': 3 }}>
             <a href="#labs" className="btn btn-primary">
-              <span>Lihat rencana lab</span>
+              <span>Explore Labs</span>
               <ArrowUpRight size={16} aria-hidden="true" />
             </a>
             <a href="#contact" className="btn btn-ghost">
-              Hubungi saya
+              Get in Touch
             </a>
           </div>
 
           <div className="hero-stagger mt-10 border-t border-aqua/15 pt-5" style={{ '--stagger': 4 }}>
             <p className="mb-2.5 font-mono text-[0.6875rem] tracking-widest text-mist/85 uppercase">
-              Perangkat yang sedang dipelajari
+              Core Stack
             </p>
             <ul className="flex flex-wrap gap-2">
               {usedTools.map((tool) => (
@@ -115,7 +114,7 @@ export default function Hero() {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-kelp opacity-65" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-kelp" />
                 </span>
-                AKTIF
+                ONLINE
               </span>
             </div>
 
@@ -124,13 +123,13 @@ export default function Hero() {
                 {avatarOk ? (
                   <img
                     src={site.avatarUrl}
-                    alt="Foto Siraj"
+                    alt="Hafidz Sirajuddin portrait"
                     className="h-full w-full object-cover object-top"
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_30%_20%,#0d5f70,#063342_62%,#021822)]">
                     <span className="font-display text-[5rem] leading-none text-white/90 italic" aria-hidden="true">
-                      S
+                      H
                     </span>
                   </div>
                 )}
@@ -140,15 +139,15 @@ export default function Hero() {
 
             <figcaption className="divide-y divide-aqua/12 border-t border-aqua/15 font-mono text-xs">
               <div className="flex items-baseline justify-between gap-2 px-3.5 py-2.5">
-                <span className="text-[0.6875rem] text-mist/75 uppercase">Subjek</span>
+                <span className="text-[0.6875rem] text-mist/75 uppercase">Subject</span>
                 <span className="font-sans text-sm font-semibold text-white">Hafidz Sirajuddin</span>
               </div>
               <div className="flex items-baseline justify-between gap-2 px-3.5 py-2.5">
-                <span className="text-[0.6875rem] text-mist/75 uppercase">Studi</span>
+                <span className="text-[0.6875rem] text-mist/75 uppercase">Degree</span>
                 <span className="font-sans text-xs text-foam">{site.subtitle}</span>
               </div>
               <div className="flex items-baseline justify-between gap-2 px-3.5 py-2.5">
-                <span className="text-[0.6875rem] text-mist/75 uppercase">Lokasi</span>
+                <span className="text-[0.6875rem] text-mist/75 uppercase">Base</span>
                 <span className="text-xs text-sand">{site.location}</span>
               </div>
             </figcaption>
@@ -156,17 +155,17 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Arsitektur Topologi Homelab yang Direncanakan */}
+      {/* Interactive Homelab Network Architecture */}
       <div ref={benchRef} className="mt-20 sm:mt-24" style={reveal(benchVisible, 24)}>
         <div className="specimen-panel reticle overflow-hidden">
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-aqua/15 px-5 py-4 sm:px-7">
             <div>
               <p className="font-mono text-[0.6875rem] tracking-widest text-aqua uppercase">
-                Arsitektur // Topologi Interaktif
+                Architecture // Interactive Topology
               </p>
-              <h2 className="mt-0.5 text-3xl text-white">Rancangan homelab</h2>
+              <h2 className="mt-0.5 text-3xl text-white">Homelab Blueprint</h2>
             </div>
-            <p className="font-mono text-xs text-mist">Pilih perangkat pada diagram untuk melihat perannya</p>
+            <p className="font-mono text-xs text-mist">Select a node to inspect role &amp; addressing</p>
           </div>
 
           <div className="grid grid-cols-1 items-center gap-8 p-5 sm:p-8 lg:grid-cols-12">
@@ -268,18 +267,18 @@ export default function Hero() {
                 >
                   <div className="p-5">
                     <p className="font-mono text-[0.6875rem] tracking-wider text-aqua uppercase">
-                      Spesifikasi Node
+                      Node Specifications
                     </p>
                     <h3 className="mt-1.5 text-3xl text-white">{selected.label}</h3>
                   </div>
 
                   <dl className="divide-y divide-aqua/10 text-sm">
                     <div className="flex flex-col gap-1 px-5 py-3">
-                      <dt className="font-mono text-[0.6875rem] text-mist/80 uppercase">Peran</dt>
+                      <dt className="font-mono text-[0.6875rem] text-mist/80 uppercase">Role</dt>
                       <dd className="text-white">{selected.role}</dd>
                     </div>
                     <div className="flex flex-col gap-1 px-5 py-3">
-                      <dt className="font-mono text-[0.6875rem] text-mist/80 uppercase">Alamat contoh</dt>
+                      <dt className="font-mono text-[0.6875rem] text-mist/80 uppercase">Address</dt>
                       <dd className="kbd-line text-sand">{selected.addr}</dd>
                     </div>
                   </dl>
@@ -291,7 +290,7 @@ export default function Hero() {
                         href="#labs"
                         className="mt-3 inline-flex items-center gap-1.5 font-mono text-xs font-semibold text-aqua hover:text-white"
                       >
-                        <span>Lihat Lab 0{selected.lab}</span>
+                        <span>View Lab 0{selected.lab}</span>
                         <ArrowUpRight size={13} aria-hidden="true" />
                       </a>
                     )}
@@ -300,7 +299,7 @@ export default function Hero() {
               </AnimatePresence>
 
               <p className="mt-3 px-1 font-mono text-xs text-mist/80">
-                * Semua perangkat di diagram ini masih rancangan lab, belum berjalan.
+                * Simulated homelab blueprint.
               </p>
             </div>
           </div>

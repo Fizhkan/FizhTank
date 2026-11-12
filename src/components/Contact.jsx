@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { GitBranch, Link2, Mail, Send, CheckCircle2, AlertCircle, ArrowUpRight } from 'lucide-react'
+import { GitBranch, Link2, Mail, Send, ArrowUpRight, CheckCircle2, AlertCircle } from 'lucide-react'
 import { useScrollReveal } from '../hooks/useScrollReveal'
 import { contactConfig } from '../data/contactData'
 import { site } from '../data/site'
@@ -60,12 +60,12 @@ export default function Contact() {
 
   const validateField = (field, val) => {
     const trimmed = val.trim()
-    if (field === 'name' && !trimmed) return 'Nama wajib diisi.'
+    if (field === 'name' && !trimmed) return 'Name is required.'
     if (field === 'email') {
-      if (!trimmed) return 'Email wajib diisi.'
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return 'Format email belum valid (contoh: nama@domain.com).'
+      if (!trimmed) return 'Email is required.'
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return 'Enter a valid email address (e.g. name@domain.com).'
     }
-    if (field === 'message' && !trimmed) return 'Pesan belum ditulis.'
+    if (field === 'message' && !trimmed) return 'Message cannot be empty.'
     return ''
   }
 
@@ -97,17 +97,17 @@ export default function Contact() {
 
     if (cooldown > 0) {
       setStatus('error')
-      setStatusMsg(`Tunggu ${cooldown} detik sebelum mengirim lagi.`)
+      setStatusMsg(`Please wait ${cooldown}s before sending another message.`)
       return
     }
 
-    // Honeypot: bot yang mengisi field tersembunyi dikira berhasil, tapi tidak dikirim ke mana pun
+    // Honeypot
     if (botTrap.trim() !== '') {
       setIsSending(true)
       setTimeout(() => {
         setIsSending(false)
         setStatus('success')
-        setStatusMsg('Pesan terkirim.')
+        setStatusMsg('Message received.')
         setForm({ name: '', email: '', message: '' })
         setTouched({ name: false, email: false, message: false })
         setCooldown(30)
@@ -118,14 +118,14 @@ export default function Contact() {
     if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
       setTouched({ name: true, email: true, message: true })
       setStatus('error')
-      setStatusMsg('Mohon periksa kolom yang masih kosong.')
+      setStatusMsg('Please complete all required fields.')
       return
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
       setTouched((prev) => ({ ...prev, email: true }))
       setStatus('error')
-      setStatusMsg('Format email belum benar.')
+      setStatusMsg('Please provide a valid email address.')
       return
     }
 
@@ -141,13 +141,13 @@ export default function Contact() {
           name: form.name.trim(),
           email: form.email.trim(),
           message: form.message.trim(),
-          _subject: `[FizhTank] Pesan dari ${form.name.trim()}`,
+          _subject: `[FizhTank] Message from ${form.name.trim()}`,
         }),
       })
 
       if (response.ok) {
         setStatus('success')
-        setStatusMsg('Terima kasih, pesanmu sudah terkirim. Saya akan membalas lewat email.')
+        setStatusMsg('Message delivered. I will reply via email shortly.')
         setForm({ name: '', email: '', message: '' })
         setTouched({ name: false, email: false, message: false })
         setCooldown(30)
@@ -162,12 +162,12 @@ export default function Contact() {
   }
 
   const handleMailtoFallback = () => {
-    const subject = encodeURIComponent(`[FizhTank] Pesan dari ${form.name}`)
-    const body = encodeURIComponent(`Halo Siraj,\n\n${form.message}\n\nDari: ${form.name} (${form.email})`)
+    const subject = encodeURIComponent(`[FizhTank] Message from ${form.name}`)
+    const body = encodeURIComponent(`Hi Hafidz,\n\n${form.message}\n\nFrom: ${form.name} (${form.email})`)
     window.location.href = `mailto:${contactConfig.fallbackEmail}?subject=${subject}&body=${body}`
 
     setStatus('sent-mailto')
-    setStatusMsg('Formulir sedang bermasalah, jadi aplikasi email kamu dibuka untuk mengirim pesan ini.')
+    setStatusMsg('Opening your default email client to dispatch the message.')
     setForm({ name: '', email: '', message: '' })
     setTouched({ name: false, email: false, message: false })
     setCooldown(30)
@@ -205,14 +205,13 @@ export default function Contact() {
         style={reveal(headerVisible)}
       >
         <div className="lg:col-span-7">
-          <p className="eyebrow">04 // Komunikasi &amp; Transmisi</p>
+          <p className="eyebrow">04 // Communications</p>
           <h2 className="section-title on-water mt-4">
-            Mari <em className="font-normal text-aqua italic">ngobrol</em>
+            Get in <em className="font-normal text-aqua italic">touch</em>
           </h2>
         </div>
         <p className="lede on-water lg:col-span-5">
-          Terbuka untuk diskusi soal jaringan dan keamanan, kolaborasi lab, atau peluang magang. Kirim pesan lewat
-          formulir, atau langsung lewat email dan GitHub.
+          Available for network engineering discussions, lab collaborations, and internship roles.
         </p>
       </div>
 
@@ -223,7 +222,7 @@ export default function Contact() {
           ))}
 
           <div className="p-5 sm:p-6">
-            <p className="font-mono text-[11px] tracking-widest text-mist uppercase">03 // Status Ekspedisi</p>
+            <p className="font-mono text-[11px] tracking-widest text-mist uppercase">03 // Availability</p>
             <p className="mt-2 flex items-start gap-2.5 font-medium text-foam">
               <span className="relative mt-[0.45em] flex h-2.5 w-2.5 shrink-0" aria-hidden="true">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-kelp opacity-60" />
@@ -232,7 +231,7 @@ export default function Contact() {
               {site.availability}
             </p>
             <p className="mt-2 text-sm leading-relaxed text-mist">
-              Saat ini fokus ke kuliah, praktik lab Cisco dan Linux, serta persiapan sertifikasi CCNA.
+              Currently focused on Informatics Engineering coursework, Cisco &amp; Linux lab builds, and CCNA preparation.
             </p>
           </div>
         </div>
@@ -240,18 +239,18 @@ export default function Contact() {
         <form onSubmit={handleSubmit} className="specimen-panel reticle space-y-5 p-6 sm:p-8 lg:col-span-7" noValidate>
           <div className="flex items-center justify-between border-b border-aqua/15 pb-3 font-mono text-[11px] tracking-widest text-mist uppercase">
             <span>DISPATCH FORM // DIRECT LINK</span>
-            <span className="text-aqua">ENCRYPTED HTTPS</span>
+            <span className="text-aqua">HTTPS</span>
           </div>
           <div className="hidden" aria-hidden="true">
             <label>
-              Jangan diisi
+              Do not fill
               <input type="text" tabIndex={-1} autoComplete="off" value={botTrap} onChange={(e) => setBotTrap(e.target.value)} />
             </label>
           </div>
 
           <div>
             <label htmlFor="contact-name" className="label">
-              Nama
+              Name
             </label>
             <input
               id="contact-name"
@@ -263,7 +262,7 @@ export default function Contact() {
               value={form.name}
               onChange={(e) => handleFieldChange('name', e.target.value)}
               onBlur={() => handleFieldBlur('name')}
-              placeholder="Nama kamu atau organisasi"
+              placeholder="Your name or organization"
               className={`field ${fieldErrors.name ? 'border-coral/70!' : ''}`}
             />
             {fieldErrors.name && (
@@ -287,7 +286,7 @@ export default function Contact() {
               value={form.email}
               onChange={(e) => handleFieldChange('email', e.target.value)}
               onBlur={() => handleFieldBlur('email')}
-              placeholder="nama@domain.com"
+              placeholder="name@domain.com"
               className={`field ${fieldErrors.email ? 'border-coral/70!' : ''}`}
             />
             {fieldErrors.email && (
@@ -299,7 +298,7 @@ export default function Contact() {
 
           <div>
             <label htmlFor="contact-message" className="label">
-              Pesan
+              Message
             </label>
             <textarea
               id="contact-message"
@@ -310,7 +309,7 @@ export default function Contact() {
               value={form.message}
               onChange={(e) => handleFieldChange('message', e.target.value)}
               onBlur={() => handleFieldBlur('message')}
-              placeholder="Tulis pertanyaan, ide kolaborasi, atau tawaran magang"
+              placeholder="Share inquiries, collaboration ideas, or internship roles"
               className={`field resize-none ${fieldErrors.message ? 'border-coral/70!' : ''}`}
             />
             {fieldErrors.message && (
@@ -338,12 +337,12 @@ export default function Contact() {
 
           <button type="submit" disabled={isSending || cooldown > 0} className="btn btn-primary w-full">
             {cooldown > 0 ? (
-              <span>Bisa kirim lagi dalam {cooldown} detik</span>
+              <span>Retry in {cooldown}s</span>
             ) : isSending ? (
-              <span>Mengirim…</span>
+              <span>Sending…</span>
             ) : (
               <>
-                <span>Kirim pesan</span>
+                <span>Send Message</span>
                 <Send size={16} aria-hidden="true" />
               </>
             )}

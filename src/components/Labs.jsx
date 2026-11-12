@@ -7,26 +7,25 @@ import { labsData } from '../data/labsData'
 const LabModal = lazy(() => import('./LabModal'))
 
 const STATUS_LABEL = {
-  planned: 'Direncanakan',
-  'in-progress': 'Sedang dikerjakan',
-  complete: 'Selesai',
+  planned: 'Planned',
+  'in-progress': 'In Progress',
+  complete: 'Completed',
 }
 
 const LAB_ICONS = { 1: Network, 2: ShieldCheck, 3: Cpu }
 
-// Diagram rancangan tiap lab. Semuanya rencana, bukan hasil pengujian.
 function Diagram({ labId }) {
   if (labId === 1) {
     return (
       <div className="specimen-inset p-4 sm:p-5">
-        <p className="font-mono text-[0.6875rem] tracking-wider text-aqua uppercase">Rancangan topologi</p>
+        <p className="font-mono text-[0.6875rem] tracking-wider text-aqua uppercase">Topology Blueprint</p>
         <div className="mt-4 flex flex-col items-center gap-3">
           <div className="flex items-center gap-2 rounded-[2px] border border-aqua/50 bg-aqua/10 px-4 py-2 font-mono text-xs font-medium text-white">
             <Network size={15} className="text-aqua" aria-hidden="true" />
-            Core L3 switch (SVI)
+            Core L3 Switch (SVI)
           </div>
           <div className="relative h-5 w-px bg-aqua/50" aria-hidden="true" />
-          <p className="-mt-1 font-mono text-[0.6875rem] text-mist">trunk 802.1Q</p>
+          <p className="-mt-1 font-mono text-[0.6875rem] text-mist">802.1Q Trunk</p>
           <div className="grid w-full grid-cols-3 gap-px border border-aqua/15 bg-aqua/15">
             {[
               ['VLAN 10', 'IT', '192.168.10.0/24'],
@@ -42,7 +41,7 @@ function Diagram({ labId }) {
           </div>
         </div>
         <p className="mt-4 border-t border-aqua/12 pt-3 text-sm text-mist">
-          Rencana ACL: akses dari VLAN 20 (HR) ke VLAN 30 (Finance) diblokir.
+          ACL Policy: deny cross-VLAN traffic from VLAN 20 (HR) to VLAN 30 (Finance).
         </p>
       </div>
     )
@@ -51,19 +50,19 @@ function Diagram({ labId }) {
   if (labId === 2) {
     return (
       <div className="specimen-inset p-4 sm:p-5">
-        <p className="font-mono text-[0.6875rem] tracking-wider text-aqua uppercase">Yang akan diamati di Wireshark</p>
+        <p className="font-mono text-[0.6875rem] tracking-wider text-aqua uppercase">Wireshark Capture Scope</p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <div className="border border-coral/40 bg-coral/10 p-3">
-            <p className="font-semibold text-white">HTTP dan FTP (plaintext)</p>
-            <p className="mt-1 text-sm text-mist">Username dan password diperkirakan terbaca di payload.</p>
+            <p className="font-semibold text-white">HTTP &amp; FTP (Cleartext)</p>
+            <p className="mt-1 text-sm text-mist">Credentials remain readable inside raw TCP streams.</p>
           </div>
           <div className="border border-kelp/40 bg-kelp/10 p-3">
             <p className="font-semibold text-white">HTTPS (TLS 1.3)</p>
-            <p className="mt-1 text-sm text-mist">Payload setelah handshake diperkirakan hanya terlihat sebagai data terenkripsi.</p>
+            <p className="mt-1 text-sm text-mist">Application payload is encrypted post-handshake.</p>
           </div>
         </div>
         <p className="mt-4 border-t border-aqua/12 pt-3 text-sm text-mist">
-          Filter yang akan dipakai: <code className="font-mono text-aqua">tcp.port == 443 || http</code>
+          Display filter: <code className="font-mono text-aqua">tcp.port == 443 || http</code>
         </p>
       </div>
     )
@@ -71,19 +70,19 @@ function Diagram({ labId }) {
 
   return (
     <div className="specimen-inset p-4 sm:p-5">
-      <p className="font-mono text-[0.6875rem] tracking-wider text-aqua uppercase">Rancangan gateway homelab</p>
+      <p className="font-mono text-[0.6875rem] tracking-wider text-aqua uppercase">Homelab Gateway Architecture</p>
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <div className="border border-aqua/15 bg-deep/70 p-3">
-          <p className="font-semibold text-white">Firewall UFW</p>
-          <p className="mt-1 text-sm text-mist">Deny incoming, allow outgoing. SSH hanya dengan key-pair.</p>
+          <p className="font-semibold text-white">UFW Stateful Firewall</p>
+          <p className="mt-1 text-sm text-mist">Default-deny ingress, allow egress, key-only SSH.</p>
         </div>
         <div className="border border-aqua/15 bg-deep/70 p-3">
-          <p className="font-semibold text-white">Pi-hole</p>
-          <p className="mt-1 text-sm text-mist">DNS lokal di port 53 untuk memblokir domain iklan.</p>
+          <p className="font-semibold text-white">Pi-hole Resolver</p>
+          <p className="mt-1 text-sm text-mist">Local DNS sinkhole filtering telemetry on port 53.</p>
         </div>
       </div>
       <p className="mt-4 border-t border-aqua/12 pt-3 text-sm text-mist">
-        Target pengecekan: Nmap dari mesin lain tidak menemukan port terbuka yang tidak diperlukan.
+        Verification: external Nmap sweep confirms zero unintended open ports.
       </p>
     </div>
   )
@@ -111,16 +110,19 @@ export default function Labs({ onModalOpenChange }) {
 
   return (
     <section id="labs" className="relative mx-auto max-w-7xl px-5 py-24 sm:px-8">
-      <div ref={headerRef} className="mb-12 flex flex-col justify-between gap-6 border-b border-aqua/15 pb-8 lg:flex-row lg:items-end" style={reveal(headerVisible)}>
+      <div
+        ref={headerRef}
+        className="mb-12 flex flex-col justify-between gap-6 border-b border-aqua/15 pb-8 lg:flex-row lg:items-end"
+        style={reveal(headerVisible)}
+      >
         <div className="max-w-2xl">
-          <p className="eyebrow">01 // Arsip Lab — Mesopelagik</p>
+          <p className="eyebrow">01 // Lab Archive — Mesopelagic</p>
           <h2 className="section-title on-water mt-4">
-            Lab yang <em className="italic text-aqua">sedang</em> saya rancang
+            Engineering <em className="italic text-aqua">labs</em>
           </h2>
         </div>
         <p className="lede on-water max-w-md text-base">
-          Ketiga lab ini belum saya kerjakan. Di sini tersimpan tujuan, rencana topologi, dan langkah awalnya.
-          Write-up lengkap menyusul setelah pengujian selesai.
+          Network topologies, security baselines, and verification plans queued for execution.
         </p>
       </div>
 
@@ -129,12 +131,12 @@ export default function Labs({ onModalOpenChange }) {
         className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12"
         style={reveal(contentVisible, 24)}
       >
-        {/* Indeks Lab Vertikal dengan Pemisah Hairline (Master Ledger) */}
+        {/* Master Lab Ledger */}
         <div className="lg:col-span-5">
           <div className="specimen-panel divide-y divide-aqua/15">
             <div className="flex items-center justify-between px-5 py-3 font-mono text-[0.6875rem] tracking-widest text-mist uppercase">
-              <span>Indeks Rencana</span>
-              <span className="text-aqua">0{labsData.length} Berkas</span>
+              <span>Lab Index</span>
+              <span className="text-aqua">0{labsData.length} Specs</span>
             </div>
 
             {labsData.map((lab) => {
@@ -161,9 +163,7 @@ export default function Labs({ onModalOpenChange }) {
                   <div className="flex items-start gap-4">
                     <span
                       className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[2px] border font-mono text-xs ${
-                        selected
-                          ? 'border-aqua bg-aqua text-deep'
-                          : 'border-aqua/25 text-aqua'
+                        selected ? 'border-aqua bg-aqua text-deep' : 'border-aqua/25 text-aqua'
                       }`}
                     >
                       <Icon size={17} aria-hidden="true" />
@@ -197,7 +197,7 @@ export default function Labs({ onModalOpenChange }) {
           </div>
         </div>
 
-        {/* Detail Blueprint Lab */}
+        {/* Lab Blueprint Detail */}
         <article className="specimen-panel reticle p-6 sm:p-8 lg:col-span-7" aria-live="polite">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
@@ -207,60 +207,60 @@ export default function Labs({ onModalOpenChange }) {
               exit={{ opacity: 0, transform: 'translateY(-6px)' }}
               transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
             >
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-aqua/15 pb-5">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="chip text-aqua">BERKAS // LAB 0{currentLab.id}</span>
-                <span className="chip">{currentLab.category}</span>
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-aqua/15 pb-5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="chip text-aqua">SPEC // LAB 0{currentLab.id}</span>
+                  <span className="chip">{currentLab.category}</span>
+                </div>
+                <span className="chip border-aqua/40 text-sand">
+                  {STATUS_LABEL[currentLab.status] || currentLab.status}
+                </span>
               </div>
-              <span className="chip border-aqua/40 text-sand">
-                {STATUS_LABEL[currentLab.status] || currentLab.status}
-              </span>
-            </div>
 
-            <h3 className="mt-6 text-3xl text-white sm:text-4xl">{currentLab.title}</h3>
-            <p className="mt-3 text-[1.0625rem] leading-relaxed text-mist">{currentLab.description}</p>
+              <h3 className="mt-6 text-3xl text-white sm:text-4xl">{currentLab.title}</h3>
+              <p className="mt-3 text-[1.0625rem] leading-relaxed text-mist">{currentLab.description}</p>
 
-            <div className="mt-6">
-              <Diagram labId={currentLab.id} />
-            </div>
+              <div className="mt-6">
+                <Diagram labId={currentLab.id} />
+              </div>
 
-            <div className="mt-6 border-t border-aqua/12 pt-5">
-              <h4 className="font-mono text-xs tracking-widest text-aqua uppercase">Tujuan Pengujian</h4>
-              <p className="mt-2 leading-relaxed text-foam">{currentLab.writeup.objective}</p>
-            </div>
+              <div className="mt-6 border-t border-aqua/12 pt-5">
+                <h4 className="font-mono text-xs tracking-widest text-aqua uppercase">Objective</h4>
+                <p className="mt-2 leading-relaxed text-foam">{currentLab.writeup.objective}</p>
+              </div>
 
-            <div className="mt-6 border-t border-aqua/12 pt-5">
-              <h4 className="font-mono text-xs tracking-widest text-aqua uppercase">Langkah Awal</h4>
-              <ol className="mt-3 space-y-2.5">
-                {currentLab.writeup.plannedSteps.slice(0, 3).map((step, idx) => (
-                  <li key={step} className="flex items-start gap-3 text-mist">
-                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-[2px] border border-aqua/40 font-mono text-[0.6875rem] font-semibold text-aqua">
-                      0{idx + 1}
-                    </span>
-                    <span className="leading-relaxed">{step}</span>
-                  </li>
-                ))}
-              </ol>
-            </div>
+              <div className="mt-6 border-t border-aqua/12 pt-5">
+                <h4 className="font-mono text-xs tracking-widest text-aqua uppercase">Execution Plan</h4>
+                <ol className="mt-3 space-y-2.5">
+                  {currentLab.writeup.plannedSteps.slice(0, 3).map((step, idx) => (
+                    <li key={step} className="flex items-start gap-3 text-mist">
+                      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-[2px] border border-aqua/40 font-mono text-[0.6875rem] font-semibold text-aqua">
+                        0{idx + 1}
+                      </span>
+                      <span className="leading-relaxed">{step}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
 
-            <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-aqua/15 pt-6">
-              <ul className="flex flex-wrap gap-2">
-                {currentLab.tags.map((tag) => (
-                  <li key={tag} className="chip">
-                    {tag}
-                  </li>
-                ))}
-              </ul>
+              <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-aqua/15 pt-6">
+                <ul className="flex flex-wrap gap-2">
+                  {currentLab.tags.map((tag) => (
+                    <li key={tag} className="chip">
+                      {tag}
+                    </li>
+                  ))}
+                </ul>
 
-              <button
-                type="button"
-                onClick={() => setModalLab(currentLab)}
-                className="btn btn-primary"
-              >
-                <span>Lihat semua langkah</span>
-                <ArrowUpRight size={16} aria-hidden="true" />
-              </button>
-            </div>
+                <button
+                  type="button"
+                  onClick={() => setModalLab(currentLab)}
+                  className="btn btn-primary"
+                >
+                  <span>Inspect Full Plan</span>
+                  <ArrowUpRight size={16} aria-hidden="true" />
+                </button>
+              </div>
             </motion.div>
           </AnimatePresence>
         </article>

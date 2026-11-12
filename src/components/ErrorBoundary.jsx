@@ -23,17 +23,17 @@ export default class ErrorBoundary extends React.Component {
     if (this.state.hasError) {
       return (
         <div className="flex min-h-screen items-center justify-center bg-deep p-6 text-foam">
-          <div className="glass w-full max-w-md space-y-4 p-8 text-center">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-coral/40 bg-coral/10 text-coral">
-              <AlertTriangle size={26} aria-hidden="true" />
+          <div className="specimen-panel reticle w-full max-w-md space-y-4 p-8 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[2px] border border-coral/40 bg-coral/10 text-coral-text">
+              <AlertTriangle size={22} aria-hidden="true" />
             </div>
-            <h2 className="text-2xl text-white">Tank-nya sedang bermasalah</h2>
+            <h2 className="text-2xl text-white">Rendering Error</h2>
             <p className="text-[0.9375rem] leading-relaxed text-mist">
-              Ada error saat menampilkan halaman ini. Muat ulang untuk mengisi ulang airnya.
+              Unable to display this view cleanly. Reload to restore the application state.
             </p>
             <button type="button" onClick={this.handleReload} className="btn btn-primary">
               <RefreshCw size={16} aria-hidden="true" />
-              <span>Muat ulang halaman</span>
+              <span>Reload Page</span>
             </button>
           </div>
         </div>

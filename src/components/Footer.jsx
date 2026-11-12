@@ -11,7 +11,7 @@ export default function Footer() {
           <div>
             <p className="font-mono text-xs tracking-widest text-foam uppercase">FizhTank // Colophon</p>
             <p className="mt-0.5 text-sm text-mist">
-              © {new Date().getFullYear()} Siraj (Fizhkan) · {site.location}
+              © {new Date().getFullYear()} Hafidz Sirajuddin · {site.location}
             </p>
           </div>
         </div>
