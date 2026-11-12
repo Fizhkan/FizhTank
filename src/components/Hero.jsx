@@ -60,8 +60,8 @@ export default function Hero() {
   })
 
   return (
-    <section id="hero" className="relative mx-auto max-w-7xl px-5 pt-32 pb-20 sm:px-8 sm:pt-40">
-      <div className="grid grid-cols-1 items-end gap-12 lg:grid-cols-12">
+    <section id="hero" className="relative mx-auto max-w-7xl px-5 pt-28 pb-20 sm:px-8 sm:pt-32">
+      <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12">
         {/* Editorial Typography Lead — Dibuka lapang di atas air */}
         <div className="lg:col-span-8">
           <p className="eyebrow hero-stagger" style={{ '--stagger': 0 }}>
