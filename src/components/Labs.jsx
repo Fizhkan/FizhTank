@@ -1,4 +1,5 @@
-import { useState, lazy, Suspense } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
 import { ArrowUpRight, Network, ShieldCheck, Cpu, ArrowRight } from 'lucide-react'
 import { useScrollReveal } from '../hooks/useScrollReveal'
 import { labsData } from '../data/labsData'
@@ -88,9 +89,14 @@ function Diagram({ labId }) {
   )
 }
 
-export default function Labs() {
+export default function Labs({ onModalOpenChange }) {
   const [activeLabId, setActiveLabId] = useState(1)
   const [modalLab, setModalLab] = useState(null)
+
+  useEffect(() => {
+    onModalOpenChange?.(Boolean(modalLab))
+    return () => onModalOpenChange?.(false)
+  }, [modalLab, onModalOpenChange])
 
   const [headerRef, headerVisible] = useScrollReveal({ threshold: 0.1 })
   const [contentRef, contentVisible] = useScrollReveal({ threshold: 0.08 })
@@ -140,12 +146,18 @@ export default function Labs() {
                   type="button"
                   aria-pressed={selected}
                   onClick={() => setActiveLabId(lab.id)}
-                  className={`group relative w-full border-l-2 p-5 text-left transition-colors duration-150 active:scale-[0.995] ${
-                    selected
-                      ? 'border-l-aqua bg-water/80'
-                      : 'border-l-transparent hover:bg-water/35'
+                  className={`group relative w-full p-5 text-left transition-colors duration-150 active:scale-[0.99] ${
+                    selected ? 'bg-water/80' : 'hover:bg-water/35'
                   }`}
                 >
+                  {selected && (
+                    <motion.span
+                      layoutId="lab-active-bar"
+                      transition={{ type: 'spring', bounce: 0, duration: 0.32 }}
+                      className="absolute inset-y-0 left-0 w-0.5 bg-aqua"
+                      aria-hidden="true"
+                    />
+                  )}
                   <div className="flex items-start gap-4">
                     <span
                       className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[2px] border font-mono text-xs ${
@@ -187,7 +199,14 @@ export default function Labs() {
 
         {/* Detail Blueprint Lab */}
         <article className="specimen-panel reticle p-6 sm:p-8 lg:col-span-7" aria-live="polite">
-          <div key={currentLab.id} className="panel-enter">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={currentLab.id}
+              initial={{ opacity: 0, transform: 'translateY(8px)' }}
+              animate={{ opacity: 1, transform: 'translateY(0px)' }}
+              exit={{ opacity: 0, transform: 'translateY(-6px)' }}
+              transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
+            >
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-aqua/15 pb-5">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="chip text-aqua">BERKAS // LAB 0{currentLab.id}</span>
@@ -242,15 +261,18 @@ export default function Labs() {
                 <ArrowUpRight size={16} aria-hidden="true" />
               </button>
             </div>
-          </div>
+            </motion.div>
+          </AnimatePresence>
         </article>
       </div>
 
-      {modalLab && (
-        <Suspense fallback={null}>
-          <LabModal lab={modalLab} onClose={() => setModalLab(null)} />
-        </Suspense>
-      )}
+      <AnimatePresence>
+        {modalLab && (
+          <Suspense fallback={null}>
+            <LabModal key={modalLab.id} lab={modalLab} onClose={() => setModalLab(null)} />
+          </Suspense>
+        )}
+      </AnimatePresence>
     </section>
   )
 }

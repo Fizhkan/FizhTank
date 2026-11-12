@@ -349,14 +349,25 @@ body {
   background: linear-gradient(115deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 18%);
 }
 
-/* ── Aksesibilitas ──────────────────────────────────────────────────────── */
+/* ── Aksesibilitas (§14 apple-design: ganti motion transform dengan cross-fade halus) */
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+  html {
     scroll-behavior: auto !important;
+  }
+
+  .hero-stagger,
+  .panel-enter,
+  .packet-flow {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  *, *::before, *::after {
+    transition-property: opacity, background-color, border-color, color !important;
+    transition-duration: 200ms !important;
+    transition-timing-function: ease !important;
   }
 }
 

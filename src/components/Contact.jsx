@@ -51,11 +51,37 @@ function SocialCard({ label, value, href, visible, idx }) {
 
 export default function Contact() {
   const [form, setForm] = useState({ name: '', email: '', message: '' })
+  const [touched, setTouched] = useState({ name: false, email: false, message: false })
   const [botTrap, setBotTrap] = useState('')
   const [cooldown, setCooldown] = useState(0)
   const [status, setStatus] = useState(null)
   const [statusMsg, setStatusMsg] = useState('')
   const [isSending, setIsSending] = useState(false)
+
+  const validateField = (field, val) => {
+    const trimmed = val.trim()
+    if (field === 'name' && !trimmed) return 'Nama wajib diisi.'
+    if (field === 'email') {
+      if (!trimmed) return 'Email wajib diisi.'
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return 'Format email belum valid (contoh: nama@domain.com).'
+    }
+    if (field === 'message' && !trimmed) return 'Pesan belum ditulis.'
+    return ''
+  }
+
+  const fieldErrors = {
+    name: touched.name ? validateField('name', form.name) : '',
+    email: touched.email ? validateField('email', form.email) : '',
+    message: touched.message ? validateField('message', form.message) : '',
+  }
+
+  const handleFieldChange = (field, value) => {
+    setForm((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const handleFieldBlur = (field) => {
+    setTouched((prev) => ({ ...prev, [field]: true }))
+  }
 
   useEffect(() => {
     if (cooldown <= 0) return
@@ -83,18 +109,21 @@ export default function Contact() {
         setStatus('success')
         setStatusMsg('Pesan terkirim.')
         setForm({ name: '', email: '', message: '' })
+        setTouched({ name: false, email: false, message: false })
         setCooldown(30)
       }, 500)
       return
     }
 
     if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
+      setTouched({ name: true, email: true, message: true })
       setStatus('error')
-      setStatusMsg('Mohon isi nama, email, dan pesan.')
+      setStatusMsg('Mohon periksa kolom yang masih kosong.')
       return
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      setTouched((prev) => ({ ...prev, email: true }))
       setStatus('error')
       setStatusMsg('Format email belum benar.')
       return
@@ -120,6 +149,7 @@ export default function Contact() {
         setStatus('success')
         setStatusMsg('Terima kasih, pesanmu sudah terkirim. Saya akan membalas lewat email.')
         setForm({ name: '', email: '', message: '' })
+        setTouched({ name: false, email: false, message: false })
         setCooldown(30)
       } else {
         handleMailtoFallback()
@@ -139,6 +169,7 @@ export default function Contact() {
     setStatus('sent-mailto')
     setStatusMsg('Formulir sedang bermasalah, jadi aplikasi email kamu dibuka untuk mengirim pesan ini.')
     setForm({ name: '', email: '', message: '' })
+    setTouched({ name: false, email: false, message: false })
     setCooldown(30)
   }
 
@@ -227,11 +258,19 @@ export default function Contact() {
               type="text"
               required
               autoComplete="name"
+              aria-invalid={Boolean(fieldErrors.name)}
+              aria-describedby={fieldErrors.name ? 'contact-name-error' : undefined}
               value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              onChange={(e) => handleFieldChange('name', e.target.value)}
+              onBlur={() => handleFieldBlur('name')}
               placeholder="Nama kamu atau organisasi"
-              className="field"
+              className={`field ${fieldErrors.name ? 'border-coral/70!' : ''}`}
             />
+            {fieldErrors.name && (
+              <p id="contact-name-error" className="mt-1.5 font-mono text-xs text-coral-text">
+                {fieldErrors.name}
+              </p>
+            )}
           </div>
 
           <div>
@@ -243,11 +282,19 @@ export default function Contact() {
               type="email"
               required
               autoComplete="email"
+              aria-invalid={Boolean(fieldErrors.email)}
+              aria-describedby={fieldErrors.email ? 'contact-email-error' : undefined}
               value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              onChange={(e) => handleFieldChange('email', e.target.value)}
+              onBlur={() => handleFieldBlur('email')}
               placeholder="nama@domain.com"
-              className="field"
+              className={`field ${fieldErrors.email ? 'border-coral/70!' : ''}`}
             />
+            {fieldErrors.email && (
+              <p id="contact-email-error" className="mt-1.5 font-mono text-xs text-coral-text">
+                {fieldErrors.email}
+              </p>
+            )}
           </div>
 
           <div>
@@ -258,11 +305,19 @@ export default function Contact() {
               id="contact-message"
               rows={5}
               required
+              aria-invalid={Boolean(fieldErrors.message)}
+              aria-describedby={fieldErrors.message ? 'contact-message-error' : undefined}
               value={form.message}
-              onChange={(e) => setForm({ ...form, message: e.target.value })}
+              onChange={(e) => handleFieldChange('message', e.target.value)}
+              onBlur={() => handleFieldBlur('message')}
               placeholder="Tulis pertanyaan, ide kolaborasi, atau tawaran magang"
-              className="field resize-none"
+              className={`field resize-none ${fieldErrors.message ? 'border-coral/70!' : ''}`}
             />
+            {fieldErrors.message && (
+              <p id="contact-message-error" className="mt-1.5 font-mono text-xs text-coral-text">
+                {fieldErrors.message}
+              </p>
+            )}
           </div>
 
           {statusMsg && (

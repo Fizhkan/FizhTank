@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
 import {
   ArrowUpRight,
   Activity,
@@ -226,13 +227,21 @@ export default function Hero() {
                       style={{ left: `${node.x}%`, top: `${node.y}%` }}
                     >
                       <span
-                        className={`flex h-10 w-10 items-center justify-center rounded-[2px] border transition-transform duration-150 active:scale-[0.95] sm:h-11 sm:w-11 ${
+                        className={`relative flex h-10 w-10 items-center justify-center rounded-[2px] border transition-transform duration-100 active:scale-[0.95] sm:h-11 sm:w-11 ${
                           active
-                            ? 'scale-105 border-aqua bg-aqua text-deep'
+                            ? 'border-aqua text-deep'
                             : 'border-aqua/30 bg-water text-aqua group-hover:border-aqua'
                         }`}
                       >
-                        <Icon size={18} aria-hidden="true" />
+                        {active && (
+                          <motion.span
+                            layoutId="topology-node-bg"
+                            transition={{ type: 'spring', bounce: 0, duration: 0.32 }}
+                            className="absolute inset-0 -z-0 bg-aqua"
+                            aria-hidden="true"
+                          />
+                        )}
+                        <Icon size={18} className="relative z-10" aria-hidden="true" />
                       </span>
                       <span
                         className={`hidden whitespace-nowrap font-mono text-[0.6875rem] leading-none sm:block ${
@@ -247,39 +256,48 @@ export default function Hero() {
               </div>
             </div>
 
-            <div className="lg:col-span-5">
-              <div key={selected.id} className="specimen-inset panel-enter divide-y divide-aqua/12" aria-live="polite">
-                <div className="p-5">
-                  <p className="font-mono text-[0.6875rem] tracking-wider text-aqua uppercase">
-                    Spesifikasi Node
-                  </p>
-                  <h3 className="mt-1.5 text-3xl text-white">{selected.label}</h3>
-                </div>
-
-                <dl className="divide-y divide-aqua/10 text-sm">
-                  <div className="flex flex-col gap-1 px-5 py-3">
-                    <dt className="font-mono text-[0.6875rem] text-mist/80 uppercase">Peran</dt>
-                    <dd className="text-white">{selected.role}</dd>
+            <div className="lg:col-span-5" aria-live="polite">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={selected.id}
+                  initial={{ opacity: 0, transform: 'translateY(6px)' }}
+                  animate={{ opacity: 1, transform: 'translateY(0px)' }}
+                  exit={{ opacity: 0, transform: 'translateY(-4px)' }}
+                  transition={{ type: 'spring', bounce: 0, duration: 0.28 }}
+                  className="specimen-inset divide-y divide-aqua/12"
+                >
+                  <div className="p-5">
+                    <p className="font-mono text-[0.6875rem] tracking-wider text-aqua uppercase">
+                      Spesifikasi Node
+                    </p>
+                    <h3 className="mt-1.5 text-3xl text-white">{selected.label}</h3>
                   </div>
-                  <div className="flex flex-col gap-1 px-5 py-3">
-                    <dt className="font-mono text-[0.6875rem] text-mist/80 uppercase">Alamat contoh</dt>
-                    <dd className="kbd-line text-sand">{selected.addr}</dd>
-                  </div>
-                </dl>
 
-                <div className="p-5">
-                  <p className="text-[0.9375rem] leading-relaxed text-mist">{selected.note}</p>
-                  {selected.lab && (
-                    <a
-                      href="#labs"
-                      className="mt-3 inline-flex items-center gap-1.5 font-mono text-xs font-semibold text-aqua hover:text-white"
-                    >
-                      <span>Lihat Lab 0{selected.lab}</span>
-                      <ArrowUpRight size={13} aria-hidden="true" />
-                    </a>
-                  )}
-                </div>
-              </div>
+                  <dl className="divide-y divide-aqua/10 text-sm">
+                    <div className="flex flex-col gap-1 px-5 py-3">
+                      <dt className="font-mono text-[0.6875rem] text-mist/80 uppercase">Peran</dt>
+                      <dd className="text-white">{selected.role}</dd>
+                    </div>
+                    <div className="flex flex-col gap-1 px-5 py-3">
+                      <dt className="font-mono text-[0.6875rem] text-mist/80 uppercase">Alamat contoh</dt>
+                      <dd className="kbd-line text-sand">{selected.addr}</dd>
+                    </div>
+                  </dl>
+
+                  <div className="p-5">
+                    <p className="text-[0.9375rem] leading-relaxed text-mist">{selected.note}</p>
+                    {selected.lab && (
+                      <a
+                        href="#labs"
+                        className="mt-3 inline-flex items-center gap-1.5 font-mono text-xs font-semibold text-aqua hover:text-white"
+                      >
+                        <span>Lihat Lab 0{selected.lab}</span>
+                        <ArrowUpRight size={13} aria-hidden="true" />
+                      </a>
+                    )}
+                  </div>
+                </motion.div>
+              </AnimatePresence>
 
               <p className="mt-3 px-1 font-mono text-xs text-mist/80">
                 * Semua perangkat di diagram ini masih rancangan lab, belum berjalan.

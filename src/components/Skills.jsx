@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
 import { useScrollReveal } from '../hooks/useScrollReveal'
 import { skillGroups, toolsData, levelNotes } from '../data/skillsData'
 
@@ -56,16 +57,24 @@ export default function Skills() {
                   role="tab"
                   aria-selected={active}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-1.5 px-4 py-2 text-xs font-medium transition-colors duration-150 active:scale-[0.98] ${
+                  className={`relative flex items-center gap-1.5 px-4 py-2 text-xs font-medium transition-[color,transform] duration-150 active:scale-[0.97] ${
                     i > 0 ? 'border-l border-aqua/15' : ''
                   } ${
-                    active ? 'bg-aqua font-semibold text-deep' : 'text-mist hover:bg-aqua/10 hover:text-white'
+                    active ? 'font-semibold text-deep' : 'text-mist hover:bg-aqua/10 hover:text-white'
                   }`}
                 >
-                  <span className={`font-mono text-[0.6875rem] ${active ? 'text-deep/75' : 'text-aqua/75'}`}>
+                  {active && (
+                    <motion.span
+                      layoutId="skills-tab-pill"
+                      transition={{ type: 'spring', bounce: 0, duration: 0.34 }}
+                      className="absolute inset-0 bg-aqua"
+                      aria-hidden="true"
+                    />
+                  )}
+                  <span className={`relative z-10 font-mono text-[0.6875rem] ${active ? 'text-deep/75' : 'text-aqua/75'}`}>
                     {tab.num}
                   </span>
-                  <span>{tab.label}</span>
+                  <span className="relative z-10">{tab.label}</span>
                 </button>
               )
             })}
@@ -83,46 +92,56 @@ export default function Skills() {
           </ul>
         </div>
 
-        {/* Matriks Hairline (Menggantikan Grid Kartu Bulat Seragam) */}
-        <div key={activeTab} role="tabpanel" className="panel-enter p-5 sm:p-8">
-          <div className="flex flex-col justify-between gap-4 border-b border-aqua/15 pb-6 sm:flex-row sm:items-end">
-            <div>
-              <h3 className="text-3xl text-white sm:text-4xl">{currentGroup.label}</h3>
-              <p className="mt-1.5 max-w-xl text-mist">{currentGroup.description}</p>
+        {/* Matriks Hairline (transisi spring interruptible antar kategori skill) */}
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={activeTab}
+            role="tabpanel"
+            initial={{ opacity: 0, transform: 'translateY(8px)' }}
+            animate={{ opacity: 1, transform: 'translateY(0px)' }}
+            exit={{ opacity: 0, transform: 'translateY(-6px)' }}
+            transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
+            className="p-5 sm:p-8"
+          >
+            <div className="flex flex-col justify-between gap-4 border-b border-aqua/15 pb-6 sm:flex-row sm:items-end">
+              <div>
+                <h3 className="text-3xl text-white sm:text-4xl">{currentGroup.label}</h3>
+                <p className="mt-1.5 max-w-xl text-mist">{currentGroup.description}</p>
+              </div>
+              <ul className="flex flex-wrap gap-2">
+                {currentGroup.tags.map((t) => (
+                  <li key={t} className="chip">
+                    {t}
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ul className="flex flex-wrap gap-2">
-              {currentGroup.tags.map((t) => (
-                <li key={t} className="chip">
-                  {t}
+
+            <ul className="mt-7 grid grid-cols-1 gap-px border border-aqua/15 bg-aqua/15 sm:grid-cols-2 lg:grid-cols-3">
+              {currentGroup.skills.map((skill, idx) => (
+                <li key={skill.name} className="specimen-hover flex flex-col justify-between bg-[#021721]/95 p-5 sm:p-6">
+                  <div>
+                    <div className="flex items-center justify-between gap-3 border-b border-aqua/10 pb-3">
+                      <span className="font-mono text-[0.6875rem] text-aqua/80">
+                        SPEC // {String(idx + 1).padStart(2, '0')}
+                      </span>
+                      <span
+                        className={`shrink-0 rounded-[2px] border px-2 py-0.5 font-mono text-[0.6875rem] font-medium ${levelStyle[skill.level]}`}
+                      >
+                        {skill.level}
+                      </span>
+                    </div>
+
+                    <h4 className="mt-4 font-sans text-base leading-snug font-semibold tracking-normal text-white">
+                      {skill.name}
+                    </h4>
+                    <p className="mt-2 text-sm leading-relaxed text-mist">{skill.context}</p>
+                  </div>
                 </li>
               ))}
             </ul>
-          </div>
-
-          <ul className="mt-7 grid grid-cols-1 gap-px border border-aqua/15 bg-aqua/15 sm:grid-cols-2 lg:grid-cols-3">
-            {currentGroup.skills.map((skill, idx) => (
-              <li key={skill.name} className="specimen-hover flex flex-col justify-between bg-[#021721]/95 p-5 sm:p-6">
-                <div>
-                  <div className="flex items-center justify-between gap-3 border-b border-aqua/10 pb-3">
-                    <span className="font-mono text-[0.6875rem] text-aqua/80">
-                      SPEC // {String(idx + 1).padStart(2, '0')}
-                    </span>
-                    <span
-                      className={`shrink-0 rounded-[2px] border px-2 py-0.5 font-mono text-[0.6875rem] font-medium ${levelStyle[skill.level]}`}
-                    >
-                      {skill.level}
-                    </span>
-                  </div>
-
-                  <h4 className="mt-4 font-sans text-base leading-snug font-semibold tracking-normal text-white">
-                    {skill.name}
-                  </h4>
-                  <p className="mt-2 text-sm leading-relaxed text-mist">{skill.context}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
+          </motion.div>
+        </AnimatePresence>
 
         {/* Daftar Tool */}
         <div className="border-t border-aqua/15 px-5 py-6 sm:px-8">
