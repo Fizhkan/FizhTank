@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { AnimatePresence, motion } from 'motion/react'
+import { useState, useEffect, useRef } from 'react'
+import { AnimatePresence, motion, useReducedMotion, useScroll, useSpring, useTransform } from 'motion/react'
 import {
   ArrowUpRight,
   Activity,
@@ -9,9 +9,9 @@ import {
   Database,
   Monitor,
 } from 'lucide-react'
-import { useScrollReveal } from '../hooks/useScrollReveal'
 import { toolsData } from '../data/skillsData'
 import { site } from '../data/site'
+import { SPRING_CRIT, SPRING_SNAP, VIEWPORT_ONCE, revealUp, revealCard } from '../utils/motion'
 
 // Planned homelab network topology blueprint.
 const NODES = [
@@ -40,7 +40,15 @@ const usedTools = toolsData.filter((t) => t.used).map((t) => t.label)
 export default function Hero() {
   const [selectedId, setSelectedId] = useState('core')
   const [avatarOk, setAvatarOk] = useState(false)
-  const [benchRef, benchVisible] = useScrollReveal({ threshold: 0.08 })
+  const heroRef = useRef(null)
+  const reduceMotion = useReducedMotion()
+
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ['start start', 'end start'],
+  })
+  const rawParallax = useTransform(scrollYProgress, [0, 1], [0, reduceMotion ? 0 : -28])
+  const profileParallax = useSpring(rawParallax, { stiffness: 180, damping: 28 })
 
   // Render profile photo when public/profile.jpg exists; otherwise display monogram fallback.
   useEffect(() => {
@@ -53,34 +61,49 @@ export default function Hero() {
   const selected = NODES.find((n) => n.id === selectedId) || NODES[0]
   const byId = Object.fromEntries(NODES.map((n) => [n.id, n]))
 
-  const reveal = (visible, offset = 20) => ({
-    opacity: visible ? 1 : 0,
-    transform: visible ? 'translateY(0)' : `translateY(${offset}px)`,
-    transition: 'opacity 550ms cubic-bezier(0.23, 1, 0.32, 1), transform 550ms cubic-bezier(0.23, 1, 0.32, 1)',
-  })
-
   return (
-    <section id="hero" className="relative mx-auto max-w-7xl px-5 pt-28 pb-20 sm:px-8 sm:pt-32">
-      <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12">
+    <section
+      id="hero"
+      ref={heroRef}
+      className="relative mx-auto max-w-7xl scroll-mt-0 px-5 pt-24 pb-16 sm:px-8 sm:pt-28 sm:pb-20"
+    >
+      <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-12 lg:gap-12">
         {/* Editorial Typography Lead */}
         <div className="lg:col-span-8">
-          <p className="eyebrow hero-stagger" style={{ '--stagger': 0 }}>
+          <motion.p
+            className="eyebrow"
+            initial={revealUp.initial}
+            animate={revealUp.animate}
+            transition={{ ...SPRING_CRIT, delay: 0.02 }}
+          >
             00 // Surabaya, Indonesia
-          </p>
+          </motion.p>
 
-          <h1
-            className="on-water hero-stagger mt-5 font-display text-[3.15rem] leading-[0.98] tracking-[-0.025em] text-white sm:text-[4.5rem] lg:text-[5.5rem]"
-            style={{ '--stagger': 1 }}
+          <motion.h1
+            className="on-water mt-5 font-display text-[3.15rem] leading-[0.98] tracking-[-0.025em] text-white sm:text-[4.5rem] lg:text-[5.5rem]"
+            initial={revealUp.initial}
+            animate={revealUp.animate}
+            transition={{ ...SPRING_CRIT, delay: 0.08 }}
           >
             Engineering resilient <em className="italic text-aqua">&amp; secure</em> networks.
-          </h1>
+          </motion.h1>
 
-          <p className="lede on-water hero-stagger mt-7 max-w-xl text-[1.0625rem]" style={{ '--stagger': 2 }}>
+          <motion.p
+            className="lede on-water mt-7 max-w-xl text-[1.0625rem]"
+            initial={revealUp.initial}
+            animate={revealUp.animate}
+            transition={{ ...SPRING_CRIT, delay: 0.14 }}
+          >
             I&apos;m <strong className="font-semibold text-white">Hafidz</strong>, an Informatics Engineering student
             focused on network architecture, Linux infrastructure, and packet security.
-          </p>
+          </motion.p>
 
-          <div className="hero-stagger mt-9 flex flex-wrap items-center gap-3" style={{ '--stagger': 3 }}>
+          <motion.div
+            className="mt-8 flex flex-wrap items-center gap-3"
+            initial={revealUp.initial}
+            animate={revealUp.animate}
+            transition={{ ...SPRING_CRIT, delay: 0.2 }}
+          >
             <a href="#labs" className="btn btn-primary">
               <span>Explore Labs</span>
               <ArrowUpRight size={16} aria-hidden="true" />
@@ -88,24 +111,41 @@ export default function Hero() {
             <a href="#contact" className="btn btn-ghost">
               Get in Touch
             </a>
-          </div>
+          </motion.div>
 
-          <div className="hero-stagger mt-10 border-t border-aqua/15 pt-5" style={{ '--stagger': 4 }}>
+          <motion.div
+            className="mt-9 border-t border-aqua/15 pt-5"
+            initial={revealUp.initial}
+            animate={revealUp.animate}
+            transition={{ ...SPRING_CRIT, delay: 0.26 }}
+          >
             <p className="mb-2.5 font-mono text-[0.6875rem] tracking-widest text-mist/85 uppercase">
               Core Stack
             </p>
             <ul className="flex flex-wrap gap-2">
-              {usedTools.map((tool) => (
-                <li key={tool} className="chip">
+              {usedTools.map((tool, idx) => (
+                <motion.li
+                  key={tool}
+                  className="chip"
+                  initial={revealUp.initial}
+                  animate={revealUp.animate}
+                  transition={{ ...SPRING_SNAP, delay: 0.28 + idx * 0.035 }}
+                >
                   {tool}
-                </li>
+                </motion.li>
               ))}
             </ul>
-          </div>
+          </motion.div>
         </div>
 
         {/* Field Specimen Dossier */}
-        <div className="hero-stagger flex justify-start lg:col-span-4 lg:justify-end" style={{ '--stagger': 3 }}>
+        <motion.div
+          className="flex justify-start lg:col-span-4 lg:justify-end"
+          style={{ y: profileParallax }}
+          initial={revealCard.initial}
+          animate={revealCard.animate}
+          transition={{ ...SPRING_CRIT, delay: 0.16 }}
+        >
           <figure className="specimen-panel reticle w-full max-w-[20rem] overflow-hidden">
             <div className="flex items-center justify-between border-b border-aqua/15 px-3.5 py-2 font-mono text-[0.6875rem] tracking-wider">
               <span className="text-aqua">PROFILE // HAFIDZ</span>
@@ -152,11 +192,17 @@ export default function Hero() {
               </div>
             </figcaption>
           </figure>
-        </div>
+        </motion.div>
       </div>
 
       {/* Interactive Homelab Network Architecture */}
-      <div ref={benchRef} className="mt-20 sm:mt-24" style={reveal(benchVisible, 24)}>
+      <motion.div
+        className="mt-14 sm:mt-16"
+        initial={revealUp.initial}
+        whileInView={revealUp.animate}
+        viewport={VIEWPORT_ONCE}
+        transition={SPRING_CRIT}
+      >
         <div className="specimen-panel reticle overflow-hidden">
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-aqua/15 px-5 py-4 sm:px-7">
             <div>
@@ -304,7 +350,7 @@ export default function Hero() {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </section>
   )
 }

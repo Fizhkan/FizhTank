@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { useScrollReveal } from '../hooks/useScrollReveal'
 import { skillGroups, toolsData, levelNotes } from '../data/skillsData'
+import { SPRING_CRIT, SPRING_SNAP, VIEWPORT_ONCE, revealUp, revealCard } from '../utils/motion'
 
 const levelStyle = {
   Foundational: 'border-kelp/50 bg-kelp/10 text-kelp',
@@ -12,24 +12,17 @@ const levelStyle = {
 export default function Skills() {
   const [activeTab, setActiveTab] = useState('networking')
 
-  const [headerRef, headerVisible] = useScrollReveal({ threshold: 0.1 })
-  const [bodyRef, bodyVisible] = useScrollReveal({ threshold: 0.06 })
-
   const currentGroup = skillGroups.find((g) => g.id === activeTab) || skillGroups[0]
   const tabs = skillGroups.map((g, i) => ({ id: g.id, num: `0${i + 1}`, label: g.short }))
 
-  const reveal = (visible, offset = 20) => ({
-    opacity: visible ? 1 : 0,
-    transform: visible ? 'translateY(0)' : `translateY(${offset}px)`,
-    transition: 'opacity 550ms cubic-bezier(0.23, 1, 0.32, 1), transform 550ms cubic-bezier(0.23, 1, 0.32, 1)',
-  })
-
   return (
-    <section id="skills" className="relative mx-auto max-w-7xl px-5 py-24 sm:px-8">
-      <div
-        ref={headerRef}
-        className="mb-12 flex flex-col justify-between gap-6 border-b border-aqua/15 pb-8 lg:flex-row lg:items-end"
-        style={reveal(headerVisible)}
+    <section id="skills" className="relative mx-auto max-w-7xl px-5 pt-6 pb-20 sm:px-8 sm:pt-8 sm:pb-24">
+      <motion.div
+        className="mb-8 flex flex-col justify-between gap-6 border-b border-aqua/15 pb-6 sm:mb-9 sm:pb-7 lg:flex-row lg:items-end"
+        initial={revealUp.initial}
+        whileInView={revealUp.animate}
+        viewport={VIEWPORT_ONCE}
+        transition={SPRING_CRIT}
       >
         <div className="max-w-2xl">
           <p className="eyebrow">02 // Capability Matrix</p>
@@ -40,9 +33,15 @@ export default function Skills() {
         <p className="lede on-water max-w-md text-base">
           Core competencies across networking, Linux administration, and packet-level security analysis.
         </p>
-      </div>
+      </motion.div>
 
-      <div ref={bodyRef} className="specimen-panel reticle overflow-hidden" style={reveal(bodyVisible, 24)}>
+      <motion.div
+        className="specimen-panel reticle overflow-hidden"
+        initial={revealCard.initial}
+        whileInView={revealCard.animate}
+        viewport={VIEWPORT_ONCE}
+        transition={{ ...SPRING_CRIT, delay: 0.05 }}
+      >
         {/* Navigation Tabs & Proficiency Legend */}
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-aqua/15 px-5 py-4 sm:px-7">
           <div role="tablist" aria-label="Skill categories" className="flex flex-wrap border border-aqua/20 bg-deep/60">
@@ -117,7 +116,14 @@ export default function Skills() {
 
             <ul className="mt-7 grid grid-cols-1 gap-px border border-aqua/15 bg-aqua/15 sm:grid-cols-2 lg:grid-cols-3">
               {currentGroup.skills.map((skill, idx) => (
-                <li key={skill.name} className="specimen-hover flex flex-col justify-between bg-[#021721]/95 p-5 sm:p-6">
+                <motion.li
+                  key={skill.name}
+                  initial={revealCard.initial}
+                  whileInView={revealCard.animate}
+                  viewport={VIEWPORT_ONCE}
+                  transition={{ ...SPRING_SNAP, delay: idx * 0.04 }}
+                  className="specimen-hover flex flex-col justify-between bg-[#021721]/95 p-5 sm:p-6"
+                >
                   <div>
                     <div className="flex items-center justify-between gap-3 border-b border-aqua/10 pb-3">
                       <span className="font-mono text-[0.6875rem] text-aqua/80">
@@ -135,7 +141,7 @@ export default function Skills() {
                     </h4>
                     <p className="mt-2 text-sm leading-relaxed text-mist">{skill.context}</p>
                   </div>
-                </li>
+                </motion.li>
               ))}
             </ul>
           </motion.div>
@@ -152,9 +158,13 @@ export default function Skills() {
             </p>
           </div>
           <ul className="mt-4 flex flex-wrap gap-2">
-            {toolsData.map((tool) => (
-              <li
+            {toolsData.map((tool, idx) => (
+              <motion.li
                 key={tool.label}
+                initial={revealUp.initial}
+                whileInView={revealUp.animate}
+                viewport={VIEWPORT_ONCE}
+                transition={{ ...SPRING_SNAP, delay: Math.min(idx * 0.025, 0.25) }}
                 className={`rounded-[2px] border px-3 py-1.5 font-mono text-xs ${
                   tool.used
                     ? 'border-aqua/45 bg-aqua/10 font-medium text-foam'
@@ -163,11 +173,11 @@ export default function Skills() {
               >
                 {tool.label}
                 <span className="sr-only">{tool.used ? ' (active)' : ' (planned)'}</span>
-              </li>
+              </motion.li>
             ))}
           </ul>
         </div>
-      </div>
+      </motion.div>
     </section>
   )
 }

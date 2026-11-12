@@ -32,7 +32,7 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 5.5rem;
+  scroll-padding-top: 4.75rem;
   max-width: 100%;
   overflow-x: clip;
   overscroll-behavior-y: none;
@@ -290,39 +290,8 @@ body {
     text-shadow: 0 2px 22px rgba(2, 15, 22, 0.78), 0 1px 3px rgba(2, 15, 22, 0.7);
   }
 
-  .panel-enter {
-    animation: panel-enter 220ms var(--ease-out) both;
-  }
-
-  .hero-stagger {
-    animation: hero-rise 420ms var(--ease-out) both;
-    animation-delay: calc(var(--stagger, 0) * 55ms);
-  }
-
   .packet-flow {
     animation: packet-flow 1.3s linear infinite;
-  }
-}
-
-@keyframes panel-enter {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes hero-rise {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 
@@ -356,8 +325,6 @@ body {
     scroll-behavior: auto !important;
   }
 
-  .hero-stagger,
-  .panel-enter,
   .packet-flow {
     animation: none !important;
     opacity: 1 !important;

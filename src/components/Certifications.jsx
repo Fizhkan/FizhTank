@@ -1,6 +1,7 @@
 import { Download } from 'lucide-react'
-import { useScrollReveal } from '../hooks/useScrollReveal'
+import { motion } from 'motion/react'
 import { site } from '../data/site'
+import { SPRING_CRIT, SPRING_SNAP, VIEWPORT_ONCE, revealUp, revealCard } from '../utils/motion'
 
 const DEFAULT_ROADMAP = [
   {
@@ -34,9 +35,6 @@ const STATUS = {
 }
 
 export default function Certifications() {
-  const [headerRef, headerVisible] = useScrollReveal({ threshold: 0.1 })
-  const [listRef, listVisible] = useScrollReveal({ threshold: 0.08 })
-
   const active = (site.certifications || []).filter((cert) => {
     const name = cert.name || cert.nama
     return Boolean(name && name.trim() !== '' && !name.includes('[ISI'))
@@ -49,20 +47,16 @@ export default function Certifications() {
   const featured = featuredIndex >= 0 ? list[featuredIndex] : list[0]
   const remaining = list.filter((_, idx) => idx !== (featuredIndex >= 0 ? featuredIndex : 0))
 
-  const reveal = (visible, offset = 20) => ({
-    opacity: visible ? 1 : 0,
-    transform: visible ? 'translateY(0)' : `translateY(${offset}px)`,
-    transition: 'opacity 550ms cubic-bezier(0.23, 1, 0.32, 1), transform 550ms cubic-bezier(0.23, 1, 0.32, 1)',
-  })
-
   const featuredStatus = STATUS[featured.status] || STATUS.Planned
 
   return (
-    <section id="certifications" className="relative mx-auto max-w-7xl px-5 py-24 sm:px-8">
-      <div
-        ref={headerRef}
-        className="mb-12 flex flex-col justify-between gap-6 border-b border-aqua/15 pb-8 sm:flex-row sm:items-end"
-        style={reveal(headerVisible)}
+    <section id="certifications" className="relative mx-auto max-w-7xl px-5 pt-6 pb-20 sm:px-8 sm:pt-8 sm:pb-24">
+      <motion.div
+        className="mb-8 flex flex-col justify-between gap-6 border-b border-aqua/15 pb-6 sm:mb-9 sm:flex-row sm:items-end sm:pb-7"
+        initial={revealUp.initial}
+        whileInView={revealUp.animate}
+        viewport={VIEWPORT_ONCE}
+        transition={SPRING_CRIT}
       >
         <div className="max-w-2xl">
           <p className="eyebrow">03 // Certification Track</p>
@@ -80,15 +74,17 @@ export default function Certifications() {
             <span>Download CV (PDF)</span>
           </a>
         )}
-      </div>
+      </motion.div>
 
       {/* Asymmetric 5 : 7 Expedition Layout */}
-      <div
-        ref={listRef}
-        className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-12"
-        style={reveal(listVisible, 24)}
-      >
-        <article className="specimen-panel reticle flex flex-col justify-between border-t-2 border-t-aqua p-6 sm:p-8 lg:col-span-5">
+      <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-12">
+        <motion.article
+          initial={revealCard.initial}
+          whileInView={revealCard.animate}
+          viewport={VIEWPORT_ONCE}
+          transition={SPRING_CRIT}
+          className="specimen-panel reticle flex flex-col justify-between border-t-2 border-t-aqua p-6 sm:p-8 lg:col-span-5"
+        >
           <div>
             <div className="flex items-center justify-between gap-3 border-b border-aqua/15 pb-4 font-mono text-xs">
               <span className="text-aqua">PRIMARY TRACK // 01</span>
@@ -107,9 +103,15 @@ export default function Certifications() {
             <span>Timeline</span>
             <span className="text-foam">{featured.date || 'Active'}</span>
           </div>
-        </article>
+        </motion.article>
 
-        <div className="specimen-panel divide-y divide-aqua/15 lg:col-span-7">
+        <motion.div
+          initial={revealCard.initial}
+          whileInView={revealCard.animate}
+          viewport={VIEWPORT_ONCE}
+          transition={{ ...SPRING_CRIT, delay: 0.08 }}
+          className="specimen-panel divide-y divide-aqua/15 lg:col-span-7"
+        >
           <div className="flex items-center justify-between px-6 py-3.5 font-mono text-[0.6875rem] tracking-widest text-mist uppercase">
             <span>Certification Queue</span>
             <span className="text-aqua">0{remaining.length} Milestones</span>
@@ -120,8 +122,12 @@ export default function Certifications() {
             const issuer = item.issuer || item.penerbit
             const s = STATUS[item.status] || STATUS.Planned
             return (
-              <div
+              <motion.div
                 key={name}
+                initial={{ opacity: 0, transform: 'translateX(-10px)' }}
+                whileInView={{ opacity: 1, transform: 'translateX(0px)' }}
+                viewport={VIEWPORT_ONCE}
+                transition={{ ...SPRING_SNAP, delay: 0.1 + idx * 0.07 }}
                 className="flex flex-col justify-between gap-4 p-6 transition-colors hover:bg-aqua/[0.03] sm:flex-row sm:items-start"
               >
                 <div className="max-w-lg">
@@ -144,10 +150,10 @@ export default function Certifications() {
                   </span>
                   {item.date && <span className="font-mono text-xs text-mist">{item.date}</span>}
                 </div>
-              </div>
+              </motion.div>
             )
           })}
-        </div>
+        </motion.div>
       </div>
     </section>
   )

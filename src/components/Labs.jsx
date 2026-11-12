@@ -1,8 +1,8 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { ArrowUpRight, Network, ShieldCheck, Cpu, ArrowRight } from 'lucide-react'
-import { useScrollReveal } from '../hooks/useScrollReveal'
 import { labsData } from '../data/labsData'
+import { SPRING_CRIT, SPRING_SNAP, VIEWPORT_ONCE, revealUp, revealCard } from '../utils/motion'
 
 const LabModal = lazy(() => import('./LabModal'))
 
@@ -97,23 +97,16 @@ export default function Labs({ onModalOpenChange }) {
     return () => onModalOpenChange?.(false)
   }, [modalLab, onModalOpenChange])
 
-  const [headerRef, headerVisible] = useScrollReveal({ threshold: 0.1 })
-  const [contentRef, contentVisible] = useScrollReveal({ threshold: 0.08 })
-
   const currentLab = labsData.find((l) => l.id === activeLabId) || labsData[0]
 
-  const reveal = (visible, offset = 20) => ({
-    opacity: visible ? 1 : 0,
-    transform: visible ? 'translateY(0)' : `translateY(${offset}px)`,
-    transition: 'opacity 550ms cubic-bezier(0.23, 1, 0.32, 1), transform 550ms cubic-bezier(0.23, 1, 0.32, 1)',
-  })
-
   return (
-    <section id="labs" className="relative mx-auto max-w-7xl px-5 py-24 sm:px-8">
-      <div
-        ref={headerRef}
-        className="mb-12 flex flex-col justify-between gap-6 border-b border-aqua/15 pb-8 lg:flex-row lg:items-end"
-        style={reveal(headerVisible)}
+    <section id="labs" className="relative mx-auto max-w-7xl px-5 pt-6 pb-20 sm:px-8 sm:pt-8 sm:pb-24">
+      <motion.div
+        className="mb-8 flex flex-col justify-between gap-6 border-b border-aqua/15 pb-6 sm:mb-9 sm:pb-7 lg:flex-row lg:items-end"
+        initial={revealUp.initial}
+        whileInView={revealUp.animate}
+        viewport={VIEWPORT_ONCE}
+        transition={SPRING_CRIT}
       >
         <div className="max-w-2xl">
           <p className="eyebrow">01 // Lab Archive</p>
@@ -124,30 +117,36 @@ export default function Labs({ onModalOpenChange }) {
         <p className="lede on-water max-w-md text-base">
           Network topologies, security baselines, and verification plans queued for execution.
         </p>
-      </div>
+      </motion.div>
 
-      <div
-        ref={contentRef}
-        className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12"
-        style={reveal(contentVisible, 24)}
-      >
+      <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
         {/* Master Lab Ledger */}
-        <div className="lg:col-span-5">
+        <motion.div
+          className="lg:col-span-5"
+          initial={revealCard.initial}
+          whileInView={revealCard.animate}
+          viewport={VIEWPORT_ONCE}
+          transition={SPRING_CRIT}
+        >
           <div className="specimen-panel divide-y divide-aqua/15">
             <div className="flex items-center justify-between px-5 py-3 font-mono text-[0.6875rem] tracking-widest text-mist uppercase">
               <span>Lab Index</span>
               <span className="text-aqua">0{labsData.length} Specs</span>
             </div>
 
-            {labsData.map((lab) => {
+            {labsData.map((lab, idx) => {
               const selected = lab.id === activeLabId
               const Icon = LAB_ICONS[lab.id] || Cpu
               return (
-                <button
+                <motion.button
                   key={lab.id}
                   type="button"
                   aria-pressed={selected}
                   onClick={() => setActiveLabId(lab.id)}
+                  initial={{ opacity: 0, transform: 'translateX(-12px)' }}
+                  whileInView={{ opacity: 1, transform: 'translateX(0px)' }}
+                  viewport={VIEWPORT_ONCE}
+                  transition={{ ...SPRING_SNAP, delay: idx * 0.06 }}
                   className={`group relative w-full p-5 text-left transition-colors duration-150 active:scale-[0.99] ${
                     selected ? 'bg-water/80' : 'hover:bg-water/35'
                   }`}
@@ -191,14 +190,21 @@ export default function Labs({ onModalOpenChange }) {
                       }`}
                     />
                   </div>
-                </button>
+                </motion.button>
               )
             })}
           </div>
-        </div>
+        </motion.div>
 
         {/* Lab Blueprint Detail */}
-        <article className="specimen-panel reticle p-6 sm:p-8 lg:col-span-7" aria-live="polite">
+        <motion.article
+          className="specimen-panel reticle p-6 sm:p-8 lg:col-span-7"
+          aria-live="polite"
+          initial={revealCard.initial}
+          whileInView={revealCard.animate}
+          viewport={VIEWPORT_ONCE}
+          transition={{ ...SPRING_CRIT, delay: 0.08 }}
+        >
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={currentLab.id}
@@ -263,7 +269,7 @@ export default function Labs({ onModalOpenChange }) {
               </div>
             </motion.div>
           </AnimatePresence>
-        </article>
+        </motion.article>
       </div>
 
       <AnimatePresence>

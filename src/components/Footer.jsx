@@ -1,10 +1,18 @@
 import { ArrowUpRight } from 'lucide-react'
+import { motion } from 'motion/react'
 import FishMark from './FishMark'
 import { site } from '../data/site'
+import { SPRING_SNAP, VIEWPORT_ONCE, revealUp } from '../utils/motion'
 
 export default function Footer() {
   return (
-    <footer className="relative z-10 border-t border-aqua/15 bg-[#02131b]/85 px-5 pt-8 pb-12 sm:px-8 sm:pb-14">
+    <motion.footer
+      initial={revealUp.initial}
+      whileInView={revealUp.animate}
+      viewport={VIEWPORT_ONCE}
+      transition={SPRING_SNAP}
+      className="relative z-10 border-t border-aqua/15 bg-[#02131b]/85 px-5 pt-8 pb-12 sm:px-8 sm:pb-14"
+    >
       <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
         <div className="flex items-center gap-4">
           <FishMark size={36} />
@@ -28,6 +36,6 @@ export default function Footer() {
           <ArrowUpRight size={13} aria-hidden="true" />
         </a>
       </div>
-    </footer>
+    </motion.footer>
   )
 }

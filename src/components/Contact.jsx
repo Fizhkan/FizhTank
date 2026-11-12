@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
 import { GitBranch, Link2, Mail, Send, ArrowUpRight, CheckCircle2, AlertCircle } from 'lucide-react'
-import { useScrollReveal } from '../hooks/useScrollReveal'
 import { contactConfig } from '../data/contactData'
 import { site } from '../data/site'
+import { SPRING_CRIT, SPRING_SNAP, VIEWPORT_ONCE, revealUp, revealCard } from '../utils/motion'
 
 const iconMap = {
   GitHub: GitBranch,
@@ -10,21 +11,20 @@ const iconMap = {
   Email: Mail,
 }
 
-function SocialCard({ label, value, href, visible, idx }) {
+function SocialCard({ label, value, href, idx }) {
   const Icon = iconMap[label] || Link2
   const isMailto = href.startsWith('mailto:')
 
   return (
-    <a
+    <motion.a
       href={href}
       target={isMailto ? undefined : '_blank'}
       rel={isMailto ? undefined : 'noopener noreferrer'}
+      initial={{ opacity: 0, transform: 'translateX(-12px)' }}
+      whileInView={{ opacity: 1, transform: 'translateX(0px)' }}
+      viewport={VIEWPORT_ONCE}
+      transition={{ ...SPRING_SNAP, delay: idx * 0.06 }}
       className="group flex items-center justify-between gap-4 p-5 transition-[background-color,color,transform] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-aqua/[0.04] active:scale-[0.99]"
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? 'translateX(0)' : 'translateX(-12px)',
-        transition: `opacity 0.24s cubic-bezier(0.23, 1, 0.32, 1) ${idx * 0.04}s, transform 0.24s cubic-bezier(0.23, 1, 0.32, 1) ${idx * 0.04}s, background-color 0.2s`,
-      }}
     >
       <span className="flex min-w-0 items-center gap-4">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[2px] border border-aqua/25 bg-aqua/5 font-mono text-xs text-aqua">
@@ -45,7 +45,7 @@ function SocialCard({ label, value, href, visible, idx }) {
         aria-hidden="true"
         className="shrink-0 text-mist transition-[transform,color] duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-aqua"
       />
-    </a>
+    </motion.a>
   )
 }
 
@@ -88,9 +88,6 @@ export default function Contact() {
     const timer = setInterval(() => setCooldown((prev) => Math.max(0, prev - 1)), 1000)
     return () => clearInterval(timer)
   }, [cooldown])
-
-  const [headerRef, headerVisible] = useScrollReveal({ threshold: 0.1 })
-  const [contentRef, contentVisible] = useScrollReveal({ threshold: 0.08 })
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -192,17 +189,15 @@ export default function Contact() {
   ]
 
   const ok = status === 'success' || status === 'sent-mailto'
-  const reveal = (visible, offset = 16) => ({
-    opacity: visible ? 1 : 0,
-    transform: visible ? 'translateY(0)' : `translateY(${offset}px)`,
-  })
 
   return (
-    <section id="contact" className="relative mx-auto max-w-7xl px-5 py-24 sm:px-8">
-      <div
-        ref={headerRef}
-        className="mb-12 grid grid-cols-1 items-end gap-6 border-b border-aqua/15 pb-8 transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] lg:grid-cols-12"
-        style={reveal(headerVisible)}
+    <section id="contact" className="relative mx-auto max-w-7xl px-5 pt-6 pb-20 sm:px-8 sm:pt-8 sm:pb-24">
+      <motion.div
+        className="mb-8 grid grid-cols-1 items-end gap-6 border-b border-aqua/15 pb-6 sm:mb-9 sm:pb-7 lg:grid-cols-12"
+        initial={revealUp.initial}
+        whileInView={revealUp.animate}
+        viewport={VIEWPORT_ONCE}
+        transition={SPRING_CRIT}
       >
         <div className="lg:col-span-7">
           <p className="eyebrow">04 // Communications</p>
@@ -213,12 +208,18 @@ export default function Contact() {
         <p className="lede on-water lg:col-span-5">
           Available for network engineering discussions, lab collaborations, and internship roles.
         </p>
-      </div>
+      </motion.div>
 
-      <div ref={contentRef} className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
-        <div className="specimen-panel divide-y divide-aqua/15 lg:col-span-5">
+      <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
+        <motion.div
+          className="specimen-panel divide-y divide-aqua/15 lg:col-span-5"
+          initial={revealCard.initial}
+          whileInView={revealCard.animate}
+          viewport={VIEWPORT_ONCE}
+          transition={SPRING_CRIT}
+        >
           {links.map((item, idx) => (
-            <SocialCard key={item.label} {...item} visible={contentVisible} idx={idx} />
+            <SocialCard key={item.label} {...item} idx={idx} />
           ))}
 
           <div className="p-5 sm:p-6">
@@ -234,9 +235,17 @@ export default function Contact() {
               Currently focused on Informatics Engineering coursework, Cisco &amp; Linux lab builds, and CCNA preparation.
             </p>
           </div>
-        </div>
+        </motion.div>
 
-        <form onSubmit={handleSubmit} className="specimen-panel reticle space-y-5 p-6 sm:p-8 lg:col-span-7" noValidate>
+        <motion.form
+          onSubmit={handleSubmit}
+          initial={revealCard.initial}
+          whileInView={revealCard.animate}
+          viewport={VIEWPORT_ONCE}
+          transition={{ ...SPRING_CRIT, delay: 0.08 }}
+          className="specimen-panel reticle space-y-5 p-6 sm:p-8 lg:col-span-7"
+          noValidate
+        >
           <div className="flex items-center justify-between border-b border-aqua/15 pb-3 font-mono text-[11px] tracking-widest text-mist uppercase">
             <span>DISPATCH FORM // DIRECT LINK</span>
             <span className="text-aqua">HTTPS</span>
@@ -319,21 +328,27 @@ export default function Contact() {
             )}
           </div>
 
-          {statusMsg && (
-            <div
-              role={ok ? 'status' : 'alert'}
-              className={`flex items-start gap-2.5 rounded-[2px] border p-3.5 text-[0.9375rem] ${
-                ok ? 'border-kelp/40 bg-kelp/10 text-kelp' : 'border-coral/40 bg-coral/10 text-coral-text'
-              }`}
-            >
-              {ok ? (
-                <CheckCircle2 size={18} className="mt-0.5 shrink-0" aria-hidden="true" />
-              ) : (
-                <AlertCircle size={18} className="mt-0.5 shrink-0" aria-hidden="true" />
-              )}
-              <span>{statusMsg}</span>
-            </div>
-          )}
+          <AnimatePresence>
+            {statusMsg && (
+              <motion.div
+                role={ok ? 'status' : 'alert'}
+                initial={{ opacity: 0, transform: 'translateY(6px)' }}
+                animate={{ opacity: 1, transform: 'translateY(0px)' }}
+                exit={{ opacity: 0, transform: 'translateY(-4px)' }}
+                transition={SPRING_SNAP}
+                className={`flex items-start gap-2.5 rounded-[2px] border p-3.5 text-[0.9375rem] ${
+                  ok ? 'border-kelp/40 bg-kelp/10 text-kelp' : 'border-coral/40 bg-coral/10 text-coral-text'
+                }`}
+              >
+                {ok ? (
+                  <CheckCircle2 size={18} className="mt-0.5 shrink-0" aria-hidden="true" />
+                ) : (
+                  <AlertCircle size={18} className="mt-0.5 shrink-0" aria-hidden="true" />
+                )}
+                <span>{statusMsg}</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <button type="submit" disabled={isSending || cooldown > 0} className="btn btn-primary w-full">
             {cooldown > 0 ? (
@@ -347,7 +362,7 @@ export default function Contact() {
               </>
             )}
           </button>
-        </form>
+        </motion.form>
       </div>
     </section>
   )

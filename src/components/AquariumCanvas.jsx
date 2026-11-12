@@ -587,6 +587,8 @@ export default function AquariumCanvas() {
     let running = true
     let rafId = 0
     let lastT = performance.now()
+    let lastScrollY = window.scrollY
+    let scrollCurrent = 0
 
     // ── Ikan ────────────────────────────────────────────────────────────
     const swimTop = () => 90
@@ -923,7 +925,7 @@ export default function AquariumCanvas() {
     const drawMotes = (dt) => {
       motes.forEach((m) => {
         m.x += m.vx * dt
-        m.y += m.vy * dt
+        m.y += (m.vy - scrollCurrent * 0.35) * dt
         if (m.x < -5) m.x = env.w + 5
         if (m.x > env.w + 5) m.x = -5
         if (m.y < -5) m.y = env.h + 5
@@ -953,7 +955,7 @@ export default function AquariumCanvas() {
       for (let i = bubbles.length - 1; i >= 0; i--) {
         const b = bubbles[i]
         b.wob += 0.05 * dt
-        b.y -= b.vy * dt
+        b.y -= (b.vy + scrollCurrent * 0.25) * dt
         b.x += Math.sin(b.wob) * b.amp * dt
         if (b.air) b.r += 0.0035 * dt
         if (b.y < SURFACE_Y) {
@@ -1137,6 +1139,7 @@ export default function AquariumCanvas() {
       drawSurface(now)
       drawRipples(dt)
 
+      scrollCurrent *= Math.pow(0.88, dt)
       rafId = requestAnimationFrame(render)
     }
 
@@ -1163,6 +1166,12 @@ export default function AquariumCanvas() {
       depthVeilRef.current.style.opacity = (ratio * 0.68).toFixed(3)
     }
     const onScrollDepth = () => {
+      const nextY = window.scrollY
+      const deltaY = nextY - lastScrollY
+      lastScrollY = nextY
+      if (!reduceMotion && Math.abs(deltaY) > 0.5) {
+        scrollCurrent = clamp(scrollCurrent + deltaY * 0.04, -5.5, 5.5)
+      }
       if (depthRaf) return
       depthRaf = requestAnimationFrame(syncDepthVeil)
     }
