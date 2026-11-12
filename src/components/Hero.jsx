@@ -65,7 +65,7 @@ export default function Hero() {
         {/* Editorial Typography Lead */}
         <div className="lg:col-span-8">
           <p className="eyebrow hero-stagger" style={{ '--stagger': 0 }}>
-            Log 00 // Surface — Surabaya, Indonesia
+            00 // Surabaya, Indonesia
           </p>
 
           <h1
@@ -77,7 +77,7 @@ export default function Hero() {
 
           <p className="lede on-water hero-stagger mt-7 max-w-xl text-[1.0625rem]" style={{ '--stagger': 2 }}>
             I&apos;m <strong className="font-semibold text-white">Hafidz</strong>, an Informatics Engineering student
-            focused on network architecture, Linux infrastructure, and packet security. Click open water to feed the tank.
+            focused on network architecture, Linux infrastructure, and packet security.
           </p>
 
           <div className="hero-stagger mt-9 flex flex-wrap items-center gap-3" style={{ '--stagger': 3 }}>
@@ -108,7 +108,7 @@ export default function Hero() {
         <div className="hero-stagger flex justify-start lg:col-span-4 lg:justify-end" style={{ '--stagger': 3 }}>
           <figure className="specimen-panel reticle w-full max-w-[20rem] overflow-hidden">
             <div className="flex items-center justify-between border-b border-aqua/15 px-3.5 py-2 font-mono text-[0.6875rem] tracking-wider">
-              <span className="text-aqua">SPECIMEN // 001</span>
+              <span className="text-aqua">PROFILE // HAFIDZ</span>
               <span className="flex items-center gap-1.5 text-kelp">
                 <span className="relative flex h-2 w-2" aria-hidden="true">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-kelp opacity-65" />

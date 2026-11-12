@@ -116,7 +116,7 @@ export default function Labs({ onModalOpenChange }) {
         style={reveal(headerVisible)}
       >
         <div className="max-w-2xl">
-          <p className="eyebrow">01 // Lab Archive — Mesopelagic</p>
+          <p className="eyebrow">01 // Lab Archive</p>
           <h2 className="section-title on-water mt-4">
             Engineering <em className="italic text-aqua">labs</em>
           </h2>

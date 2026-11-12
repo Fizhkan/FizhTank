@@ -9,7 +9,7 @@ export default function Footer() {
         <div className="flex items-center gap-4">
           <FishMark size={36} />
           <div>
-            <p className="font-mono text-xs tracking-widest text-foam uppercase">FizhTank // Colophon</p>
+            <p className="font-mono text-xs tracking-widest text-foam uppercase">FizhTank</p>
             <p className="mt-0.5 text-sm text-mist">
               © {new Date().getFullYear()} Hafidz Sirajuddin · {site.location}
             </p>

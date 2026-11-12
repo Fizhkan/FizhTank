@@ -7,7 +7,6 @@ import { useEffect, useRef } from 'react'
  *  - air dengan permukaan bergelombang dan berkas cahaya dari atas
  *  - pasir, batu, tanaman, dan airstone yang mengeluarkan gelembung
  *  - clownfish, blue tang, angelfish, sekawanan neon tetra, dan corydoras di dasar
- *  - makanan ikan: klik area air kosong (atau tombol "Beri makan") dan ikan akan mengejarnya
  *
  * Animasi sepenuhnya terpisah dari scroll, jadi tidak ter-reset saat halaman digulir.
  */
@@ -976,26 +975,6 @@ export default function AquariumCanvas() {
       }
     }
 
-    // ── Makanan ikan ─────────────────────────────────────────────────────
-    const feed = (x) => {
-      if (food.filter((f) => !f.eaten).length > 40) return
-      const cx = x ?? rand(env.w * 0.2, env.w * 0.8)
-      for (let i = 0; i < 8; i++) {
-        food.push({
-          x: cx + rand(-28, 28),
-          y: SURFACE_Y + rand(2, 16),
-          vy: rand(0.35, 0.65),
-          phase: rand(0, Math.PI * 2),
-          size: rand(2.2, 3.6),
-          hue: rand(18, 46),
-          landed: false,
-          life: 0,
-          eaten: false,
-        })
-      }
-      ripples.push({ x: cx, r: 4, max: 52, a: 0.55 })
-    }
-
     const updateFood = (dt, t) => {
       for (let i = food.length - 1; i >= 0; i--) {
         const f = food[i]
@@ -1126,23 +1105,6 @@ export default function AquariumCanvas() {
     }
     window.addEventListener('resize', onResize)
 
-    const onPointerDown = (e) => {
-      if (e.button !== undefined && e.button !== 0) return
-      const target = e.target
-      if (
-        target &&
-        target.closest &&
-        target.closest('button, a, input, textarea, select, label, summary, header, footer, [data-no-feed], .glass, .glass-inset, .specimen-panel, .specimen-inset')
-      ) {
-        return
-      }
-      feed(e.clientX)
-    }
-    window.addEventListener('pointerdown', onPointerDown)
-
-    const onFeedEvent = (e) => feed(e.detail?.x)
-    window.addEventListener('fizhtank-feed', onFeedEvent)
-
     const render = (now) => {
       if (!running) return
       const dt = Math.min((now - lastT) / 16.667, 3) * timeScale
@@ -1216,8 +1178,6 @@ export default function AquariumCanvas() {
       if (depthRaf) cancelAnimationFrame(depthRaf)
       clearTimeout(resizeTimer)
       window.removeEventListener('resize', onResize)
-      window.removeEventListener('pointerdown', onPointerDown)
-      window.removeEventListener('fizhtank-feed', onFeedEvent)
       window.removeEventListener('scroll', onScrollDepth)
       window.removeEventListener('resize', onScrollDepth)
       document.removeEventListener('visibilitychange', onVisibility)

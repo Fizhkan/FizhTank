@@ -32,7 +32,7 @@ export default function Skills() {
         style={reveal(headerVisible)}
       >
         <div className="max-w-2xl">
-          <p className="eyebrow">02 // Capability Matrix — Bathypelagic</p>
+          <p className="eyebrow">02 // Capability Matrix</p>
           <h2 className="section-title on-water mt-4">
             Technical <em className="italic text-aqua">capabilities</em>
           </h2>

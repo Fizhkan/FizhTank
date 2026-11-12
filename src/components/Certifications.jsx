@@ -65,7 +65,7 @@ export default function Certifications() {
         style={reveal(headerVisible)}
       >
         <div className="max-w-2xl">
-          <p className="eyebrow">03 // Certification Track — Abyssal Slope</p>
+          <p className="eyebrow">03 // Certification Track</p>
           <h2 className="section-title on-water mt-4">
             Upcoming <em className="italic text-aqua">milestones</em>
           </h2>
