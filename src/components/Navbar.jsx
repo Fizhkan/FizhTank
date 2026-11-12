@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Menu, X, ArrowUpRight } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import FishMark from './FishMark'
+import { smoothScrollTo, isProgrammaticScrolling } from '../utils/scroll'
 
 const NAV_LINKS = [
   { num: '01', label: 'Labs', href: '#labs', id: 'labs' },
@@ -33,6 +34,7 @@ export default function Navbar() {
     const ids = ['hero', 'labs', 'skills', 'certifications', 'contact']
     const observer = new IntersectionObserver(
       (entries) => {
+        if (isProgrammaticScrolling()) return
         entries.forEach((entry) => {
           if (entry.isIntersecting) setActiveSection(entry.target.id)
         })
@@ -45,6 +47,13 @@ export default function Navbar() {
     })
     return () => observer.disconnect()
   }, [])
+
+  const handleAnchorClick = (e, id, href, offset = 76) => {
+    e.preventDefault()
+    setActiveSection(id)
+    setMobileOpen(false)
+    smoothScrollTo(id === 'hero' ? 0 : id, { offset, hash: href })
+  }
 
   return (
     <header
@@ -65,6 +74,7 @@ export default function Navbar() {
       <div className="mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between px-5 sm:px-8">
         <a
           href="#hero"
+          onClick={(e) => handleAnchorClick(e, 'hero', '#hero', 0)}
           className="group flex items-center gap-3 transition-transform duration-100 active:scale-[0.97]"
           aria-label="FizhTank, back to top"
         >
@@ -84,6 +94,7 @@ export default function Navbar() {
               <a
                 key={link.id}
                 href={link.href}
+                onClick={(e) => handleAnchorClick(e, link.id, link.href)}
                 aria-current={isActive ? 'true' : undefined}
                 className={`relative flex items-baseline gap-1.5 rounded-[2px] px-3.5 py-2 text-sm font-medium transition-[color,transform] duration-150 active:scale-[0.97] ${
                   isActive ? 'text-white' : 'text-mist hover:text-white'
@@ -164,7 +175,7 @@ export default function Navbar() {
                 <a
                   key={link.id}
                   href={link.href}
-                  onClick={() => setMobileOpen(false)}
+                  onClick={(e) => handleAnchorClick(e, link.id, link.href)}
                   className="flex items-baseline gap-3 py-3.5 text-lg font-medium text-foam active:opacity-75"
                 >
                   <span className="font-mono text-xs text-aqua">{link.num}</span>

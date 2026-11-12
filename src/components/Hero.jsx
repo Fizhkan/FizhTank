@@ -12,6 +12,7 @@ import {
 import { toolsData } from '../data/skillsData'
 import { site } from '../data/site'
 import { SPRING_CRIT, SPRING_SNAP, VIEWPORT_ONCE, revealUp, revealCard } from '../utils/motion'
+import { smoothScrollTo } from '../utils/scroll'
 
 // Planned homelab network topology blueprint.
 const NODES = [
@@ -104,11 +105,25 @@ export default function Hero() {
             animate={revealUp.animate}
             transition={{ ...SPRING_CRIT, delay: 0.2 }}
           >
-            <a href="#labs" className="btn btn-primary">
+            <a
+              href="#labs"
+              onClick={(e) => {
+                e.preventDefault()
+                smoothScrollTo('labs', { hash: '#labs' })
+              }}
+              className="btn btn-primary"
+            >
               <span>Explore Labs</span>
               <ArrowUpRight size={16} aria-hidden="true" />
             </a>
-            <a href="#contact" className="btn btn-ghost">
+            <a
+              href="#contact"
+              onClick={(e) => {
+                e.preventDefault()
+                smoothScrollTo('contact', { hash: '#contact' })
+              }}
+              className="btn btn-ghost"
+            >
               Get in Touch
             </a>
           </motion.div>
@@ -334,6 +349,10 @@ export default function Hero() {
                     {selected.lab && (
                       <a
                         href="#labs"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          smoothScrollTo('labs', { hash: '#labs' })
+                        }}
                         className="mt-3 inline-flex items-center gap-1.5 font-mono text-xs font-semibold text-aqua hover:text-white"
                       >
                         <span>View Lab 0{selected.lab}</span>

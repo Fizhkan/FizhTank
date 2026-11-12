@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { ArrowUp } from 'lucide-react'
 import { AnimatePresence, motion, useScroll, useSpring } from 'motion/react'
+import { smoothScrollTo } from '../utils/scroll'
 
 const RADIUS = 21
 
@@ -35,14 +36,14 @@ export default function ScrollToTop() {
         <motion.button
           key="scroll-to-top"
           type="button"
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          onClick={() => smoothScrollTo(0, { hash: '#hero' })}
           aria-label="Back to top"
-          initial={{ opacity: 0, transform: 'translateY(24px) scale(0.84)' }}
+          initial={{ opacity: 0, transform: 'translateY(28px) scale(0.75)' }}
           animate={{ opacity: 1, transform: 'translateY(0px) scale(1)' }}
-          exit={{ opacity: 0, transform: 'translateY(24px) scale(0.84)' }}
+          exit={{ opacity: 0, transform: 'translateY(28px) scale(0.75)' }}
           whileHover={{ transform: 'translateY(-2px) scale(1.05)' }}
           whileTap={{ transform: 'translateY(0px) scale(0.95)' }}
-          transition={{ type: 'spring', bounce: 0, duration: 0.36 }}
+          transition={{ type: 'spring', bounce: 0, duration: 0.4 }}
           className="fixed right-5 bottom-5 z-40 flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-deep/75 text-aqua shadow-[0_10px_28px_rgba(1,10,16,0.55)] backdrop-blur-md transition-colors duration-150 hover:bg-water/85 hover:text-foam sm:right-7 sm:bottom-6"
         >
           <svg
