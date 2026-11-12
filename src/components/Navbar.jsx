@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Menu, X, ArrowUpRight } from 'lucide-react'
-import { AnimatePresence, motion, useScroll, useSpring } from 'motion/react'
+import { AnimatePresence, motion } from 'motion/react'
 import FishMark from './FishMark'
 
 const NAV_LINKS = [
@@ -14,13 +14,6 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [activeSection, setActiveSection] = useState('hero')
   const [mobileOpen, setMobileOpen] = useState(false)
-
-  const { scrollYProgress } = useScroll()
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 260,
-    damping: 32,
-    restDelta: 0.001,
-  })
 
   useEffect(() => {
     let ticking = false
@@ -67,12 +60,6 @@ export default function Navbar() {
         className={`pointer-events-none absolute inset-x-0 -bottom-4 h-4 bg-gradient-to-b from-deep/45 to-transparent transition-opacity duration-200 ${
           scrolled ? 'opacity-100' : 'opacity-0'
         }`}
-      />
-      {/* Scroll progress hairline linked smoothly to viewport scroll */}
-      <motion.div
-        aria-hidden="true"
-        className="pointer-events-none absolute right-0 bottom-0 left-0 h-[1.5px] origin-left bg-gradient-to-r from-aqua/40 via-aqua to-kelp/90"
-        style={{ scaleX: smoothProgress }}
       />
 
       <div className="mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between px-5 sm:px-8">

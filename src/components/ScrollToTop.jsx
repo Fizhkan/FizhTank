@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { ArrowUp } from 'lucide-react'
 import { AnimatePresence, motion, useScroll, useSpring } from 'motion/react'
 
-const RADIUS = 18
+const RADIUS = 21
 
 export default function ScrollToTop() {
   const [show, setShow] = useState(false)
@@ -40,36 +40,36 @@ export default function ScrollToTop() {
           initial={{ opacity: 0, transform: 'translateY(24px) scale(0.84)' }}
           animate={{ opacity: 1, transform: 'translateY(0px) scale(1)' }}
           exit={{ opacity: 0, transform: 'translateY(24px) scale(0.84)' }}
-          whileHover={{ transform: 'translateY(-2px) scale(1.04)' }}
+          whileHover={{ transform: 'translateY(-2px) scale(1.05)' }}
           whileTap={{ transform: 'translateY(0px) scale(0.95)' }}
           transition={{ type: 'spring', bounce: 0, duration: 0.36 }}
-          className="specimen-panel fixed right-5 bottom-5 z-40 flex h-12 w-12 items-center justify-center rounded-[2px] text-aqua shadow-[0_10px_28px_rgba(1,10,16,0.55)] transition-[border-color,color] duration-150 hover:border-aqua/65 hover:text-foam sm:right-7 sm:bottom-6"
+          className="fixed right-5 bottom-5 z-40 flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-deep/75 text-aqua shadow-[0_10px_28px_rgba(1,10,16,0.55)] backdrop-blur-md transition-colors duration-150 hover:bg-water/85 hover:text-foam sm:right-7 sm:bottom-6"
         >
           <svg
-            viewBox="0 0 44 44"
+            viewBox="0 0 48 48"
             className="pointer-events-none absolute inset-0 h-full w-full -rotate-90"
             aria-hidden="true"
           >
             <circle
-              cx="22"
-              cy="22"
+              cx="24"
+              cy="24"
               r={RADIUS}
               fill="none"
-              stroke="rgba(94, 234, 212, 0.14)"
-              strokeWidth="1.5"
+              stroke="rgba(94, 234, 212, 0.16)"
+              strokeWidth="2"
             />
             <motion.circle
-              cx="22"
-              cy="22"
+              cx="24"
+              cy="24"
               r={RADIUS}
               fill="none"
               stroke="currentColor"
-              strokeWidth="1.75"
+              strokeWidth="2.25"
               strokeLinecap="round"
               style={{ pathLength: smoothProgress }}
             />
           </svg>
-          <ArrowUp size={16} className="relative z-10" aria-hidden="true" />
+          <ArrowUp size={17} className="relative z-10" aria-hidden="true" />
         </motion.button>
       )}
     </AnimatePresence>
