@@ -1,26 +1,29 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "DM Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
+  --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Instrument Serif", Georgia, "Times New Roman", serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-  /* Warna air, busa, karang, dan pasir */
-  --color-deep: #031c26;
-  --color-water: #05303e;
-  --color-lagoon: #0a4a5c;
-  --color-foam: #eaf7f6;
-  --color-mist: #acd0d4;
-  --color-aqua: #6fe3d3;
+  /* Palet Abyssal Telemetry & Naturalist Journal (uji kontras WCAG AA/AAA) */
+  --color-deep: #02131b;
+  --color-water: #042532;
+  --color-lagoon: #083b4c;
+  --color-foam: #edf7f6;
+  --color-mist: #a5cdd2;
+  --color-aqua: #5eead4;
   --color-coral: #ff8a4c;
+  --color-coral-text: #ffad80;
   --color-kelp: #86e0a3;
-  --color-sand: #ecdcb2;
+  --color-sand: #e6d5a8;
 }
 
 :root {
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --glass-bg: rgba(4, 40, 52, 0.66);
-  --glass-edge: rgba(190, 240, 240, 0.14);
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --panel-bg: rgba(3, 24, 34, 0.62);
+  --panel-edge: rgba(132, 224, 214, 0.16);
+  --panel-top: rgba(190, 246, 240, 0.28);
 }
 
 * {
@@ -29,9 +32,10 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 5rem;
+  scroll-padding-top: 5.5rem;
   max-width: 100vw;
   overflow-x: hidden;
+  overscroll-behavior-y: none;
   -webkit-tap-highlight-color: transparent;
   background-color: var(--color-deep);
   color-scheme: dark;
@@ -46,17 +50,18 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
+  overscroll-behavior-y: none;
   max-width: 100vw;
   width: 100%;
-  line-height: 1.6;
+  line-height: 1.62;
 }
 
 @layer base {
   h1, h2, h3, h4 {
     font-family: var(--font-display);
-    font-weight: 600;
+    font-weight: 400;
     letter-spacing: -0.02em;
-    line-height: 1.1;
+    line-height: 1.04;
     text-wrap: balance;
   }
 
@@ -72,56 +77,91 @@ body {
   button, a, [role="button"] {
     touch-action: manipulation;
   }
+
+  input, textarea, select {
+    font-size: 16px;
+  }
 }
 
 ::selection {
-  background: rgba(111, 227, 211, 0.35);
+  background: rgba(94, 234, 212, 0.32);
   color: #fff;
 }
 
-/* ── Komponen bersama ───────────────────────────────────────────────────── */
+/* ── Sistem Komponen: Specimen HUD & Hairline Grid ─────────────────────── */
 
 @layer components {
-  /* Panel kaca: berada di depan tank, ikan tetap samar terlihat di belakangnya */
-  .glass {
-    background: var(--glass-bg);
-    backdrop-filter: blur(14px) saturate(140%);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
-    border: 1px solid var(--glass-edge);
-    border-top-color: rgba(220, 250, 250, 0.24);
-    border-radius: 1.25rem;
-    box-shadow: 0 18px 40px rgba(0, 16, 22, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  /* Panel instrumen transparan berbingkai arsitektural (menggantikan kartu bulat generik) */
+  .glass,
+  .specimen-panel {
+    background: var(--panel-bg);
+    backdrop-filter: blur(10px) saturate(125%);
+    -webkit-backdrop-filter: blur(10px) saturate(125%);
+    border: 1px solid var(--panel-edge);
+    border-top-color: var(--panel-top);
+    border-radius: 0.25rem;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
   }
 
-  .glass-inset {
-    background: rgba(2, 26, 36, 0.55);
-    border: 1px solid rgba(190, 240, 240, 0.1);
-    border-radius: 0.875rem;
+  .glass-inset,
+  .specimen-inset {
+    background: rgba(2, 17, 25, 0.64);
+    border: 1px solid rgba(132, 224, 214, 0.12);
+    border-radius: 0.125rem;
+  }
+
+  /* Tanda bidik sudut (crosshair reticle) khas instrumen observasi kelautan */
+  .reticle {
+    position: relative;
+  }
+
+  .reticle::before,
+  .reticle::after {
+    content: "";
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    pointer-events: none;
+    border-color: rgba(94, 234, 212, 0.45);
+  }
+
+  .reticle::before {
+    top: -1px;
+    left: -1px;
+    border-top: 1.5px solid;
+    border-left: 1.5px solid;
+  }
+
+  .reticle::after {
+    bottom: -1px;
+    right: -1px;
+    border-bottom: 1.5px solid;
+    border-right: 1.5px solid;
   }
 
   .eyebrow {
     display: inline-flex;
     align-items: center;
-    gap: 0.6rem;
-    font-size: 0.875rem;
-    font-weight: 600;
-    letter-spacing: 0.02em;
+    gap: 0.65rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
     color: var(--color-aqua);
   }
 
   .eyebrow::before {
     content: "";
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 9999px;
-    border: 1.5px solid currentColor;
-    box-shadow: 0.55rem -0.4rem 0 -0.12rem currentColor;
-    margin-right: 0.35rem;
+    width: 1.25rem;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.75;
   }
 
   .section-title {
-    font-size: clamp(2rem, 4.6vw, 3.25rem);
-    line-height: 1.08;
+    font-size: clamp(2.25rem, 5vw, 3.75rem);
+    line-height: 1.02;
     color: #fff;
   }
 
@@ -135,16 +175,17 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    min-height: 2.875rem;
-    padding: 0.7rem 1.5rem;
-    border-radius: 9999px;
-    font-size: 0.9375rem;
+    gap: 0.55rem;
+    min-height: 2.75rem;
+    padding: 0.65rem 1.35rem;
+    border-radius: 0.125rem;
+    font-size: 0.875rem;
     font-weight: 600;
+    letter-spacing: 0.01em;
     line-height: 1.2;
     cursor: pointer;
     user-select: none;
-    transition: transform 140ms var(--ease-out), background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+    transition: transform 140ms var(--ease-out), background-color 160ms ease, border-color 160ms ease, color 160ms ease;
   }
 
   .btn:active {
@@ -158,64 +199,69 @@ body {
 
   .btn-primary {
     background: var(--color-coral);
-    color: #2a1204;
-    box-shadow: 0 6px 18px rgba(255, 138, 76, 0.28);
+    color: #1f0a02;
+    border: 1px solid rgba(255, 173, 128, 0.55);
   }
 
   .btn-ghost {
-    border: 1px solid rgba(234, 247, 246, 0.28);
+    border: 1px solid rgba(165, 205, 210, 0.28);
     color: var(--color-foam);
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(4, 37, 50, 0.45);
   }
 
   @media (hover: hover) and (pointer: fine) {
     .btn-primary:hover {
-      background: #ffa070;
+      background: #ff9c68;
     }
 
     .btn-ghost:hover {
-      border-color: rgba(111, 227, 211, 0.7);
-      background: rgba(111, 227, 211, 0.1);
+      border-color: rgba(94, 234, 212, 0.75);
+      background: rgba(94, 234, 212, 0.1);
+      color: #fff;
     }
   }
 
   .chip {
     display: inline-flex;
     align-items: center;
-    padding: 0.2rem 0.7rem;
-    border-radius: 9999px;
-    font-size: 0.8125rem;
-    line-height: 1.5;
+    padding: 0.2rem 0.6rem;
+    border-radius: 0.125rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 1.45;
     color: var(--color-foam);
-    background: rgba(255, 255, 255, 0.07);
-    border: 1px solid rgba(234, 247, 246, 0.14);
+    background: rgba(4, 37, 50, 0.55);
+    border: 1px solid rgba(132, 224, 214, 0.18);
   }
 
   .field {
     width: 100%;
-    padding: 0.75rem 1rem;
-    border-radius: 0.75rem;
-    background: rgba(2, 26, 36, 0.7);
-    border: 1px solid rgba(190, 240, 240, 0.2);
+    padding: 0.75rem 0.95rem;
+    border-radius: 0.125rem;
+    background: rgba(2, 17, 25, 0.78);
+    border: 1px solid rgba(132, 224, 214, 0.22);
     color: #fff;
     font-size: 1rem;
     transition: border-color 160ms ease, box-shadow 160ms ease;
   }
 
   .field::placeholder {
-    color: rgba(172, 208, 212, 0.65);
+    color: rgba(165, 205, 210, 0.6);
   }
 
   .field:focus {
     outline: none;
     border-color: var(--color-aqua);
-    box-shadow: 0 0 0 3px rgba(111, 227, 211, 0.18);
+    box-shadow: 0 0 0 2px rgba(94, 234, 212, 0.18);
   }
 
   .label {
     display: block;
-    margin-bottom: 0.4rem;
-    font-size: 0.875rem;
+    margin-bottom: 0.45rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     font-weight: 500;
     color: var(--color-mist);
   }
@@ -225,18 +271,18 @@ body {
     font-size: 0.8125rem;
   }
 
-  /* Teks yang berada langsung di atas air (tanpa panel) perlu bayangan agar tetap terbaca di depan ikan */
+  /* Teks langsung di atas air agar tetap tajam terbaca tanpa panel penghalang */
   .on-water {
-    text-shadow: 0 2px 18px rgba(2, 24, 32, 0.6), 0 1px 2px rgba(2, 24, 32, 0.5);
+    text-shadow: 0 2px 22px rgba(2, 15, 22, 0.78), 0 1px 3px rgba(2, 15, 22, 0.7);
   }
 
   .terminal-scroll {
     scrollbar-width: thin;
-    scrollbar-color: rgba(111, 227, 211, 0.35) transparent;
+    scrollbar-color: rgba(94, 234, 212, 0.35) transparent;
   }
 }
 
-/* ── Kerangka kaca tank ─────────────────────────────────────────────────── */
+/* ── Kerangka kaca tank (jendela observasi) ─────────────────────────────── */
 
 .tank-frame {
   pointer-events: none;
@@ -244,10 +290,10 @@ body {
   inset: 0;
   z-index: 45;
   box-shadow:
-    inset 0 0 0 4px #021017,
-    inset 0 0 0 5px rgba(190, 240, 245, 0.16),
-    inset 0 0 80px rgba(0, 12, 18, 0.4);
-  background: linear-gradient(112deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0) 20%);
+    inset 0 0 0 3px #010c12,
+    inset 0 0 0 4px rgba(132, 224, 214, 0.14),
+    inset 0 0 90px rgba(0, 10, 16, 0.42);
+  background: linear-gradient(115deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 18%);
 }
 
 /* ── Aksesibilitas ──────────────────────────────────────────────────────── */
@@ -262,16 +308,17 @@ body {
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  .glass {
-    background: #052a38;
+  .glass,
+  .specimen-panel {
+    background: #03202c;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
 }
 
 @media (prefers-contrast: more) {
-  .glass, .glass-inset, .chip {
-    border-color: rgba(255, 255, 255, 0.5);
+  .glass, .specimen-panel, .glass-inset, .specimen-inset, .chip {
+    border-color: rgba(255, 255, 255, 0.55);
   }
 }
 
@@ -279,7 +326,7 @@ body {
 
 html {
   scrollbar-width: thin;
-  scrollbar-color: rgba(111, 227, 211, 0.4) var(--color-deep);
+  scrollbar-color: rgba(94, 234, 212, 0.4) var(--color-deep);
 }
 
 ::-webkit-scrollbar {
@@ -289,6 +336,6 @@ html {
   background: var(--color-deep);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(111, 227, 211, 0.35);
-  border-radius: 9999px;
+  background: rgba(94, 234, 212, 0.32);
+  border-radius: 2px;
 }

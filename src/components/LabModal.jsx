@@ -14,13 +14,13 @@ function Section({ icon: Icon, title, children, visible = true, delay = 0 }) {
     <section
       style={{
         opacity: visible ? 1 : 0,
-        transform: visible ? 'translateY(0)' : 'translateY(16px)',
-        transition: `opacity 0.5s ease ${0.1 + delay * 0.1}s, transform 0.5s ease ${0.1 + delay * 0.1}s`,
+        transform: visible ? 'translateY(0)' : 'translateY(10px)',
+        transition: `opacity 0.22s cubic-bezier(0.23, 1, 0.32, 1) ${0.04 + delay * 0.04}s, transform 0.22s cubic-bezier(0.23, 1, 0.32, 1) ${0.04 + delay * 0.04}s`,
       }}
     >
       <div className="mb-3 flex items-center gap-2">
-        <Icon size={17} className="text-aqua" aria-hidden="true" />
-        <h3 className="text-lg text-white">{title}</h3>
+        <Icon size={16} className="text-aqua" aria-hidden="true" />
+        <h3 className="font-mono text-xs tracking-widest text-foam uppercase">{title}</h3>
       </div>
       {children}
     </section>
@@ -116,25 +116,26 @@ export default function LabModal({ lab, onClose }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="lab-modal-title"
-        className="glass relative max-h-[92vh] w-full max-w-2xl overflow-y-auto"
+        className="specimen-panel reticle relative max-h-[92vh] w-full max-w-2xl overflow-y-auto"
         style={{
           opacity: isOpen ? 1 : 0,
-          transform: isOpen ? 'translateY(0) scale(1)' : 'translateY(24px) scale(0.97)',
-          transition: 'opacity 0.3s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
-          background: 'rgba(4, 38, 50, 0.96)',
+          transform: isOpen ? 'translateY(0) scale(1)' : 'translateY(10px) scale(0.96)',
+          transition:
+            'opacity 0.22s cubic-bezier(0.23, 1, 0.32, 1), transform 0.24s cubic-bezier(0.23, 1, 0.32, 1)',
+          background: 'rgba(3, 29, 40, 0.98)',
         }}
       >
-        <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-white/10 bg-[rgba(4,38,50,0.98)] p-5 sm:p-6">
+        <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-aqua/15 bg-[#031d28]/98 p-5 sm:p-6">
           <div className="flex items-start gap-4">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-aqua/40 bg-aqua/10 text-aqua">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[2px] border border-aqua/35 bg-aqua/10 text-aqua">
               <ModalIcon size={20} aria-hidden="true" />
             </span>
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm text-aqua">{lab.category}</span>
+                <span className="font-mono text-xs tracking-widest text-aqua uppercase">{lab.category}</span>
                 <span className="chip">{STATUS_LABEL[lab.status] || lab.status}</span>
               </div>
-              <h2 id="lab-modal-title" className="mt-1 text-2xl leading-tight text-white sm:text-3xl">
+              <h2 id="lab-modal-title" className="mt-1.5 text-2xl leading-tight text-foam sm:text-3xl">
                 {lab.title}
               </h2>
             </div>
@@ -145,7 +146,7 @@ export default function LabModal({ lab, onClose }) {
             type="button"
             onClick={handleClose}
             aria-label="Tutup detail lab"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/20 text-mist transition-colors hover:border-white/50 hover:text-white"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[2px] border border-aqua/25 text-mist transition-[border-color,color,transform] duration-150 hover:border-aqua/60 hover:text-foam active:scale-[0.97]"
           >
             <X size={18} aria-hidden="true" />
           </button>
@@ -162,15 +163,15 @@ export default function LabModal({ lab, onClose }) {
                 {lab.writeup.plannedSteps.map((step, i) => (
                   <li
                     key={step}
-                    className="glass-inset flex items-start gap-3 p-3.5"
+                    className="specimen-inset flex items-start gap-3 p-3.5"
                     style={{
                       opacity: revealed ? 1 : 0,
-                      transform: revealed ? 'translateX(0)' : 'translateX(-10px)',
-                      transition: `opacity 0.4s ease ${0.25 + i * 0.07}s, transform 0.4s ease ${0.25 + i * 0.07}s`,
+                      transform: revealed ? 'translateX(0)' : 'translateX(-8px)',
+                      transition: `opacity 0.22s cubic-bezier(0.23, 1, 0.32, 1) ${0.08 + i * 0.03}s, transform 0.22s cubic-bezier(0.23, 1, 0.32, 1) ${0.08 + i * 0.03}s`,
                     }}
                   >
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-aqua/50 text-xs font-semibold text-aqua">
-                      {i + 1}
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[2px] border border-aqua/40 font-mono text-xs font-semibold text-aqua">
+                      {String(i + 1).padStart(2, '0')}
                     </span>
                     <span className="leading-relaxed text-foam">{step}</span>
                   </li>
@@ -184,15 +185,18 @@ export default function LabModal({ lab, onClose }) {
               <img
                 src={topologyImage}
                 alt={lab.topologyAlt || `Topologi untuk ${lab.title}`}
-                className="w-full rounded-xl border border-white/15"
+                className="w-full rounded-[2px] border border-aqua/20"
               />
             </Section>
           )}
 
           {isPlanned && (
             <div
-              className="flex items-center gap-3 rounded-xl border border-aqua/30 bg-aqua/10 p-4 text-[0.9375rem] text-foam"
-              style={{ opacity: revealed ? 1 : 0, transition: 'opacity 0.5s ease 0.4s' }}
+              className="flex items-center gap-3 rounded-[2px] border border-aqua/25 bg-aqua/8 p-4 text-[0.9375rem] text-foam"
+              style={{
+                opacity: revealed ? 1 : 0,
+                transition: 'opacity 0.24s cubic-bezier(0.23, 1, 0.32, 1) 0.14s',
+              }}
             >
               <Info size={18} className="shrink-0 text-aqua" aria-hidden="true" />
               <p>Write-up hasil lab ditambahkan setelah lab selesai dikerjakan.</p>
@@ -201,7 +205,7 @@ export default function LabModal({ lab, onClose }) {
 
           {isComplete && lab.writeup?.commands && (
             <Section icon={Target} title="Perintah kunci" visible={revealed} delay={2}>
-              <pre className="glass-inset overflow-x-auto p-4 font-mono text-[0.8125rem] leading-relaxed whitespace-pre-wrap text-foam">
+              <pre className="specimen-inset overflow-x-auto p-4 font-mono text-[0.8125rem] leading-relaxed whitespace-pre-wrap text-foam">
                 {lab.writeup.commands}
               </pre>
             </Section>

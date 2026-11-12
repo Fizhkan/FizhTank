@@ -19,27 +19,31 @@ function SocialCard({ label, value, href, visible, idx }) {
       href={href}
       target={isMailto ? undefined : '_blank'}
       rel={isMailto ? undefined : 'noopener noreferrer'}
-      className="glass group flex items-center justify-between gap-4 p-5 transition-[border-color,transform] duration-200 hover:border-aqua/50 active:scale-[0.99]"
+      className="group flex items-center justify-between gap-4 p-5 transition-[background-color,color,transform] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-aqua/[0.04] active:scale-[0.99]"
       style={{
         opacity: visible ? 1 : 0,
-        transform: visible ? 'translateX(0)' : 'translateX(-20px)',
-        transition: `opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1) ${idx * 0.1}s, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) ${idx * 0.1}s, border-color 0.2s`,
+        transform: visible ? 'translateX(0)' : 'translateX(-12px)',
+        transition: `opacity 0.24s cubic-bezier(0.23, 1, 0.32, 1) ${idx * 0.04}s, transform 0.24s cubic-bezier(0.23, 1, 0.32, 1) ${idx * 0.04}s, background-color 0.2s`,
       }}
     >
       <span className="flex min-w-0 items-center gap-4">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/20 text-aqua">
-          <Icon size={19} aria-hidden="true" />
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[2px] border border-aqua/25 bg-aqua/5 font-mono text-xs text-aqua">
+          <Icon size={17} aria-hidden="true" />
         </span>
         <span className="min-w-0">
-          <span className="block text-sm text-mist">{label}</span>
-          <span className="block truncate font-semibold text-white">{value}</span>
+          <span className="block font-mono text-[11px] tracking-widest text-mist uppercase">
+            {String(idx + 1).padStart(2, '0')} // {label}
+          </span>
+          <span className="mt-0.5 block truncate font-medium text-foam transition-colors group-hover:text-aqua">
+            {value}
+          </span>
         </span>
       </span>
 
       <ArrowUpRight
-        size={18}
+        size={17}
         aria-hidden="true"
-        className="shrink-0 text-mist transition-colors group-hover:text-aqua"
+        className="shrink-0 text-mist transition-[transform,color] duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-aqua"
       />
     </a>
   )
@@ -157,43 +161,56 @@ export default function Contact() {
   ]
 
   const ok = status === 'success' || status === 'sent-mailto'
-  const reveal = (visible, offset = 24) => ({
+  const reveal = (visible, offset = 16) => ({
     opacity: visible ? 1 : 0,
     transform: visible ? 'translateY(0)' : `translateY(${offset}px)`,
   })
 
   return (
     <section id="contact" className="relative mx-auto max-w-7xl px-5 py-24 sm:px-8">
-      <div ref={headerRef} className="mb-12 max-w-2xl transition-all duration-700" style={reveal(headerVisible)}>
-        <p className="eyebrow">Kontak</p>
-        <h2 className="section-title on-water mt-4">Mari ngobrol</h2>
-        <p className="lede on-water mt-4">
-          Saya terbuka untuk diskusi soal jaringan dan keamanan, kolaborasi lab, atau peluang magang. Kirim pesan
-          lewat formulir, atau langsung lewat email dan GitHub.
+      <div
+        ref={headerRef}
+        className="mb-12 grid grid-cols-1 items-end gap-6 border-b border-aqua/15 pb-8 transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] lg:grid-cols-12"
+        style={reveal(headerVisible)}
+      >
+        <div className="lg:col-span-7">
+          <p className="eyebrow">04 // Komunikasi &amp; Transmisi</p>
+          <h2 className="section-title on-water mt-4">
+            Mari <em className="font-normal text-aqua italic">ngobrol</em>
+          </h2>
+        </div>
+        <p className="lede on-water lg:col-span-5">
+          Terbuka untuk diskusi soal jaringan dan keamanan, kolaborasi lab, atau peluang magang. Kirim pesan lewat
+          formulir, atau langsung lewat email dan GitHub.
         </p>
       </div>
 
-      <div ref={contentRef} className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
-        <div className="space-y-4 lg:col-span-5">
+      <div ref={contentRef} className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
+        <div className="specimen-panel divide-y divide-aqua/15 lg:col-span-5">
           {links.map((item, idx) => (
             <SocialCard key={item.label} {...item} visible={contentVisible} idx={idx} />
           ))}
 
-          <div className="glass p-6">
-            <p className="flex items-start gap-2.5 font-semibold text-white">
-              <span className="relative mt-[0.5em] flex h-2.5 w-2.5 shrink-0" aria-hidden="true">
+          <div className="p-5 sm:p-6">
+            <p className="font-mono text-[11px] tracking-widest text-mist uppercase">03 // Status Ekspedisi</p>
+            <p className="mt-2 flex items-start gap-2.5 font-medium text-foam">
+              <span className="relative mt-[0.45em] flex h-2.5 w-2.5 shrink-0" aria-hidden="true">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-kelp opacity-60" />
                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-kelp" />
               </span>
               {site.availability}
             </p>
-            <p className="mt-2 leading-relaxed text-mist">
-              Saat ini saya fokus ke kuliah, praktik lab Cisco dan Linux, dan persiapan CCNA.
+            <p className="mt-2 text-sm leading-relaxed text-mist">
+              Saat ini fokus ke kuliah, praktik lab Cisco dan Linux, serta persiapan sertifikasi CCNA.
             </p>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="glass space-y-5 p-6 sm:p-8 lg:col-span-7" noValidate>
+        <form onSubmit={handleSubmit} className="specimen-panel reticle space-y-5 p-6 sm:p-8 lg:col-span-7" noValidate>
+          <div className="flex items-center justify-between border-b border-aqua/15 pb-3 font-mono text-[11px] tracking-widest text-mist uppercase">
+            <span>DISPATCH FORM // DIRECT LINK</span>
+            <span className="text-aqua">ENCRYPTED HTTPS</span>
+          </div>
           <div className="hidden" aria-hidden="true">
             <label>
               Jangan diisi
@@ -251,8 +268,8 @@ export default function Contact() {
           {statusMsg && (
             <div
               role={ok ? 'status' : 'alert'}
-              className={`flex items-start gap-2.5 rounded-xl border p-3.5 text-[0.9375rem] ${
-                ok ? 'border-kelp/40 bg-kelp/10 text-kelp' : 'border-coral/40 bg-coral/10 text-coral'
+              className={`flex items-start gap-2.5 rounded-[2px] border p-3.5 text-[0.9375rem] ${
+                ok ? 'border-kelp/40 bg-kelp/10 text-kelp' : 'border-coral/40 bg-coral/10 text-coral-text'
               }`}
             >
               {ok ? (

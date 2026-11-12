@@ -4,10 +4,10 @@ import FishMark from './FishMark'
 import { toggleAudio, isAudioActive, playWaterBubble } from '../utils/audio'
 
 const NAV_LINKS = [
-  { label: 'Lab', href: '#labs', id: 'labs' },
-  { label: 'Skill', href: '#skills', id: 'skills' },
-  { label: 'Sertifikasi', href: '#certifications', id: 'certifications' },
-  { label: 'Kontak', href: '#contact', id: 'contact' },
+  { num: '01', label: 'Lab', href: '#labs', id: 'labs' },
+  { num: '02', label: 'Skill', href: '#skills', id: 'skills' },
+  { num: '03', label: 'Target', href: '#certifications', id: 'certifications' },
+  { num: '04', label: 'Kontak', href: '#contact', id: 'contact' },
 ]
 
 export default function Navbar() {
@@ -52,18 +52,20 @@ export default function Navbar() {
 
   return (
     <header
-      className={`fixed top-0 right-0 left-0 z-50 transition-[background-color,border-color,backdrop-filter] duration-300 ${
+      className={`fixed top-0 right-0 left-0 z-50 transition-[background-color,border-color,backdrop-filter] duration-200 ${
         scrolled
-          ? 'border-b border-white/10 bg-deep/80 backdrop-blur-xl'
-          : 'border-b border-transparent bg-transparent'
+          ? 'border-b border-aqua/15 bg-deep/85 backdrop-blur-xl'
+          : 'border-b border-white/8 bg-deep/20 backdrop-blur-sm'
       }`}
     >
       <div className="mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between px-5 sm:px-8">
-        <a href="#hero" className="flex items-center gap-3" aria-label="FizhTank, kembali ke atas">
-          <FishMark size={38} />
-          <span className="flex flex-col leading-tight">
-            <span className="font-display text-xl font-semibold tracking-tight text-white">FizhTank</span>
-            <span className="text-xs text-mist">Portofolio Siraj</span>
+        <a href="#hero" className="group flex items-center gap-3 active:scale-[0.98]" aria-label="FizhTank, kembali ke atas">
+          <FishMark size={34} />
+          <span className="flex flex-col leading-none">
+            <span className="font-display text-2xl tracking-tight text-white">FizhTank</span>
+            <span className="mt-0.5 font-mono text-[0.6875rem] tracking-wider text-mist uppercase">
+              Log // Siraj
+            </span>
           </span>
         </a>
 
@@ -75,24 +77,35 @@ export default function Navbar() {
                 key={link.id}
                 href={link.href}
                 aria-current={isActive ? 'true' : undefined}
-                className={`rounded-full px-4 py-2 text-[0.9375rem] font-medium transition-colors ${
-                  isActive ? 'bg-white/12 text-white' : 'text-mist hover:text-white'
+                className={`relative flex items-baseline gap-1.5 rounded-[2px] px-3.5 py-2 text-sm font-medium transition-colors active:scale-[0.97] ${
+                  isActive
+                    ? 'bg-aqua/12 text-white'
+                    : 'text-mist hover:text-white'
                 }`}
               >
-                {link.label}
+                <span className={`font-mono text-[0.6875rem] ${isActive ? 'text-aqua' : 'text-mist/60'}`}>
+                  {link.num}
+                </span>
+                <span>{link.label}</span>
+                {isActive && (
+                  <span
+                    className="absolute right-3.5 bottom-0 left-3.5 h-[1.5px] bg-aqua"
+                    aria-hidden="true"
+                  />
+                )}
               </a>
             )
           })}
 
-          <span className="mx-2 h-6 w-px bg-white/15" aria-hidden="true" />
+          <span className="mx-2.5 h-5 w-px bg-aqua/20" aria-hidden="true" />
 
           <button
             type="button"
             onClick={handleFeed}
-            className="btn btn-ghost min-h-10! px-4! py-2! text-sm"
+            className="btn btn-ghost min-h-9! px-3.5! py-1.5! font-mono text-xs!"
             title="Jatuhkan makanan ke tank"
           >
-            <Fish size={16} aria-hidden="true" />
+            <Fish size={15} className="text-coral" aria-hidden="true" />
             <span>Beri makan</span>
           </button>
 
@@ -103,23 +116,23 @@ export default function Navbar() {
             aria-label={audioActive ? 'Matikan suara air' : 'Nyalakan suara air'}
             title={audioActive ? 'Matikan suara air' : 'Nyalakan suara air'}
             onMouseEnter={playWaterBubble}
-            className={`ml-1 flex h-10 w-10 items-center justify-center rounded-full border transition-colors ${
+            className={`ml-1 flex h-9 w-9 items-center justify-center rounded-[2px] border transition-colors active:scale-[0.97] ${
               audioActive
                 ? 'border-aqua/60 bg-aqua/15 text-aqua'
-                : 'border-white/20 text-mist hover:border-white/40 hover:text-white'
+                : 'border-aqua/20 text-mist hover:border-aqua/50 hover:text-white'
             }`}
           >
-            {audioActive ? <Volume2 size={17} /> : <VolumeX size={17} />}
+            {audioActive ? <Volume2 size={16} /> : <VolumeX size={16} />}
           </button>
 
           <a
             href="https://github.com/Fizhkan"
             target="_blank"
             rel="noopener noreferrer"
-            className="ml-1 inline-flex h-10 items-center gap-1.5 rounded-full border border-white/20 px-4 text-sm font-medium text-foam transition-colors hover:border-white/40 hover:bg-white/8"
+            className="ml-1 inline-flex h-9 items-center gap-1.5 rounded-[2px] border border-aqua/20 px-3.5 font-mono text-xs font-medium text-foam transition-colors hover:border-aqua/55 hover:bg-aqua/10 active:scale-[0.97]"
           >
             <span>GitHub</span>
-            <ArrowUpRight size={14} aria-hidden="true" />
+            <ArrowUpRight size={13} aria-hidden="true" />
           </a>
         </nav>
 
@@ -129,8 +142,8 @@ export default function Navbar() {
             onClick={handleAudioToggle}
             aria-pressed={audioActive}
             aria-label={audioActive ? 'Matikan suara air' : 'Nyalakan suara air'}
-            className={`flex h-11 w-11 items-center justify-center rounded-full border ${
-              audioActive ? 'border-aqua/60 bg-aqua/15 text-aqua' : 'border-white/20 text-mist'
+            className={`flex h-11 w-11 items-center justify-center rounded-[2px] border active:scale-[0.97] ${
+              audioActive ? 'border-aqua/60 bg-aqua/15 text-aqua' : 'border-aqua/20 text-mist'
             }`}
           >
             {audioActive ? <Volume2 size={18} /> : <VolumeX size={18} />}
@@ -142,7 +155,7 @@ export default function Navbar() {
             aria-expanded={mobileOpen}
             aria-controls="mobile-menu"
             aria-label={mobileOpen ? 'Tutup menu' : 'Buka menu'}
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 text-foam"
+            className="flex h-11 w-11 items-center justify-center rounded-[2px] border border-aqua/25 text-foam active:scale-[0.97]"
           >
             {mobileOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -152,17 +165,18 @@ export default function Navbar() {
       {mobileOpen && (
         <div
           id="mobile-menu"
-          className="border-b border-white/10 bg-deep/95 px-5 pt-2 pb-6 backdrop-blur-xl md:hidden"
+          className="border-b border-aqua/20 bg-deep/95 px-5 pt-2 pb-6 backdrop-blur-xl md:hidden"
         >
-          <nav className="flex flex-col" aria-label="Navigasi seluler">
+          <nav className="flex flex-col divide-y divide-aqua/12" aria-label="Navigasi seluler">
             {NAV_LINKS.map((link) => (
               <a
                 key={link.id}
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
-                className="border-b border-white/8 py-3.5 text-lg font-medium text-foam"
+                className="flex items-baseline gap-3 py-3.5 text-lg font-medium text-foam"
               >
-                {link.label}
+                <span className="font-mono text-xs text-aqua">{link.num}</span>
+                <span>{link.label}</span>
               </a>
             ))}
           </nav>

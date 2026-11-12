@@ -41,9 +41,9 @@ const LINKS = [
 ]
 
 const TABS = [
-  { id: 'topology', label: 'Topologi', icon: Network },
-  { id: 'subnet', label: 'Kalkulator subnet', icon: Calculator },
-  { id: 'cli', label: 'Terminal', icon: TerminalIcon },
+  { id: 'topology', num: '01', label: 'Topologi', icon: Network },
+  { id: 'subnet', num: '02', label: 'Kalkulator subnet', icon: Calculator },
+  { id: 'cli', num: '03', label: 'Terminal', icon: TerminalIcon },
 ]
 
 const PRESETS = ['192.168.10.0/24', '192.168.20.0/26', '10.0.0.0/27', '172.16.0.0/29']
@@ -162,47 +162,51 @@ export default function Hero() {
     setCliInput('')
   }
 
-  const reveal = (visible, offset = 24) => ({
+  const reveal = (visible, offset = 20) => ({
     opacity: visible ? 1 : 0,
     transform: visible ? 'translateY(0)' : `translateY(${offset}px)`,
+    transition: 'opacity 550ms cubic-bezier(0.23, 1, 0.32, 1), transform 550ms cubic-bezier(0.23, 1, 0.32, 1)',
   })
 
   return (
-    <section id="hero" className="relative mx-auto max-w-7xl px-5 pt-36 pb-24 sm:px-8 sm:pt-44">
+    <section id="hero" className="relative mx-auto max-w-7xl px-5 pt-32 pb-20 sm:px-8 sm:pt-40">
       <div
         ref={headerRef}
-        className="grid grid-cols-1 items-center gap-12 transition-all duration-700 lg:grid-cols-12"
+        className="grid grid-cols-1 items-end gap-12 lg:grid-cols-12"
         style={reveal(headerVisible)}
       >
-        <div className="lg:col-span-7">
-          <p className="eyebrow">Jaringan · Keamanan · Linux</p>
+        {/* Editorial Typography Lead — Dibuka lapang di atas air */}
+        <div className="lg:col-span-8">
+          <p className="eyebrow">Log 00 // Permukaan — Surabaya, Indonesia</p>
 
-          <h1 className="on-water mt-5 text-[2.75rem] leading-[1.04] text-white sm:text-6xl lg:text-7xl">
-            Belajar membangun dan mengamankan jaringan.
+          <h1 className="on-water mt-5 font-display text-[3.15rem] leading-[0.98] tracking-[-0.025em] text-white sm:text-[4.5rem] lg:text-[5.5rem]">
+            Belajar membangun <em className="italic text-aqua">&amp; mengamankan</em> jaringan.
           </h1>
 
-          <p className="lede on-water mt-7 max-w-xl text-lg">
+          <p className="lede on-water mt-7 max-w-xl text-[1.0625rem]">
             Halo, saya <strong className="font-semibold text-white">Siraj</strong>, mahasiswa D3 Teknik Informatika.
-            Di sini saya mencatat lab jaringan, keamanan, dan Linux yang sedang saya pelajari. Situs ini saya buat
-            seperti akuarium: klik bagian air yang kosong untuk memberi makan ikan.
+            Situs ini adalah catatan lab jaringan, keamanan, dan Linux—dirancang seperti jendela observasi akuarium:
+            klik area air yang kosong untuk memberi makan ikan.
           </p>
 
           <div className="mt-9 flex flex-wrap items-center gap-3">
             <a href="#labs" className="btn btn-primary">
-              <span>Lihat lab</span>
-              <ArrowUpRight size={17} aria-hidden="true" />
+              <span>Lihat rencana lab</span>
+              <ArrowUpRight size={16} aria-hidden="true" />
             </a>
             <a href="#contact" className="btn btn-ghost">
               Hubungi saya
             </a>
             <button type="button" onClick={handleFeed} className="btn btn-ghost">
-              <Fish size={17} aria-hidden="true" />
+              <Fish size={16} className="text-coral-text" aria-hidden="true" />
               <span>Beri makan ikan</span>
             </button>
           </div>
 
-          <div className="mt-10">
-            <p className="mb-2.5 text-sm text-mist">Tool yang sedang saya pelajari</p>
+          <div className="mt-10 border-t border-aqua/15 pt-5">
+            <p className="mb-2.5 font-mono text-[0.6875rem] tracking-widest text-mist/85 uppercase">
+              Perangkat yang sedang dipelajari
+            </p>
             <ul className="flex flex-wrap gap-2">
               {usedTools.map((tool) => (
                 <li key={tool} className="chip">
@@ -213,47 +217,67 @@ export default function Hero() {
           </div>
         </div>
 
-        <div className="flex justify-center lg:col-span-5 lg:justify-end">
-          <figure className="glass w-full max-w-[19rem] rotate-0 p-3 sm:max-w-[21rem]">
-            <div
-                          className={`relative overflow-hidden rounded-[0.875rem] bg-lagoon ${avatarOk ? 'aspect-[4/5]' : 'aspect-[16/10]'}`}
-                        >
-              {avatarOk ? (
-                <img
-                  src={site.avatarUrl}
-                  alt="Foto Siraj"
-                  className="h-full w-full object-cover object-top"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_30%_20%,#14879a,#0a4a5c_60%,#05303e)]">
-                  <span className="font-display text-[5.5rem] font-semibold leading-none text-white/90" aria-hidden="true">
-                    S
-                  </span>
-                </div>
-              )}
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-deep/70 via-transparent to-transparent" />
+        {/* Field Specimen Dossier — Menggantikan kartu foto bulat generik */}
+        <div className="flex justify-start lg:col-span-4 lg:justify-end">
+          <figure className="specimen-panel reticle w-full max-w-[20rem] overflow-hidden">
+            <div className="flex items-center justify-between border-b border-aqua/15 px-3.5 py-2 font-mono text-[0.6875rem] tracking-wider">
+              <span className="text-aqua">SPECIMEN // 001</span>
+              <span className="flex items-center gap-1.5 text-kelp">
+                <span className="h-1.5 w-1.5 rounded-full bg-kelp" aria-hidden="true" />
+                AKTIF
+              </span>
             </div>
 
-            <figcaption className="px-2 pt-4 pb-2">
-              <p className="font-display text-2xl font-semibold text-white">Hafidz Sirajuddin</p>
-              <p className="mt-0.5 text-[0.9375rem] text-mist">{site.subtitle}</p>
-              <p className="mt-0.5 text-sm text-mist/80">{site.location}</p>
+            <div className="p-3">
+              <div className={`relative overflow-hidden border border-aqua/15 bg-lagoon ${avatarOk ? 'aspect-[4/5]' : 'aspect-[16/10]'}`}>
+                {avatarOk ? (
+                  <img
+                    src={site.avatarUrl}
+                    alt="Foto Siraj"
+                    className="h-full w-full object-cover object-top"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_30%_20%,#0d5f70,#063342_62%,#021822)]">
+                    <span className="font-display text-[5rem] leading-none text-white/90 italic" aria-hidden="true">
+                      S
+                    </span>
+                  </div>
+                )}
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-deep/65 via-transparent to-transparent" />
+              </div>
+            </div>
+
+            <figcaption className="divide-y divide-aqua/12 border-t border-aqua/15 font-mono text-xs">
+              <div className="flex items-baseline justify-between gap-2 px-3.5 py-2.5">
+                <span className="text-[0.6875rem] text-mist/75 uppercase">Subjek</span>
+                <span className="font-sans text-sm font-semibold text-white">Hafidz Sirajuddin</span>
+              </div>
+              <div className="flex items-baseline justify-between gap-2 px-3.5 py-2.5">
+                <span className="text-[0.6875rem] text-mist/75 uppercase">Studi</span>
+                <span className="font-sans text-xs text-foam">{site.subtitle}</span>
+              </div>
+              <div className="flex items-baseline justify-between gap-2 px-3.5 py-2.5">
+                <span className="text-[0.6875rem] text-mist/75 uppercase">Lokasi</span>
+                <span className="text-xs text-sand">{site.location}</span>
+              </div>
             </figcaption>
           </figure>
         </div>
       </div>
 
-      {/* Meja kerja */}
-      <div ref={benchRef} className="mt-24 transition-all duration-700" style={reveal(benchVisible, 28)}>
-        <div className="glass overflow-hidden">
-          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 px-5 py-4 sm:px-7">
+      {/* Konsol Meja Kerja — Hairline Instrumentation Frame */}
+      <div ref={benchRef} className="mt-20 sm:mt-24" style={reveal(benchVisible, 24)}>
+        <div className="specimen-panel reticle overflow-hidden">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-aqua/15 px-5 py-4 sm:px-7">
             <div>
-              <h2 className="text-2xl text-white">Meja kerja</h2>
-              <p className="mt-0.5 text-sm text-mist">Tiga alat kecil untuk berlatih. Coba langsung.</p>
+              <p className="font-mono text-[0.6875rem] tracking-widest text-aqua uppercase">
+                Bench // Modul Interaktif
+              </p>
+              <h2 className="mt-0.5 text-3xl text-white">Meja kerja</h2>
             </div>
 
-            <div role="tablist" aria-label="Alat di meja kerja" className="flex flex-wrap gap-1 rounded-full bg-black/25 p-1">
-              {TABS.map((tab) => {
+            <div role="tablist" aria-label="Alat di meja kerja" className="flex flex-wrap border border-aqua/20 bg-deep/60">
+              {TABS.map((tab, i) => {
                 const Icon = tab.icon
                 const active = activeTab === tab.id
                 return (
@@ -266,11 +290,16 @@ export default function Hero() {
                       playWaterBubble()
                       setActiveTab(tab.id)
                     }}
-                    className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                      active ? 'bg-aqua text-deep' : 'text-mist hover:text-white'
+                    className={`flex items-center gap-2 px-4 py-2 text-xs font-medium transition-colors duration-150 active:scale-[0.98] ${
+                      i > 0 ? 'border-l border-aqua/15' : ''
+                    } ${
+                      active ? 'bg-aqua text-deep font-semibold' : 'text-mist hover:bg-aqua/10 hover:text-white'
                     }`}
                   >
-                    <Icon size={15} aria-hidden="true" />
+                    <span className={`font-mono text-[0.6875rem] ${active ? 'text-deep/75' : 'text-aqua/75'}`}>
+                      {tab.num}
+                    </span>
+                    <Icon size={14} aria-hidden="true" />
                     <span>{tab.label}</span>
                   </button>
                 )
@@ -281,7 +310,7 @@ export default function Hero() {
           {activeTab === 'topology' && (
             <div role="tabpanel" className="grid grid-cols-1 items-center gap-8 p-5 sm:p-8 lg:grid-cols-12">
               <div className="lg:col-span-7">
-                <div className="glass-inset relative mx-auto aspect-[4/3] w-full max-w-[34rem]">
+                <div className="specimen-inset relative mx-auto aspect-[4/3] w-full max-w-[34rem]">
                   <svg
                     viewBox="0 0 100 100"
                     preserveAspectRatio="none"
@@ -299,7 +328,7 @@ export default function Hero() {
                           y1={from.y}
                           x2={to.x}
                           y2={to.y}
-                          stroke={hot ? '#6fe3d3' : 'rgba(172, 208, 212, 0.4)'}
+                          stroke={hot ? '#5eead4' : 'rgba(165, 205, 210, 0.35)'}
                           strokeWidth={hot ? 0.8 : 0.5}
                           vectorEffect="non-scaling-stroke"
                           strokeDasharray={hot ? undefined : '3 3'}
@@ -325,16 +354,16 @@ export default function Hero() {
                         style={{ left: `${node.x}%`, top: `${node.y}%` }}
                       >
                         <span
-                          className={`flex h-10 w-10 items-center justify-center rounded-xl border transition-all sm:h-11 sm:w-11 ${
+                          className={`flex h-10 w-10 items-center justify-center rounded-[2px] border transition-transform duration-150 active:scale-[0.95] sm:h-11 sm:w-11 ${
                             active
-                              ? 'scale-110 border-aqua bg-aqua text-deep'
-                              : 'border-white/25 bg-water text-aqua group-hover:border-aqua/70'
+                              ? 'scale-105 border-aqua bg-aqua text-deep'
+                              : 'border-aqua/30 bg-water text-aqua group-hover:border-aqua'
                           }`}
                         >
                           <Icon size={18} aria-hidden="true" />
                         </span>
                         <span
-                          className={`hidden whitespace-nowrap text-[0.6875rem] leading-none sm:block ${
+                          className={`hidden whitespace-nowrap font-mono text-[0.6875rem] leading-none sm:block ${
                             active ? 'font-semibold text-white' : 'text-mist'
                           }`}
                         >
@@ -347,36 +376,41 @@ export default function Hero() {
               </div>
 
               <div className="lg:col-span-5">
-                <div className="glass-inset p-5" aria-live="polite">
-                  <p className="text-sm text-aqua">Rancangan topologi homelab</p>
-                  <h3 className="mt-1 text-2xl text-white">{selected.label}</h3>
+                <div className="specimen-inset divide-y divide-aqua/12" aria-live="polite">
+                  <div className="p-5">
+                    <p className="font-mono text-[0.6875rem] tracking-wider text-aqua uppercase">
+                      Rancangan topologi homelab
+                    </p>
+                    <h3 className="mt-1.5 text-3xl text-white">{selected.label}</h3>
+                  </div>
 
-                  <dl className="mt-4 space-y-3 text-[0.9375rem]">
-                    <div>
-                      <dt className="text-sm text-mist">Peran</dt>
+                  <dl className="divide-y divide-aqua/10 text-sm">
+                    <div className="flex flex-col gap-1 px-5 py-3">
+                      <dt className="font-mono text-[0.6875rem] text-mist/80 uppercase">Peran</dt>
                       <dd className="text-white">{selected.role}</dd>
                     </div>
-                    <div>
-                      <dt className="text-sm text-mist">Alamat contoh</dt>
-                      <dd className="kbd-line text-white">{selected.addr}</dd>
+                    <div className="flex flex-col gap-1 px-5 py-3">
+                      <dt className="font-mono text-[0.6875rem] text-mist/80 uppercase">Alamat contoh</dt>
+                      <dd className="kbd-line text-sand">{selected.addr}</dd>
                     </div>
                   </dl>
 
-                  <p className="mt-4 text-[0.9375rem] leading-relaxed text-mist">{selected.note}</p>
-
-                  {selected.lab && (
-                    <a
-                      href="#labs"
-                      className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-aqua hover:text-white"
-                    >
-                      <span>Lihat Lab 0{selected.lab}</span>
-                      <ArrowUpRight size={14} aria-hidden="true" />
-                    </a>
-                  )}
+                  <div className="p-5">
+                    <p className="text-[0.9375rem] leading-relaxed text-mist">{selected.note}</p>
+                    {selected.lab && (
+                      <a
+                        href="#labs"
+                        className="mt-3 inline-flex items-center gap-1.5 font-mono text-xs font-semibold text-aqua hover:text-white"
+                      >
+                        <span>Lihat Lab 0{selected.lab}</span>
+                        <ArrowUpRight size={13} aria-hidden="true" />
+                      </a>
+                    )}
+                  </div>
                 </div>
 
-                <p className="mt-3 px-1 text-sm text-mist/80">
-                  Semua perangkat di diagram ini masih rancangan untuk lab, belum berjalan.
+                <p className="mt-3 px-1 font-mono text-xs text-mist/80">
+                  * Semua perangkat di diagram ini masih rancangan lab, belum berjalan.
                 </p>
               </div>
             </div>
@@ -404,14 +438,16 @@ export default function Hero() {
                   className="field font-mono"
                 />
 
-                <p className="mt-4 mb-2 text-sm text-mist">Contoh cepat</p>
+                <p className="mt-4 mb-2 font-mono text-[0.6875rem] tracking-wider text-mist uppercase">
+                  Contoh cepat
+                </p>
                 <div className="flex flex-wrap gap-2">
                   {PRESETS.map((preset) => (
                     <button
                       key={preset}
                       type="button"
                       onClick={() => handleCalculateSubnet(preset)}
-                      className="chip kbd-line cursor-pointer transition-colors hover:border-aqua/60 hover:text-aqua"
+                      className="chip kbd-line cursor-pointer transition-colors hover:border-aqua/65 hover:text-aqua active:scale-[0.97]"
                     >
                       {preset}
                     </button>
@@ -421,38 +457,40 @@ export default function Hero() {
 
               <div className="lg:col-span-7" aria-live="polite">
                 {subnetResult && !subnetResult.error ? (
-                  <div className="glass-inset p-5 sm:p-6">
-                    <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                  <div className="specimen-inset overflow-hidden">
+                    <div className="flex items-center justify-between border-b border-aqua/15 px-5 py-3.5">
                       <span className="kbd-line text-base font-semibold text-white">
                         {subnetResult.network}
                         {subnetResult.cidr}
                       </span>
-                      <span className="chip kbd-line">{subnetResult.totalUsable} host</span>
+                      <span className="chip kbd-line text-aqua">{subnetResult.totalUsable} host</span>
                     </div>
 
-                    <dl className="mt-4 grid gap-4 sm:grid-cols-2">
+                    <dl className="grid grid-cols-2 divide-x divide-y divide-aqua/10">
                       {[
                         ['Netmask', subnetResult.netmask],
                         ['Wildcard', subnetResult.wildcard],
                         ['Network', subnetResult.network],
                         ['Broadcast', subnetResult.broadcast],
                       ].map(([k, v]) => (
-                        <div key={k}>
-                          <dt className="text-sm text-mist">{k}</dt>
-                          <dd className="kbd-line text-[0.9375rem] text-white">{v}</dd>
+                        <div key={k} className="p-4 sm:px-5">
+                          <dt className="font-mono text-[0.6875rem] text-mist/80 uppercase">{k}</dt>
+                          <dd className="kbd-line mt-1 text-[0.9375rem] text-white">{v}</dd>
                         </div>
                       ))}
                     </dl>
 
-                    <div className="mt-5 border-t border-white/10 pt-4">
-                      <p className="text-sm text-mist">Rentang host yang bisa dipakai</p>
+                    <div className="border-t border-aqua/15 px-5 py-4">
+                      <p className="font-mono text-[0.6875rem] text-mist/80 uppercase">
+                        Rentang host yang bisa dipakai
+                      </p>
                       <p className="kbd-line mt-1 text-[0.9375rem] text-aqua">{subnetResult.usableRange}</p>
                     </div>
                   </div>
                 ) : (
-                  <div className="rounded-[0.875rem] border border-coral/40 bg-coral/10 p-5">
+                  <div className="rounded-[2px] border border-coral/50 bg-coral/10 p-5">
                     <p className="font-semibold text-white">Format belum sesuai</p>
-                    <p className="mt-1 text-[0.9375rem] text-mist">
+                    <p className="mt-1 text-[0.9375rem] text-coral-text">
                       {subnetResult?.error || 'Contoh yang valid: 192.168.1.0/24 atau 10.0.0.0/26'}
                     </p>
                   </div>
@@ -478,16 +516,16 @@ export default function Hero() {
                       </p>
                     )}
                     {item.type === 'out' && (
-                      <pre className="my-1 border-l border-white/15 pl-4 font-[inherit] whitespace-pre-wrap text-mist">
+                      <pre className="my-1 border-l border-aqua/25 pl-4 font-[inherit] whitespace-pre-wrap text-mist">
                         {item.text}
                       </pre>
                     )}
-                    {item.type === 'err' && <p className="pl-4 text-coral">{item.text}</p>}
+                    {item.type === 'err' && <p className="pl-4 text-coral-text">{item.text}</p>}
                   </div>
                 ))}
               </div>
 
-              <form onSubmit={handleRunCommand} className="mt-4 flex items-center gap-2 border-t border-white/10 pt-4">
+              <form onSubmit={handleRunCommand} className="mt-4 flex items-center gap-2 border-t border-aqua/15 pt-4">
                 <label htmlFor="cli-input" className="kbd-line shrink-0 text-kelp">
                   siraj@fizhtank:~$
                 </label>
@@ -497,9 +535,11 @@ export default function Hero() {
                   value={cliInput}
                   onChange={(e) => setCliInput(e.target.value)}
                   autoComplete="off"
+                  autoCapitalize="none"
+                  autoCorrect="off"
                   spellCheck={false}
                   placeholder="ketik help"
-                  className="min-w-0 flex-1 bg-transparent font-mono text-base text-white placeholder:text-mist/60 focus:outline-none sm:text-[0.8125rem]"
+                  className="min-w-0 flex-1 bg-transparent font-mono text-base text-white placeholder:text-mist/60 focus:outline-none sm:text-sm"
                 />
               </form>
             </div>
@@ -509,4 +549,3 @@ export default function Hero() {
     </section>
   )
 }
-

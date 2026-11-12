@@ -1,10 +1,19 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Fish, Thermometer } from 'lucide-react'
 import { site } from '../data/site'
 
-// Kartu kecil di pojok kiri bawah: tombol beri makan dan hitungan berapa kali tank sudah diberi makan.
+function getOceanZone(meters) {
+  if (meters < 110) return 'PERMUKAAN'
+  if (meters < 240) return 'MESOPELAGIK'
+  if (meters < 390) return 'BATIPELAGIK'
+  return 'ABISAL'
+}
+
+// HUD telemetri tangki & kedalaman air: merespons posisi scroll (0m - 500m) dan tombol beri makan ikan.
 export default function TankInfo() {
   const [fed, setFed] = useState(0)
+  const [depth, setDepth] = useState(0)
+  const meterBarRef = useRef(null)
 
   useEffect(() => {
     const onFed = (e) => setFed(e.detail?.count ?? 0)
@@ -12,36 +21,95 @@ export default function TankInfo() {
     return () => window.removeEventListener('fizhtank-fed', onFed)
   }, [])
 
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return
+    let rafId = null
+
+    const updateDepth = () => {
+      const doc = document.documentElement
+      const maxScroll = Math.max(1, doc.scrollHeight - window.innerHeight)
+      const ratio = Math.max(0, Math.min(1, window.scrollY / maxScroll))
+      const meters = Math.round(ratio * 500)
+      setDepth(meters)
+      if (meterBarRef.current) {
+        meterBarRef.current.style.transform = `scaleY(${ratio})`
+      }
+      rafId = null
+    }
+
+    const onScroll = () => {
+      if (rafId) return
+      rafId = window.requestAnimationFrame(updateDepth)
+    }
+
+    updateDepth()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+      if (rafId) window.cancelAnimationFrame(rafId)
+    }
+  }, [])
+
   const aq = site.aquarium
+  const zone = getOceanZone(depth)
 
   return (
-    <aside
-      aria-label="Info tank"
-      className="pointer-events-none fixed bottom-6 left-7 z-40 hidden select-none sm:block"
-    >
-      <div className="glass pointer-events-auto flex items-center gap-3 rounded-full py-2 pr-5 pl-2">
-        <button
-          type="button"
-          onClick={() => window.dispatchEvent(new CustomEvent('fizhtank-feed'))}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-coral text-[#2a1204] transition-transform active:scale-95"
-          aria-label="Beri makan ikan"
-          title="Beri makan ikan"
-        >
-          <Fish size={18} aria-hidden="true" />
-        </button>
+    <>
+      {/* Kartu Telemetri Kiri Bawah */}
+      <aside
+        aria-label="Telemetri tank dan kedalaman"
+        className="pointer-events-none fixed bottom-5 left-6 z-40 hidden select-none sm:block"
+      >
+        <div className="specimen-panel reticle pointer-events-auto flex items-center gap-3.5 py-2 pr-4 pl-2">
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent('fizhtank-feed'))}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[2px] bg-coral text-[#1f0a02] transition-transform duration-150 active:scale-[0.95]"
+            aria-label="Beri makan ikan"
+            title="Beri makan ikan"
+          >
+            <Fish size={18} aria-hidden="true" />
+          </button>
 
-        <div className="text-sm leading-tight">
-          <p className="flex items-center gap-1.5 text-foam">
-            <Thermometer size={13} className="text-aqua" aria-hidden="true" />
-            <span>
-              {aq.waterTemp} · pH {aq.phLevel}
-            </span>
-          </p>
-          <p className="mt-0.5 text-mist" aria-live="polite">
-            {fed === 0 ? 'Belum diberi makan' : `Diberi makan ${fed}×`}
-          </p>
+          <div className="font-mono text-[0.6875rem] leading-tight">
+            <p className="flex items-center gap-2 text-foam">
+              <span className="text-aqua">{String(depth).padStart(3, '0')}M</span>
+              <span className="text-aqua/35" aria-hidden="true">·</span>
+              <span className="tracking-wider text-sand">{zone}</span>
+            </p>
+            <p className="mt-1 flex items-center gap-2 text-mist" aria-live="polite">
+              <span className="inline-flex items-center gap-1">
+                <Thermometer size={11} className="text-aqua" aria-hidden="true" />
+                {aq.waterTemp}
+              </span>
+              <span className="text-aqua/30" aria-hidden="true">/</span>
+              <span>pH {aq.phLevel}</span>
+              <span className="text-aqua/30" aria-hidden="true">/</span>
+              <span className={fed > 0 ? 'text-coral-text' : ''}>
+                {fed === 0 ? 'PAKAN 0×' : `PAKAN ${fed}×`}
+              </span>
+            </p>
+          </div>
         </div>
-      </div>
-    </aside>
+      </aside>
+
+      {/* Pengukur Kedalaman Vertikal Minimalis (Desktop Lebar) */}
+      <aside
+        aria-hidden="true"
+        className="pointer-events-none fixed top-1/2 right-5 z-30 hidden -translate-y-1/2 flex-col items-center gap-2 select-none xl:flex"
+      >
+        <span className="font-mono text-[0.625rem] tracking-widest text-mist/70">0M</span>
+        <div className="relative h-40 w-[3px] overflow-hidden bg-aqua/15">
+          <div
+            ref={meterBarRef}
+            className="h-full w-full origin-top bg-aqua transition-none"
+            style={{ transform: 'scaleY(0)' }}
+          />
+        </div>
+        <span className="font-mono text-[0.625rem] tracking-widest text-mist/70">500M</span>
+      </aside>
+    </>
   )
 }
