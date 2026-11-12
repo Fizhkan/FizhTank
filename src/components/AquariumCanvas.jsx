@@ -575,92 +575,60 @@ export default function AquariumCanvas() {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const timeScale = reduceMotion ? 0.35 : 1
 
-    const env = { w: 0, h: 0, dpr: 1, mobile: false, sandTop: 0, sandH: 0, airX: 0, airY: 0 }
+    const env = { w: 0, h: 0, dpr: 1, mobile: false, sandTop: 0, sandH: 0, airX: 0, airY: 0, seabedTravel: 180 }
     let substrate = null
     let backPlants = []
     let frontPlants = []
     let motes = []
     const bubbles = []
     const ripples = []
-    const food = []
     let airTimer = 0
     let running = true
     let rafId = 0
     let lastT = performance.now()
     let lastScrollY = window.scrollY
+    let targetScrollRatio = 0
+    let smoothScrollRatio = 0
     let scrollCurrent = 0
 
     // ── Ikan ────────────────────────────────────────────────────────────
     const swimTop = () => 90
-    const swimBottom = () => env.sandTop - 50
-
-    const nearestFood = (x, y, range, landedOnly = false) => {
-      let best = null
-      let bestD = range
-      for (const f of food) {
-        if (f.eaten) continue
-        if (landedOnly ? !f.landed : f.landed) continue
-        const d = Math.hypot(f.x - x, f.y - y)
-        if (d < bestD) {
-          bestD = d
-          best = f
-        }
-      }
-      return best
-    }
-
-    const eat = (f, x, y) => {
-      f.eaten = true
-      bubbles.push({ x, y, r: rand(1.2, 2.2), vy: rand(0.6, 1), wob: rand(0, 6), amp: 0.3, air: false })
-    }
+    const swimBottom = () => env.sandTop + env.seabedTravel * 0.45 - 40
 
     class Swimmer {
-      constructor(kind, x, y, speed, size, turn) {
+      constructor(kind, x, y, speed, size, turn, depth = 0.4) {
         this.kind = kind
         this.x = x
         this.y = y
         this.speed = speed
         this.size = size
         this.turn = turn
+        this.depth = depth
         this.angle = rand(-0.4, 0.4)
         this.dir = 1
         this.sx = 1
         this.phase = rand(0, 100)
-        this.gulp = 0
         this.pickTarget()
       }
 
       pickTarget() {
         this.tx = rand(90, Math.max(160, env.w - 90))
-        this.ty = rand(swimTop(), Math.max(swimTop() + 40, swimBottom()))
+        this.ty = rand(swimTop(), Math.max(swimTop() + 60, swimBottom()))
       }
 
       update(dt) {
         this.phase += 0.18 * dt
-        let tx = this.tx
-        let ty = this.ty
-        let boost = 1
-
-        const f = nearestFood(this.x, this.y, 560)
-        if (f) {
-          tx = f.x
-          ty = f.y
-          boost = 1.75
-          if (this.kind !== 'leader' && Math.hypot(f.x - this.x, f.y - this.y) < this.size * 0.5 + 6) {
-            eat(f, this.x + Math.cos(this.angle) * this.size * 0.5, this.y)
-            this.gulp = 1
-          }
-        } else if (Math.hypot(this.tx - this.x, this.ty - this.y) < 70) {
+        if (Math.hypot(this.tx - this.x, this.ty - this.y) < 70) {
           this.pickTarget()
         }
 
-        let diff = Math.atan2(ty - this.y, tx - this.x) - this.angle
+        let diff = Math.atan2(this.ty - this.y, this.tx - this.x) - this.angle
         while (diff < -Math.PI) diff += Math.PI * 2
         while (diff > Math.PI) diff -= Math.PI * 2
         this.angle += diff * this.turn * dt
 
         const burst = this.kind === 'clown' ? 0.85 + Math.sin(this.phase * 0.7) * 0.3 : 1
-        const v = this.speed * boost * burst * dt
+        const v = this.speed * burst * dt
         this.x += Math.cos(this.angle) * v
         this.y += Math.sin(this.angle) * v
 
@@ -672,14 +640,12 @@ export default function AquariumCanvas() {
         if (c > 0.15) this.dir = 1
         else if (c < -0.15) this.dir = -1
         this.sx += (this.dir - this.sx) * Math.min(1, 0.12 * dt)
-        this.gulp = Math.max(0, this.gulp - 0.06 * dt)
       }
 
-      draw() {
+      draw(camY) {
         ctx.save()
-        ctx.translate(this.x, this.y)
-        const g = 1 + this.gulp * 0.1
-        ctx.scale(this.sx * g, g)
+        ctx.translate(this.x, this.y - camY * this.depth)
+        ctx.scale(this.sx, 1)
         ctx.rotate(pitchOf(this.angle))
         const wag = Math.sin(this.phase) * 4
         if (this.kind === 'clown') drawClownfish(ctx, this.size, wag, this.phase)
@@ -698,10 +664,10 @@ export default function AquariumCanvas() {
 
     const buildFish = () => {
       const m = env.mobile
-      clown = new Swimmer('clown', env.w * 0.22, env.h * 0.5, m ? 0.95 : 1.2, m ? 38 : 50, 0.035)
-      tang = new Swimmer('tang', env.w * 0.75, env.h * 0.4, m ? 1.05 : 1.3, m ? 42 : 56, 0.032)
-      angel = new Swimmer('angel', env.w * 0.5, env.h * 0.6, 0.65, m ? 44 : 62, 0.02)
-      leader = new Swimmer('leader', env.w * 0.4, env.h * 0.3, 1.45, 10, 0.03)
+      clown = new Swimmer('clown', env.w * 0.22, env.h * 0.5, m ? 0.95 : 1.2, m ? 38 : 50, 0.035, 0.55)
+      tang = new Swimmer('tang', env.w * 0.75, env.h * 0.42, m ? 1.05 : 1.3, m ? 42 : 56, 0.032, 0.45)
+      angel = new Swimmer('angel', env.w * 0.5, env.h * 0.68, 0.65, m ? 44 : 62, 0.02, 0.34)
+      leader = new Swimmer('leader', env.w * 0.4, env.h * 0.32, 1.45, 10, 0.03, 0.42)
       leader.vx = 0
       leader.vy = 0
       const count = m ? 8 : 15
@@ -729,7 +695,6 @@ export default function AquariumCanvas() {
     }
 
     const updateTetras = (dt, t) => {
-      // Pemimpin kawanan: berenang seperti ikan lain, ikut mengejar makanan
       leader.update(dt)
       const lvx = Math.cos(leader.angle) * leader.speed
       const lvy = Math.sin(leader.angle) * leader.speed
@@ -740,15 +705,8 @@ export default function AquariumCanvas() {
         s.phase += 0.3 * dt
         const ox = s.ox + Math.sin(t * 0.0008 + i) * 8
         const oy = s.oy + Math.cos(t * 0.0011 + i * 1.7) * 6
-        let dx = leader.x + cosA * ox - sinA * oy
-        let dy = leader.y + sinA * ox + cosA * oy
-
-        const f = nearestFood(s.x, s.y, 240)
-        if (f) {
-          dx = f.x
-          dy = f.y
-          if (Math.hypot(f.x - s.x, f.y - s.y) < 12) eat(f, s.x, s.y)
-        }
+        const dx = leader.x + cosA * ox - sinA * oy
+        const dy = leader.y + sinA * ox + cosA * oy
 
         s.vx += ((dx - s.x) * 0.012 + (lvx - s.vx) * 0.03) * dt
         s.vy += ((dy - s.y) * 0.012 + (lvy - s.vy) * 0.03) * dt
@@ -767,7 +725,7 @@ export default function AquariumCanvas() {
         }
 
         const sp = Math.hypot(s.vx, s.vy)
-        const max = f ? 3.4 : leader.speed * 1.6
+        const max = leader.speed * 1.6
         if (sp > max) {
           s.vx = (s.vx / sp) * max
           s.vy = (s.vy / sp) * max
@@ -788,10 +746,10 @@ export default function AquariumCanvas() {
       })
     }
 
-    const drawTetras = () => {
+    const drawTetras = (camY) => {
       tetras.forEach((s) => {
         ctx.save()
-        ctx.translate(s.x, s.y)
+        ctx.translate(s.x, s.y - camY * leader.depth)
         ctx.scale(s.sx, 1)
         ctx.rotate(pitchOf(s.angle))
         drawTetra(ctx, s.size, Math.sin(s.phase) * 2.4)
@@ -801,30 +759,25 @@ export default function AquariumCanvas() {
 
     const updateCory = (dt) => {
       const c = cory
-      const f = nearestFood(c.x, env.sandTop + 20, 380, true)
-      if (f) {
-        c.pause = 0
-        c.tx = f.x
-        if (Math.abs(f.x - c.x) < 14) eat(f, c.x, sandSurface(c.x, env.sandTop) + 14)
-      } else if (c.pause > 0) {
+      if (c.pause > 0) {
         c.pause -= dt
       } else if (Math.abs(c.tx - c.x) < 8) {
         c.pause = rand(40, 150)
         c.tx = rand(60, Math.max(120, env.w - 60))
       }
-      if (c.pause <= 0 || f) {
+      if (c.pause <= 0) {
         const dir = Math.sign(c.tx - c.x)
         if (dir !== 0 && Math.abs(c.tx - c.x) > 4) {
           c.dir = dir
-          c.x += dir * (f ? 1.1 : 0.55) * dt
+          c.x += dir * 0.55 * dt
           c.step += 0.25 * dt
         }
       }
     }
 
-    const drawCoryFish = () => {
+    const drawCoryFish = (seabedShiftY) => {
       const c = cory
-      const y = sandSurface(c.x, env.sandTop) + env.sandH * 0.32
+      const y = sandSurface(c.x, env.sandTop) + env.sandH * 0.32 + seabedShiftY
       ctx.save()
       ctx.translate(c.x, y)
       ctx.scale(c.dir, 1)
@@ -852,45 +805,52 @@ export default function AquariumCanvas() {
             light,
           }
         })
-      backPlants = makeBlades(m ? 7 : 14, env.h * 0.28, env.h * 0.58, 6, 11, 150, 24)
-      frontPlants = makeBlades(m ? 9 : 18, env.h * 0.1, env.h * 0.3, 5, 9, 140, 36)
+      backPlants = makeBlades(m ? 7 : 14, env.h * 0.34, env.h * 0.68, 6, 11, 150, 24)
+      frontPlants = makeBlades(m ? 9 : 18, env.h * 0.14, env.h * 0.34, 5, 9, 140, 36)
     }
 
     const buildMotes = () => {
-      const n = env.mobile ? 18 : 42
-      motes = Array.from({ length: n }, () => ({
-        x: rand(0, env.w),
-        y: rand(0, env.h),
-        r: rand(0.6, 1.7),
-        vx: rand(-0.08, 0.08),
-        vy: rand(-0.05, 0.06),
-        a: rand(0.12, 0.38),
-      }))
+      const n = env.mobile ? 24 : 56
+      const depths = [0.25, 0.55, 0.92]
+      motes = Array.from({ length: n }, (_, idx) => {
+        const depth = depths[idx % depths.length]
+        return {
+          x: rand(0, env.w),
+          y: rand(0, env.h),
+          r: (0.65 + depth * 1.15) * rand(0.85, 1.25),
+          vx: rand(-0.07, 0.07),
+          vy: rand(-0.04, 0.05),
+          a: rand(0.14, 0.38) * (0.65 + depth * 0.5),
+          depth,
+        }
+      })
     }
 
-    const drawBlades = (list, t) => {
+    const drawBlades = (list, t, shiftY = 0) => {
       list.forEach((b) => {
+        const baseY = b.y + shiftY
+        if (baseY - b.height > env.h + 10) return
         const sway = Math.sin(t * b.speed + b.phase) * b.amp
         ctx.beginPath()
-        ctx.moveTo(b.x - b.width * 0.5, b.y)
+        ctx.moveTo(b.x - b.width * 0.5, baseY)
         ctx.bezierCurveTo(
           b.x - b.width * 0.3 + sway * 0.2,
-          b.y - b.height * 0.35,
+          baseY - b.height * 0.35,
           b.x + sway * 0.7,
-          b.y - b.height * 0.7,
+          baseY - b.height * 0.7,
           b.x + sway,
-          b.y - b.height
+          baseY - b.height
         )
         ctx.bezierCurveTo(
           b.x + sway * 0.7 + b.width * 0.4,
-          b.y - b.height * 0.7,
+          baseY - b.height * 0.7,
           b.x + b.width * 0.3 + sway * 0.2,
-          b.y - b.height * 0.35,
+          baseY - b.height * 0.35,
           b.x + b.width * 0.5,
-          b.y
+          baseY
         )
         ctx.closePath()
-        const g = ctx.createLinearGradient(0, b.y, 0, b.y - b.height)
+        const g = ctx.createLinearGradient(0, baseY, 0, baseY - b.height)
         g.addColorStop(0, `hsla(${b.hue}, 62%, ${b.light - 14}%, 0.95)`)
         g.addColorStop(1, `hsla(${b.hue}, 66%, ${b.light + 14}%, 0.85)`)
         ctx.fillStyle = g
@@ -898,7 +858,12 @@ export default function AquariumCanvas() {
       })
     }
 
-    const drawRays = (t) => {
+    const drawRays = (t, camY, depthRatio) => {
+      const rayVis = Math.max(0.18, 1 - depthRatio * 0.75)
+      const topY = -camY * 0.55
+      const bottomY = topY + env.h * 0.9
+      if (bottomY < 0) return
+
       ctx.save()
       ctx.globalCompositeOperation = 'screen'
       const n = env.mobile ? 3 : 6
@@ -906,43 +871,48 @@ export default function AquariumCanvas() {
         const phase = (t * 0.00028 + (i * Math.PI) / 3) % (Math.PI * 2)
         const sway = Math.sin(phase) * 42
         const x = (env.w / (n + 1)) * (i + 1) + sway
-        const g = ctx.createLinearGradient(x, 0, x + sway, env.h * 0.85)
-        g.addColorStop(0, 'rgba(255, 255, 235, 0.085)')
-        g.addColorStop(0.45, 'rgba(180, 250, 245, 0.03)')
+        const g = ctx.createLinearGradient(x, topY, x + sway, bottomY)
+        g.addColorStop(0, `rgba(255, 255, 235, ${(0.088 * rayVis).toFixed(4)})`)
+        g.addColorStop(0.45, `rgba(180, 250, 245, ${(0.032 * rayVis).toFixed(4)})`)
         g.addColorStop(1, 'rgba(0, 0, 0, 0)')
         ctx.fillStyle = g
         ctx.beginPath()
-        ctx.moveTo(x - 26, 0)
-        ctx.lineTo(x + 26, 0)
-        ctx.lineTo(x + 80 + sway, env.h * 0.85)
-        ctx.lineTo(x - 80 + sway, env.h * 0.85)
+        ctx.moveTo(x - 26, topY)
+        ctx.lineTo(x + 26, topY)
+        ctx.lineTo(x + 80 + sway, bottomY)
+        ctx.lineTo(x - 80 + sway, bottomY)
         ctx.closePath()
         ctx.fill()
       }
       ctx.restore()
     }
 
-    const drawMotes = (dt) => {
+    const drawMotes = (dt, camY, depthRatio) => {
+      const spanH = env.h + 20
+      const bioMix = Math.max(0, (depthRatio - 0.25) / 0.75)
       motes.forEach((m) => {
         m.x += m.vx * dt
-        m.y += (m.vy - scrollCurrent * 0.35) * dt
+        m.y += (m.vy - scrollCurrent * 0.28 * m.depth) * dt
         if (m.x < -5) m.x = env.w + 5
         if (m.x > env.w + 5) m.x = -5
-        if (m.y < -5) m.y = env.h + 5
-        if (m.y > env.h + 5) m.y = -5
+        const screenY = (((m.y - camY * m.depth) % spanH) + spanH) % spanH - 10
+        const r = m.r
+        const red = Math.round(230 - bioMix * 120)
+        const green = Math.round(255 - bioMix * 10)
+        const blue = Math.round(250 - bioMix * 28)
         ctx.beginPath()
-        ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(230, 255, 250, ${m.a})`
+        ctx.arc(m.x, screenY, r, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(${red}, ${green}, ${blue}, ${(m.a + bioMix * 0.08).toFixed(3)})`
         ctx.fill()
       })
     }
 
-    const updateBubbles = (dt) => {
+    const updateBubbles = (dt, seabedShiftY, surfaceY) => {
       airTimer -= dt
       if (airTimer <= 0 && bubbles.length < 90) {
         bubbles.push({
           x: env.airX + rand(-3, 3),
-          y: env.airY,
+          y: env.airY + seabedShiftY,
           r: rand(1.4, 3.6),
           vy: rand(0.9, 1.7),
           wob: rand(0, 6),
@@ -955,14 +925,15 @@ export default function AquariumCanvas() {
       for (let i = bubbles.length - 1; i >= 0; i--) {
         const b = bubbles[i]
         b.wob += 0.05 * dt
-        b.y -= (b.vy + scrollCurrent * 0.25) * dt
+        b.y -= (b.vy + scrollCurrent * 0.3) * dt
         b.x += Math.sin(b.wob) * b.amp * dt
         if (b.air) b.r += 0.0035 * dt
-        if (b.y < SURFACE_Y) {
-          ripples.push({ x: b.x, r: 3, max: 22, a: 0.4 })
+        if (b.y < surfaceY || b.y < -20) {
+          if (surfaceY > -15) ripples.push({ x: b.x, r: 3, max: 22, a: 0.4 })
           bubbles.splice(i, 1)
           continue
         }
+        if (b.y > env.h + 24) continue
         ctx.beginPath()
         ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2)
         ctx.fillStyle = 'rgba(220, 250, 255, 0.12)'
@@ -977,48 +948,20 @@ export default function AquariumCanvas() {
       }
     }
 
-    const updateFood = (dt, t) => {
-      for (let i = food.length - 1; i >= 0; i--) {
-        const f = food[i]
-        if (f.eaten) {
-          food.splice(i, 1)
-          continue
-        }
-        if (!f.landed) {
-          f.y += f.vy * dt
-          f.x += Math.sin(f.phase + t * 0.002) * 0.25 * dt
-          if (f.y >= sandSurface(f.x, env.sandTop) + env.sandH * 0.28) f.landed = true
-        } else {
-          f.life += dt
-          if (f.life > 900) {
-            food.splice(i, 1)
-            continue
-          }
-        }
-        const alpha = f.landed ? clamp(1 - (f.life - 600) / 300, 0, 1) : 1
-        ctx.save()
-        ctx.translate(f.x, f.y)
-        ctx.rotate(f.phase + t * 0.001)
-        ctx.fillStyle = `hsla(${f.hue}, 85%, 62%, ${alpha})`
-        ctx.beginPath()
-        ctx.ellipse(0, 0, f.size, f.size * 0.6, 0, 0, Math.PI * 2)
-        ctx.fill()
-        ctx.restore()
-      }
-    }
-
     // ── Permukaan air dan cahaya di pasir ────────────────────────────────
-    const drawSurface = (t) => {
-      const g = ctx.createLinearGradient(0, 0, 0, 52)
+    const drawSurface = (t, surfaceShiftY) => {
+      const sy = SURFACE_Y + surfaceShiftY
+      if (sy < -60) return
+      const g = ctx.createLinearGradient(0, surfaceShiftY, 0, surfaceShiftY + 52)
       g.addColorStop(0, 'rgba(235, 255, 255, 0.42)')
       g.addColorStop(0.35, 'rgba(170, 245, 240, 0.14)')
       g.addColorStop(1, 'rgba(170, 245, 240, 0)')
       ctx.fillStyle = g
-      ctx.fillRect(0, 0, env.w, 52)
+      ctx.fillRect(0, surfaceShiftY, env.w, 52)
 
       ctx.beginPath()
       for (let x = 0; x <= env.w + 8; x += 8) {
-        const y = SURFACE_Y + Math.sin(x * 0.02 + t * 0.0015) * 2 + Math.sin(x * 0.05 - t * 0.0021) * 1.2
+        const y = sy + Math.sin(x * 0.02 + t * 0.0015) * 2 + Math.sin(x * 0.05 - t * 0.0021) * 1.2
         if (x === 0) ctx.moveTo(x, y)
         else ctx.lineTo(x, y)
       }
@@ -1027,14 +970,15 @@ export default function AquariumCanvas() {
       ctx.stroke()
     }
 
-    const drawSandLight = (t) => {
+    const drawSandLight = (t, seabedShiftY) => {
+      if (env.sandTop + seabedShiftY > env.h + 10) return
       ctx.save()
       ctx.globalCompositeOperation = 'screen'
       const n = env.mobile ? 8 : 16
       for (let i = 0; i < n; i++) {
         const dir = i % 2 ? 1 : -1
         const x = (((i * env.w) / n + t * 0.014 * dir) % env.w + env.w) % env.w
-        const y = env.sandTop + 12 + ((i * 37) % Math.max(20, env.sandH * 0.7))
+        const y = env.sandTop + seabedShiftY + 12 + ((i * 37) % Math.max(20, env.sandH * 0.7))
         const a = 0.05 + (Math.sin(t * 0.0012 + i) + 1) * 0.04
         ctx.beginPath()
         ctx.ellipse(x, y, 34 + (i % 3) * 10, 4, 0, 0, Math.PI * 2)
@@ -1044,7 +988,8 @@ export default function AquariumCanvas() {
       ctx.restore()
     }
 
-    const drawRipples = (dt) => {
+    const drawRipples = (dt, surfaceShiftY) => {
+      const sy = SURFACE_Y + surfaceShiftY
       for (let i = ripples.length - 1; i >= 0; i--) {
         const r = ripples[i]
         r.r += 1.5 * dt
@@ -1053,8 +998,9 @@ export default function AquariumCanvas() {
           ripples.splice(i, 1)
           continue
         }
+        if (sy < -30) continue
         ctx.beginPath()
-        ctx.ellipse(r.x, SURFACE_Y + 2, r.r, r.r * 0.16, 0, 0, Math.PI * 2)
+        ctx.ellipse(r.x, sy + 2, r.r, r.r * 0.16, 0, 0, Math.PI * 2)
         ctx.strokeStyle = `rgba(255, 255, 255, ${r.a})`
         ctx.lineWidth = 1.2
         ctx.stroke()
@@ -1076,6 +1022,7 @@ export default function AquariumCanvas() {
       env.sandH = substrate.sandH
       env.airX = substrate.airX
       env.airY = substrate.airY
+      env.seabedTravel = env.sandH + Math.min(170, env.h * 0.22)
 
       buildPlants()
       buildMotes()
@@ -1112,32 +1059,42 @@ export default function AquariumCanvas() {
       const dt = Math.min((now - lastT) / 16.667, 3) * timeScale
       lastT = now
 
+      const follow = reduceMotion ? 1 : 1 - Math.exp(-0.18 * (dt / Math.max(0.01, timeScale)))
+      smoothScrollRatio += (targetScrollRatio - smoothScrollRatio) * follow
+
+      const parallaxRatio = reduceMotion ? 0 : smoothScrollRatio
+      const camY = parallaxRatio * Math.min(480, env.h * 0.72)
+      const surfaceShiftY = -camY * 0.85
+      const seabedShiftY = reduceMotion ? 0 : (1 - smoothScrollRatio) * env.seabedTravel
+
       ctx.clearRect(0, 0, env.w, env.h)
 
-      drawRays(now)
-      drawMotes(dt)
-      drawBlades(backPlants, now)
+      drawRays(now, camY, parallaxRatio)
+      drawMotes(dt, camY, parallaxRatio)
+      drawBlades(backPlants, now, seabedShiftY * 0.9)
 
-      ctx.drawImage(substrate.canvas, 0, 0, env.w, env.h)
-
-      updateCory(dt)
-      drawCoryFish()
+      if (env.sandTop + seabedShiftY < env.h + 4) {
+        ctx.drawImage(substrate.canvas, 0, seabedShiftY, env.w, env.h)
+        updateCory(dt)
+        drawCoryFish(seabedShiftY)
+      } else {
+        updateCory(dt)
+      }
 
       angel.update(dt)
-      angel.draw()
+      angel.draw(camY)
       tang.update(dt)
-      tang.draw()
+      tang.draw(camY)
       clown.update(dt)
-      clown.draw()
+      clown.draw(camY)
       updateTetras(dt, now)
-      drawTetras()
+      drawTetras(camY)
 
-      drawBlades(frontPlants, now)
-      updateFood(dt, now)
-      updateBubbles(dt)
-      drawSandLight(now)
-      drawSurface(now)
-      drawRipples(dt)
+      drawBlades(frontPlants, now, seabedShiftY)
+      updateBubbles(dt, seabedShiftY, SURFACE_Y + surfaceShiftY)
+      drawSandLight(now, seabedShiftY)
+      drawSurface(now, surfaceShiftY)
+      drawRipples(dt, surfaceShiftY)
 
       scrollCurrent *= Math.pow(0.88, dt)
       rafId = requestAnimationFrame(render)
@@ -1155,27 +1112,30 @@ export default function AquariumCanvas() {
     }
     document.addEventListener('visibilitychange', onVisibility)
 
-    // Kedalaman air bertahap mengikuti posisi scroll (Permukaan 0m -> Abisal 500m) via GPU opacity
+    // Kedalaman air bertahap mengikuti posisi scroll (Permukaan -> Dasar laut) via GPU opacity
     let depthRaf = null
     const syncDepthVeil = () => {
       depthRaf = null
-      if (!depthVeilRef.current) return
       const doc = document.documentElement
       const maxScroll = Math.max(1, doc.scrollHeight - window.innerHeight)
       const ratio = Math.max(0, Math.min(1, window.scrollY / maxScroll))
-      depthVeilRef.current.style.opacity = (ratio * 0.68).toFixed(3)
+      targetScrollRatio = ratio
+      if (depthVeilRef.current) {
+        depthVeilRef.current.style.opacity = (ratio * 0.76).toFixed(3)
+      }
     }
     const onScrollDepth = () => {
       const nextY = window.scrollY
       const deltaY = nextY - lastScrollY
       lastScrollY = nextY
       if (!reduceMotion && Math.abs(deltaY) > 0.5) {
-        scrollCurrent = clamp(scrollCurrent + deltaY * 0.04, -5.5, 5.5)
+        scrollCurrent = clamp(scrollCurrent + deltaY * 0.045, -6, 6)
       }
       if (depthRaf) return
       depthRaf = requestAnimationFrame(syncDepthVeil)
     }
     syncDepthVeil()
+    smoothScrollRatio = targetScrollRatio
     window.addEventListener('scroll', onScrollDepth, { passive: true })
     window.addEventListener('resize', onScrollDepth, { passive: true })
 
