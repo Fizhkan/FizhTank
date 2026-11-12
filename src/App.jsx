@@ -8,7 +8,6 @@ import Certifications from './components/Certifications'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
 import ScrollToTop from './components/ScrollToTop'
-import TankInfo from './components/TankInfo'
 import ErrorBoundary from './components/ErrorBoundary'
 import { site } from './data/site'
 
@@ -46,7 +45,6 @@ function App() {
         </div>
 
         <div className="tank-frame" aria-hidden="true" />
-        <TankInfo />
         <ScrollToTop />
       </div>
     </ErrorBoundary>

@@ -1,39 +1,6 @@
 import { useState } from 'react'
 import { useScrollReveal } from '../hooks/useScrollReveal'
 import { skillGroups, toolsData, levelNotes } from '../data/skillsData'
-import { playWaterBubble } from '../utils/audio'
-
-// Penjelasan tiap layer, dengan contoh display filter Wireshark yang relevan
-const OSI_LAYERS = [
-  {
-    code: 'L7',
-    layer: 'Layer 7 Application',
-    protocols: 'HTTP/HTTPS, DNS, SSH, DHCP',
-    focus: 'Melihat port 80/443, 53, dan 22, serta credential yang terkirim plaintext.',
-    filter: 'http.request.method == "POST"',
-  },
-  {
-    code: 'L4',
-    layer: 'Layer 4 Transport',
-    protocols: 'TCP, UDP',
-    focus: 'TCP 3-way handshake (SYN, SYN-ACK, ACK), ukuran window, dan aliran UDP.',
-    filter: 'tcp.flags.syn == 1 && tcp.flags.ack == 0',
-  },
-  {
-    code: 'L3',
-    layer: 'Layer 3 Network',
-    protocols: 'IPv4, ICMP, OSPF, ARP',
-    focus: 'Subnetting CIDR dan VLSM, routing SVI, dan TTL di header IP.',
-    filter: 'ip.addr == 192.168.10.0/24',
-  },
-  {
-    code: 'L2',
-    layer: 'Layer 2 Data Link',
-    protocols: 'Ethernet II, 802.1Q, STP',
-    focus: 'VLAN tagging, trunking, tabel MAC address, dan PVST+.',
-    filter: 'vlan.id == 10',
-  },
-]
 
 const levelStyle = {
   Dasar: 'border-kelp/50 bg-kelp/10 text-kelp',
@@ -43,18 +10,13 @@ const levelStyle = {
 
 export default function Skills() {
   const [activeTab, setActiveTab] = useState('networking')
-  const [activeOsi, setActiveOsi] = useState(0)
 
   const [headerRef, headerVisible] = useScrollReveal({ threshold: 0.1 })
   const [bodyRef, bodyVisible] = useScrollReveal({ threshold: 0.06 })
 
-  const currentGroup = skillGroups.find((g) => g.id === activeTab)
-  const osi = OSI_LAYERS[activeOsi]
+  const currentGroup = skillGroups.find((g) => g.id === activeTab) || skillGroups[0]
 
-  const tabs = [
-    ...skillGroups.map((g, i) => ({ id: g.id, num: `0${i + 1}`, label: g.short })),
-    { id: 'osi', num: '04', label: 'Layer OSI' },
-  ]
+  const tabs = skillGroups.map((g, i) => ({ id: g.id, num: `0${i + 1}`, label: g.short }))
 
   const reveal = (visible, offset = 20) => ({
     opacity: visible ? 1 : 0,
@@ -93,10 +55,7 @@ export default function Skills() {
                   type="button"
                   role="tab"
                   aria-selected={active}
-                  onClick={() => {
-                    playWaterBubble()
-                    setActiveTab(tab.id)
-                  }}
+                  onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center gap-1.5 px-4 py-2 text-xs font-medium transition-colors duration-150 active:scale-[0.98] ${
                     i > 0 ? 'border-l border-aqua/15' : ''
                   } ${
@@ -125,111 +84,45 @@ export default function Skills() {
         </div>
 
         {/* Matriks Hairline (Menggantikan Grid Kartu Bulat Seragam) */}
-        {currentGroup && activeTab !== 'osi' && (
-          <div key={activeTab} role="tabpanel" className="panel-enter p-5 sm:p-8">
-            <div className="flex flex-col justify-between gap-4 border-b border-aqua/15 pb-6 sm:flex-row sm:items-end">
-              <div>
-                <h3 className="text-3xl text-white sm:text-4xl">{currentGroup.label}</h3>
-                <p className="mt-1.5 max-w-xl text-mist">{currentGroup.description}</p>
-              </div>
-              <ul className="flex flex-wrap gap-2">
-                {currentGroup.tags.map((t) => (
-                  <li key={t} className="chip">
-                    {t}
-                  </li>
-                ))}
-              </ul>
+        <div key={activeTab} role="tabpanel" className="panel-enter p-5 sm:p-8">
+          <div className="flex flex-col justify-between gap-4 border-b border-aqua/15 pb-6 sm:flex-row sm:items-end">
+            <div>
+              <h3 className="text-3xl text-white sm:text-4xl">{currentGroup.label}</h3>
+              <p className="mt-1.5 max-w-xl text-mist">{currentGroup.description}</p>
             </div>
-
-            <ul className="mt-7 grid grid-cols-1 gap-px border border-aqua/15 bg-aqua/15 sm:grid-cols-2 lg:grid-cols-3">
-              {currentGroup.skills.map((skill, idx) => (
-                <li key={skill.name} className="specimen-hover flex flex-col justify-between bg-[#021721]/95 p-5 sm:p-6">
-                  <div>
-                    <div className="flex items-center justify-between gap-3 border-b border-aqua/10 pb-3">
-                      <span className="font-mono text-[0.6875rem] text-aqua/80">
-                        SPEC // {String(idx + 1).padStart(2, '0')}
-                      </span>
-                      <span
-                        className={`shrink-0 rounded-[2px] border px-2 py-0.5 font-mono text-[0.6875rem] font-medium ${levelStyle[skill.level]}`}
-                      >
-                        {skill.level}
-                      </span>
-                    </div>
-
-                    <h4 className="mt-4 font-sans text-base leading-snug font-semibold tracking-normal text-white">
-                      {skill.name}
-                    </h4>
-                    <p className="mt-2 text-sm leading-relaxed text-mist">{skill.context}</p>
-                  </div>
+            <ul className="flex flex-wrap gap-2">
+              {currentGroup.tags.map((t) => (
+                <li key={t} className="chip">
+                  {t}
                 </li>
               ))}
             </ul>
           </div>
-        )}
 
-        {/* Bedah Layer OSI */}
-        {activeTab === 'osi' && (
-          <div key="osi" role="tabpanel" className="panel-enter p-5 sm:p-8">
-            <div className="border-b border-aqua/15 pb-6">
-              <h3 className="text-3xl text-white sm:text-4xl">Dari aplikasi sampai kabel</h3>
-              <p className="mt-1.5 max-w-xl text-mist">
-                Empat layer yang paling sering saya amati di lab dan Wireshark. Pilih satu untuk melihat contoh
-                filternya.
-              </p>
-            </div>
-
-            <div className="mt-7 grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
-              <div className="divide-y divide-aqua/15 border border-aqua/15 lg:col-span-5">
-                {OSI_LAYERS.map((item, idx) => {
-                  const selected = activeOsi === idx
-                  return (
-                    <button
-                      key={item.layer}
-                      type="button"
-                      aria-pressed={selected}
-                      onClick={() => {
-                        playWaterBubble()
-                        setActiveOsi(idx)
-                      }}
-                      className={`flex w-full items-center gap-4 border-l-2 p-4 text-left transition-colors duration-150 ${
-                        selected
-                          ? 'border-l-aqua bg-water/80'
-                          : 'border-l-transparent bg-deep/50 hover:bg-water/35'
-                      }`}
+          <ul className="mt-7 grid grid-cols-1 gap-px border border-aqua/15 bg-aqua/15 sm:grid-cols-2 lg:grid-cols-3">
+            {currentGroup.skills.map((skill, idx) => (
+              <li key={skill.name} className="specimen-hover flex flex-col justify-between bg-[#021721]/95 p-5 sm:p-6">
+                <div>
+                  <div className="flex items-center justify-between gap-3 border-b border-aqua/10 pb-3">
+                    <span className="font-mono text-[0.6875rem] text-aqua/80">
+                      SPEC // {String(idx + 1).padStart(2, '0')}
+                    </span>
+                    <span
+                      className={`shrink-0 rounded-[2px] border px-2 py-0.5 font-mono text-[0.6875rem] font-medium ${levelStyle[skill.level]}`}
                     >
-                      <span className={`font-mono text-xs font-semibold ${selected ? 'text-aqua' : 'text-mist/70'}`}>
-                        {item.code}
-                      </span>
-                      <span>
-                        <span className={`block font-semibold ${selected ? 'text-white' : 'text-foam'}`}>
-                          {item.layer}
-                        </span>
-                        <span className="mt-0.5 block font-mono text-xs text-mist">{item.protocols}</span>
-                      </span>
-                    </button>
-                  )
-                })}
-              </div>
+                      {skill.level}
+                    </span>
+                  </div>
 
-              <div key={osi.code} className="specimen-inset panel-enter p-5 sm:p-6 lg:col-span-7" aria-live="polite">
-                <span className="font-mono text-[0.6875rem] tracking-widest text-aqua uppercase">
-                  Inspeksi // {osi.code}
-                </span>
-                <h4 className="mt-1 font-display text-3xl text-white">{osi.layer}</h4>
-                <p className="mt-1 font-mono text-xs text-sand">{osi.protocols}</p>
-
-                <p className="mt-4 leading-relaxed text-foam">{osi.focus}</p>
-
-                <div className="mt-5 border border-aqua/20 bg-black/40 p-4">
-                  <p className="font-mono text-[0.6875rem] tracking-wider text-mist uppercase">
-                    Contoh display filter Wireshark
-                  </p>
-                  <code className="mt-1.5 block font-mono text-[0.8125rem] break-all text-aqua">{osi.filter}</code>
+                  <h4 className="mt-4 font-sans text-base leading-snug font-semibold tracking-normal text-white">
+                    {skill.name}
+                  </h4>
+                  <p className="mt-2 text-sm leading-relaxed text-mist">{skill.context}</p>
                 </div>
-              </div>
-            </div>
-          </div>
-        )}
+              </li>
+            ))}
+          </ul>
+        </div>
 
         {/* Daftar Tool */}
         <div className="border-t border-aqua/15 px-5 py-6 sm:px-8">

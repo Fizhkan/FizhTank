@@ -2,7 +2,6 @@ import { useState, lazy, Suspense } from 'react'
 import { ArrowUpRight, Network, ShieldCheck, Cpu, ArrowRight } from 'lucide-react'
 import { useScrollReveal } from '../hooks/useScrollReveal'
 import { labsData } from '../data/labsData'
-import { playWaterBubble } from '../utils/audio'
 
 const LabModal = lazy(() => import('./LabModal'))
 
@@ -140,10 +139,7 @@ export default function Labs() {
                   key={lab.id}
                   type="button"
                   aria-pressed={selected}
-                  onClick={() => {
-                    playWaterBubble()
-                    setActiveLabId(lab.id)
-                  }}
+                  onClick={() => setActiveLabId(lab.id)}
                   className={`group relative w-full border-l-2 p-5 text-left transition-colors duration-150 active:scale-[0.995] ${
                     selected
                       ? 'border-l-aqua bg-water/80'
@@ -239,10 +235,7 @@ export default function Labs() {
 
               <button
                 type="button"
-                onClick={() => {
-                  playWaterBubble()
-                  setModalLab(currentLab)
-                }}
+                onClick={() => setModalLab(currentLab)}
                 className="btn btn-primary"
               >
                 <span>Lihat semua langkah</span>

@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react'
-import { playFeedSplash } from '../utils/audio'
 
 /**
  * Tank akuarium yang menjadi latar seluruh halaman.
@@ -585,7 +584,6 @@ export default function AquariumCanvas() {
     const bubbles = []
     const ripples = []
     const food = []
-    let fedCount = 0
     let airTimer = 0
     let running = true
     let rafId = 0
@@ -996,9 +994,6 @@ export default function AquariumCanvas() {
         })
       }
       ripples.push({ x: cx, r: 4, max: 52, a: 0.55 })
-      playFeedSplash()
-      fedCount += 1
-      window.dispatchEvent(new CustomEvent('fizhtank-fed', { detail: { count: fedCount } }))
     }
 
     const updateFood = (dt, t) => {

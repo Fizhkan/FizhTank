@@ -290,11 +290,6 @@ body {
     text-shadow: 0 2px 22px rgba(2, 15, 22, 0.78), 0 1px 3px rgba(2, 15, 22, 0.7);
   }
 
-  .terminal-scroll {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(94, 234, 212, 0.35) transparent;
-  }
-
   .panel-enter {
     animation: panel-enter 220ms var(--ease-out) both;
   }

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Menu, X, ArrowUpRight, Volume2, VolumeX, Fish } from 'lucide-react'
+import { Menu, X, ArrowUpRight } from 'lucide-react'
 import FishMark from './FishMark'
-import { toggleAudio, isAudioActive, playWaterBubble } from '../utils/audio'
 
 const NAV_LINKS = [
   { num: '01', label: 'Lab', href: '#labs', id: 'labs' },
@@ -14,7 +13,6 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [activeSection, setActiveSection] = useState('hero')
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [audioActive, setAudioActive] = useState(() => isAudioActive())
 
   useEffect(() => {
     let ticking = false
@@ -46,9 +44,6 @@ export default function Navbar() {
     })
     return () => observer.disconnect()
   }, [])
-
-  const handleAudioToggle = () => setAudioActive(toggleAudio())
-  const handleFeed = () => window.dispatchEvent(new CustomEvent('fizhtank-feed'))
 
   return (
     <header
@@ -99,37 +94,11 @@ export default function Navbar() {
 
           <span className="mx-2.5 h-5 w-px bg-aqua/20" aria-hidden="true" />
 
-          <button
-            type="button"
-            onClick={handleFeed}
-            className="btn btn-ghost min-h-9! px-3.5! py-1.5! font-mono text-xs!"
-            title="Jatuhkan makanan ke tank"
-          >
-            <Fish size={15} className="text-coral" aria-hidden="true" />
-            <span>Beri makan</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={handleAudioToggle}
-            aria-pressed={audioActive}
-            aria-label={audioActive ? 'Matikan suara air' : 'Nyalakan suara air'}
-            title={audioActive ? 'Matikan suara air' : 'Nyalakan suara air'}
-            onMouseEnter={playWaterBubble}
-            className={`ml-1 flex h-9 w-9 items-center justify-center rounded-[2px] border transition-colors active:scale-[0.97] ${
-              audioActive
-                ? 'border-aqua/60 bg-aqua/15 text-aqua'
-                : 'border-aqua/20 text-mist hover:border-aqua/50 hover:text-white'
-            }`}
-          >
-            {audioActive ? <Volume2 size={16} /> : <VolumeX size={16} />}
-          </button>
-
           <a
             href="https://github.com/Fizhkan"
             target="_blank"
             rel="noopener noreferrer"
-            className="ml-1 inline-flex h-9 items-center gap-1.5 rounded-[2px] border border-aqua/20 px-3.5 font-mono text-xs font-medium text-foam transition-colors hover:border-aqua/55 hover:bg-aqua/10 active:scale-[0.97]"
+            className="inline-flex h-9 items-center gap-1.5 rounded-[2px] border border-aqua/20 px-3.5 font-mono text-xs font-medium text-foam transition-colors hover:border-aqua/55 hover:bg-aqua/10 active:scale-[0.97]"
           >
             <span>GitHub</span>
             <ArrowUpRight size={13} aria-hidden="true" />
@@ -137,18 +106,6 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2 md:hidden">
-          <button
-            type="button"
-            onClick={handleAudioToggle}
-            aria-pressed={audioActive}
-            aria-label={audioActive ? 'Matikan suara air' : 'Nyalakan suara air'}
-            className={`flex h-11 w-11 items-center justify-center rounded-[2px] border active:scale-[0.97] ${
-              audioActive ? 'border-aqua/60 bg-aqua/15 text-aqua' : 'border-aqua/20 text-mist'
-            }`}
-          >
-            {audioActive ? <Volume2 size={18} /> : <VolumeX size={18} />}
-          </button>
-
           <button
             type="button"
             onClick={() => setMobileOpen((open) => !open)}
@@ -181,23 +138,12 @@ export default function Navbar() {
             ))}
           </nav>
 
-          <div className="mt-5 flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => {
-                handleFeed()
-                setMobileOpen(false)
-              }}
-              className="btn btn-primary"
-            >
-              <Fish size={16} aria-hidden="true" />
-              <span>Beri makan ikan</span>
-            </button>
+          <div className="mt-5">
             <a
               href="https://github.com/Fizhkan"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn btn-ghost"
+              className="btn btn-ghost w-full"
             >
               <span>GitHub</span>
               <ArrowUpRight size={14} aria-hidden="true" />

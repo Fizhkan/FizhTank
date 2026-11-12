@@ -1,22 +1,16 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import {
   ArrowUpRight,
-  Fish,
-  Terminal as TerminalIcon,
   Activity,
   Shield,
   Network,
   Globe,
   Database,
   Monitor,
-  Calculator,
 } from 'lucide-react'
 import { useScrollReveal } from '../hooks/useScrollReveal'
-import { labsData } from '../data/labsData'
-import { skillGroups, toolsData } from '../data/skillsData'
+import { toolsData } from '../data/skillsData'
 import { site } from '../data/site'
-import { calculateSubnet } from '../utils/subnetCalculator'
-import { playWaterBubble } from '../utils/audio'
 
 // Topologi homelab yang direncanakan. Alamat hanya contoh rancangan, bukan perangkat yang sedang berjalan.
 const NODES = [
@@ -40,29 +34,11 @@ const LINKS = [
   ['core', 'v30'],
 ]
 
-const TABS = [
-  { id: 'topology', num: '01', label: 'Topologi', icon: Network },
-  { id: 'subnet', num: '02', label: 'Kalkulator subnet', icon: Calculator },
-  { id: 'cli', num: '03', label: 'Terminal', icon: TerminalIcon },
-]
-
-const PRESETS = ['192.168.10.0/24', '192.168.20.0/26', '10.0.0.0/27', '172.16.0.0/29']
-
 const usedTools = toolsData.filter((t) => t.used).map((t) => t.label)
 
 export default function Hero() {
-  const [activeTab, setActiveTab] = useState('topology')
   const [selectedId, setSelectedId] = useState('core')
-  const [subnetInput, setSubnetInput] = useState('192.168.10.0/26')
-  const [subnetResult, setSubnetResult] = useState(() => calculateSubnet('192.168.10.0/26'))
   const [avatarOk, setAvatarOk] = useState(false)
-
-  const [terminalHistory, setTerminalHistory] = useState([
-    { type: 'sys', text: 'Terminal FizhTank. Ketik help untuk melihat perintah.' },
-  ])
-  const [cliInput, setCliInput] = useState('')
-  const terminalBodyRef = useRef(null)
-
   const [benchRef, benchVisible] = useScrollReveal({ threshold: 0.08 })
 
   // Foto hanya ditampilkan jika file-nya ada; jika tidak, kartu menampilkan inisial
@@ -73,93 +49,8 @@ export default function Hero() {
     probe.src = site.avatarUrl
   }, [])
 
-  useEffect(() => {
-    if (activeTab === 'cli' && terminalBodyRef.current) {
-      terminalBodyRef.current.scrollTop = terminalBodyRef.current.scrollHeight
-    }
-  }, [terminalHistory, activeTab])
-
   const selected = NODES.find((n) => n.id === selectedId) || NODES[0]
   const byId = Object.fromEntries(NODES.map((n) => [n.id, n]))
-
-  const handleCalculateSubnet = (value) => {
-    setSubnetInput(value)
-    setSubnetResult(calculateSubnet(value))
-  }
-
-  const handleFeed = () => window.dispatchEvent(new CustomEvent('fizhtank-feed'))
-
-  const handleRunCommand = (e) => {
-    e.preventDefault()
-    const trimmed = cliInput.trim()
-    if (!trimmed) return
-
-    const lower = trimmed.toLowerCase()
-    const next = [...terminalHistory, { type: 'cmd', text: trimmed }]
-
-    if (lower === 'help') {
-      next.push({
-        type: 'out',
-        text: [
-          'whoami          profil singkat',
-          'labs            daftar lab yang direncanakan',
-          'skills          ringkasan skill dan levelnya',
-          'subnet <ip/n>   hitung subnet, contoh: subnet 10.0.0.0/24',
-          'contact         cara menghubungi saya',
-          'feed            beri makan ikan di tank',
-          'clear           bersihkan layar',
-        ].join('\n'),
-      })
-    } else if (lower === 'whoami') {
-      next.push({
-        type: 'out',
-        text: `Hafidz Sirajuddin (Siraj)\n${site.subtitle}\n${site.jobTitle}\n${site.location}`,
-      })
-    } else if (lower === 'labs') {
-      next.push({
-        type: 'out',
-        text: labsData.map((l) => `${String(l.id).padStart(2, '0')}  ${l.title}  [${l.status}]`).join('\n'),
-      })
-    } else if (lower === 'skills') {
-      next.push({
-        type: 'out',
-        text: skillGroups
-          .map((g) => `${g.label}\n${g.skills.map((s) => `  - ${s.name} (${s.level})`).join('\n')}`)
-          .join('\n\n'),
-      })
-    } else if (lower === 'contact') {
-      next.push({ type: 'out', text: `Email   ${site.email}\nGitHub  github.com/Fizhkan` })
-    } else if (lower.startsWith('subnet')) {
-      const arg = trimmed.split(/\s+/)[1]
-      if (!arg) {
-        next.push({ type: 'err', text: 'Pemakaian: subnet <ip/cidr>, contoh: subnet 192.168.1.0/26' })
-      } else {
-        const res = calculateSubnet(arg)
-        if (res.error) {
-          next.push({ type: 'err', text: res.error })
-        } else {
-          next.push({
-            type: 'out',
-            text: `Network    ${res.network}${res.cidr}\nNetmask    ${res.netmask}\nBroadcast  ${res.broadcast}\nHost       ${res.usableRange} (${res.totalUsable} host)`,
-          })
-          setSubnetInput(arg)
-          setSubnetResult(res)
-        }
-      }
-    } else if (lower === 'feed') {
-      handleFeed()
-      next.push({ type: 'sys', text: 'Makanan dijatuhkan ke tank. Lihat ikan-ikan mengejarnya.' })
-    } else if (lower === 'clear') {
-      setTerminalHistory([])
-      setCliInput('')
-      return
-    } else {
-      next.push({ type: 'err', text: `Perintah tidak dikenal: ${trimmed}. Ketik help untuk daftar perintah.` })
-    }
-
-    setTerminalHistory(next)
-    setCliInput('')
-  }
 
   const reveal = (visible, offset = 20) => ({
     opacity: visible ? 1 : 0,
@@ -185,8 +76,8 @@ export default function Hero() {
 
           <p className="lede on-water hero-stagger mt-7 max-w-xl text-[1.0625rem]" style={{ '--stagger': 2 }}>
             Halo, saya <strong className="font-semibold text-white">Siraj</strong>, mahasiswa D3 Teknik Informatika.
-            Situs ini adalah catatan lab jaringan, keamanan, dan Linux—dirancang seperti jendela observasi akuarium:
-            klik area air yang kosong untuk memberi makan ikan.
+            Situs ini berisi catatan lab jaringan, keamanan, dan Linux—dengan latar akuarium interaktif: klik area
+            air yang kosong untuk memberi makan ikan.
           </p>
 
           <div className="hero-stagger mt-9 flex flex-wrap items-center gap-3" style={{ '--stagger': 3 }}>
@@ -197,10 +88,6 @@ export default function Hero() {
             <a href="#contact" className="btn btn-ghost">
               Hubungi saya
             </a>
-            <button type="button" onClick={handleFeed} className="btn btn-ghost">
-              <Fish size={16} className="text-coral-text" aria-hidden="true" />
-              <span>Beri makan ikan</span>
-            </button>
           </div>
 
           <div className="hero-stagger mt-10 border-t border-aqua/15 pt-5" style={{ '--stagger': 4 }}>
@@ -217,7 +104,7 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Field Specimen Dossier — Menggantikan kartu foto bulat generik */}
+        {/* Field Specimen Dossier */}
         <div className="hero-stagger flex justify-start lg:col-span-4 lg:justify-end" style={{ '--stagger': 3 }}>
           <figure className="specimen-panel reticle w-full max-w-[20rem] overflow-hidden">
             <div className="flex items-center justify-between border-b border-aqua/15 px-3.5 py-2 font-mono text-[0.6875rem] tracking-wider">
@@ -268,300 +155,137 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Konsol Meja Kerja — Hairline Instrumentation Frame */}
+      {/* Arsitektur Topologi Homelab yang Direncanakan */}
       <div ref={benchRef} className="mt-20 sm:mt-24" style={reveal(benchVisible, 24)}>
         <div className="specimen-panel reticle overflow-hidden">
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-aqua/15 px-5 py-4 sm:px-7">
             <div>
               <p className="font-mono text-[0.6875rem] tracking-widest text-aqua uppercase">
-                Bench // Modul Interaktif
+                Arsitektur // Topologi Interaktif
               </p>
-              <h2 className="mt-0.5 text-3xl text-white">Meja kerja</h2>
+              <h2 className="mt-0.5 text-3xl text-white">Rancangan homelab</h2>
             </div>
-
-            <div role="tablist" aria-label="Alat di meja kerja" className="flex flex-wrap border border-aqua/20 bg-deep/60">
-              {TABS.map((tab, i) => {
-                const Icon = tab.icon
-                const active = activeTab === tab.id
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={active}
-                    onClick={() => {
-                      playWaterBubble()
-                      setActiveTab(tab.id)
-                    }}
-                    className={`flex items-center gap-2 px-4 py-2 text-xs font-medium transition-colors duration-150 active:scale-[0.98] ${
-                      i > 0 ? 'border-l border-aqua/15' : ''
-                    } ${
-                      active ? 'bg-aqua text-deep font-semibold' : 'text-mist hover:bg-aqua/10 hover:text-white'
-                    }`}
-                  >
-                    <span className={`font-mono text-[0.6875rem] ${active ? 'text-deep/75' : 'text-aqua/75'}`}>
-                      {tab.num}
-                    </span>
-                    <Icon size={14} aria-hidden="true" />
-                    <span>{tab.label}</span>
-                  </button>
-                )
-              })}
-            </div>
+            <p className="font-mono text-xs text-mist">Pilih perangkat pada diagram untuk melihat perannya</p>
           </div>
 
-          {activeTab === 'topology' && (
-            <div key="topology" role="tabpanel" className="panel-enter grid grid-cols-1 items-center gap-8 p-5 sm:p-8 lg:grid-cols-12">
-              <div className="lg:col-span-7">
-                <div className="specimen-inset relative mx-auto aspect-[4/3] w-full max-w-[34rem]">
-                  <svg
-                    viewBox="0 0 100 100"
-                    preserveAspectRatio="none"
-                    className="absolute inset-0 h-full w-full"
-                    aria-hidden="true"
-                  >
-                    {LINKS.map(([a, b]) => {
-                      const from = byId[a]
-                      const to = byId[b]
-                      const hot = selectedId === a || selectedId === b
-                      return (
-                        <g key={`${a}-${b}`}>
+          <div className="grid grid-cols-1 items-center gap-8 p-5 sm:p-8 lg:grid-cols-12">
+            <div className="lg:col-span-7">
+              <div className="specimen-inset relative mx-auto aspect-[4/3] w-full max-w-[34rem]">
+                <svg
+                  viewBox="0 0 100 100"
+                  preserveAspectRatio="none"
+                  className="absolute inset-0 h-full w-full"
+                  aria-hidden="true"
+                >
+                  {LINKS.map(([a, b]) => {
+                    const from = byId[a]
+                    const to = byId[b]
+                    const hot = selectedId === a || selectedId === b
+                    return (
+                      <g key={`${a}-${b}`}>
+                        <line
+                          x1={from.x}
+                          y1={from.y}
+                          x2={to.x}
+                          y2={to.y}
+                          stroke={hot ? 'rgba(94, 234, 212, 0.32)' : 'rgba(165, 205, 210, 0.28)'}
+                          strokeWidth={hot ? 0.75 : 0.45}
+                          vectorEffect="non-scaling-stroke"
+                          strokeDasharray={hot ? undefined : '3 3'}
+                        />
+                        {hot && (
                           <line
                             x1={from.x}
                             y1={from.y}
                             x2={to.x}
                             y2={to.y}
-                            stroke={hot ? 'rgba(94, 234, 212, 0.32)' : 'rgba(165, 205, 210, 0.28)'}
-                            strokeWidth={hot ? 0.75 : 0.45}
+                            stroke="#5eead4"
+                            strokeWidth={1.15}
+                            strokeLinecap="round"
                             vectorEffect="non-scaling-stroke"
-                            strokeDasharray={hot ? undefined : '3 3'}
+                            strokeDasharray="4 8"
+                            className="packet-flow"
                           />
-                          {hot && (
-                            <line
-                              x1={from.x}
-                              y1={from.y}
-                              x2={to.x}
-                              y2={to.y}
-                              stroke="#5eead4"
-                              strokeWidth={1.15}
-                              strokeLinecap="round"
-                              vectorEffect="non-scaling-stroke"
-                              strokeDasharray="4 8"
-                              className="packet-flow"
-                            />
-                          )}
-                        </g>
-                      )
-                    })}
-                  </svg>
-
-                  {NODES.map((node) => {
-                    const Icon = node.icon
-                    const active = node.id === selectedId
-                    return (
-                      <button
-                        key={node.id}
-                        type="button"
-                        onClick={() => {
-                          playWaterBubble()
-                          setSelectedId(node.id)
-                        }}
-                        aria-pressed={active}
-                        aria-label={node.label}
-                        className="group absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1"
-                        style={{ left: `${node.x}%`, top: `${node.y}%` }}
-                      >
-                        <span
-                          className={`flex h-10 w-10 items-center justify-center rounded-[2px] border transition-transform duration-150 active:scale-[0.95] sm:h-11 sm:w-11 ${
-                            active
-                              ? 'scale-105 border-aqua bg-aqua text-deep'
-                              : 'border-aqua/30 bg-water text-aqua group-hover:border-aqua'
-                          }`}
-                        >
-                          <Icon size={18} aria-hidden="true" />
-                        </span>
-                        <span
-                          className={`hidden whitespace-nowrap font-mono text-[0.6875rem] leading-none sm:block ${
-                            active ? 'font-semibold text-white' : 'text-mist'
-                          }`}
-                        >
-                          {node.label}
-                        </span>
-                      </button>
+                        )}
+                      </g>
                     )
                   })}
-                </div>
-              </div>
+                </svg>
 
-              <div className="lg:col-span-5">
-                <div key={selected.id} className="specimen-inset panel-enter divide-y divide-aqua/12" aria-live="polite">
-                  <div className="p-5">
-                    <p className="font-mono text-[0.6875rem] tracking-wider text-aqua uppercase">
-                      Rancangan topologi homelab
-                    </p>
-                    <h3 className="mt-1.5 text-3xl text-white">{selected.label}</h3>
-                  </div>
-
-                  <dl className="divide-y divide-aqua/10 text-sm">
-                    <div className="flex flex-col gap-1 px-5 py-3">
-                      <dt className="font-mono text-[0.6875rem] text-mist/80 uppercase">Peran</dt>
-                      <dd className="text-white">{selected.role}</dd>
-                    </div>
-                    <div className="flex flex-col gap-1 px-5 py-3">
-                      <dt className="font-mono text-[0.6875rem] text-mist/80 uppercase">Alamat contoh</dt>
-                      <dd className="kbd-line text-sand">{selected.addr}</dd>
-                    </div>
-                  </dl>
-
-                  <div className="p-5">
-                    <p className="text-[0.9375rem] leading-relaxed text-mist">{selected.note}</p>
-                    {selected.lab && (
-                      <a
-                        href="#labs"
-                        className="mt-3 inline-flex items-center gap-1.5 font-mono text-xs font-semibold text-aqua hover:text-white"
-                      >
-                        <span>Lihat Lab 0{selected.lab}</span>
-                        <ArrowUpRight size={13} aria-hidden="true" />
-                      </a>
-                    )}
-                  </div>
-                </div>
-
-                <p className="mt-3 px-1 font-mono text-xs text-mist/80">
-                  * Semua perangkat di diagram ini masih rancangan lab, belum berjalan.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'subnet' && (
-            <div key="subnet" role="tabpanel" className="panel-enter grid grid-cols-1 items-start gap-8 p-5 sm:p-8 lg:grid-cols-12">
-              <div className="lg:col-span-5">
-                <p className="text-[0.9375rem] leading-relaxed text-mist">
-                  Hitung blok network, netmask, rentang host, dan broadcast dari alamat IPv4 dengan prefix CIDR.
-                </p>
-
-                <label htmlFor="cidr-input" className="label mt-5">
-                  Alamat IP dengan prefix
-                </label>
-                <input
-                  id="cidr-input"
-                  type="text"
-                  inputMode="text"
-                  autoComplete="off"
-                  spellCheck={false}
-                  value={subnetInput}
-                  onChange={(e) => handleCalculateSubnet(e.target.value)}
-                  placeholder="192.168.10.0/26"
-                  className="field font-mono"
-                />
-
-                <p className="mt-4 mb-2 font-mono text-[0.6875rem] tracking-wider text-mist uppercase">
-                  Contoh cepat
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {PRESETS.map((preset) => (
+                {NODES.map((node) => {
+                  const Icon = node.icon
+                  const active = node.id === selectedId
+                  return (
                     <button
-                      key={preset}
+                      key={node.id}
                       type="button"
-                      onClick={() => handleCalculateSubnet(preset)}
-                      className="chip kbd-line cursor-pointer transition-colors hover:border-aqua/65 hover:text-aqua active:scale-[0.97]"
+                      onClick={() => setSelectedId(node.id)}
+                      aria-pressed={active}
+                      aria-label={node.label}
+                      className="group absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1"
+                      style={{ left: `${node.x}%`, top: `${node.y}%` }}
                     >
-                      {preset}
+                      <span
+                        className={`flex h-10 w-10 items-center justify-center rounded-[2px] border transition-transform duration-150 active:scale-[0.95] sm:h-11 sm:w-11 ${
+                          active
+                            ? 'scale-105 border-aqua bg-aqua text-deep'
+                            : 'border-aqua/30 bg-water text-aqua group-hover:border-aqua'
+                        }`}
+                      >
+                        <Icon size={18} aria-hidden="true" />
+                      </span>
+                      <span
+                        className={`hidden whitespace-nowrap font-mono text-[0.6875rem] leading-none sm:block ${
+                          active ? 'font-semibold text-white' : 'text-mist'
+                        }`}
+                      >
+                        {node.label}
+                      </span>
                     </button>
-                  ))}
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className="lg:col-span-5">
+              <div key={selected.id} className="specimen-inset panel-enter divide-y divide-aqua/12" aria-live="polite">
+                <div className="p-5">
+                  <p className="font-mono text-[0.6875rem] tracking-wider text-aqua uppercase">
+                    Spesifikasi Node
+                  </p>
+                  <h3 className="mt-1.5 text-3xl text-white">{selected.label}</h3>
+                </div>
+
+                <dl className="divide-y divide-aqua/10 text-sm">
+                  <div className="flex flex-col gap-1 px-5 py-3">
+                    <dt className="font-mono text-[0.6875rem] text-mist/80 uppercase">Peran</dt>
+                    <dd className="text-white">{selected.role}</dd>
+                  </div>
+                  <div className="flex flex-col gap-1 px-5 py-3">
+                    <dt className="font-mono text-[0.6875rem] text-mist/80 uppercase">Alamat contoh</dt>
+                    <dd className="kbd-line text-sand">{selected.addr}</dd>
+                  </div>
+                </dl>
+
+                <div className="p-5">
+                  <p className="text-[0.9375rem] leading-relaxed text-mist">{selected.note}</p>
+                  {selected.lab && (
+                    <a
+                      href="#labs"
+                      className="mt-3 inline-flex items-center gap-1.5 font-mono text-xs font-semibold text-aqua hover:text-white"
+                    >
+                      <span>Lihat Lab 0{selected.lab}</span>
+                      <ArrowUpRight size={13} aria-hidden="true" />
+                    </a>
+                  )}
                 </div>
               </div>
 
-              <div className="lg:col-span-7" aria-live="polite">
-                {subnetResult && !subnetResult.error ? (
-                  <div className="specimen-inset overflow-hidden">
-                    <div className="flex items-center justify-between border-b border-aqua/15 px-5 py-3.5">
-                      <span className="kbd-line text-base font-semibold text-white">
-                        {subnetResult.network}
-                        {subnetResult.cidr}
-                      </span>
-                      <span className="chip kbd-line text-aqua">{subnetResult.totalUsable} host</span>
-                    </div>
-
-                    <dl className="grid grid-cols-2 divide-x divide-y divide-aqua/10">
-                      {[
-                        ['Netmask', subnetResult.netmask],
-                        ['Wildcard', subnetResult.wildcard],
-                        ['Network', subnetResult.network],
-                        ['Broadcast', subnetResult.broadcast],
-                      ].map(([k, v]) => (
-                        <div key={k} className="p-4 sm:px-5">
-                          <dt className="font-mono text-[0.6875rem] text-mist/80 uppercase">{k}</dt>
-                          <dd className="kbd-line mt-1 text-[0.9375rem] text-white">{v}</dd>
-                        </div>
-                      ))}
-                    </dl>
-
-                    <div className="border-t border-aqua/15 px-5 py-4">
-                      <p className="font-mono text-[0.6875rem] text-mist/80 uppercase">
-                        Rentang host yang bisa dipakai
-                      </p>
-                      <p className="kbd-line mt-1 text-[0.9375rem] text-aqua">{subnetResult.usableRange}</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="rounded-[2px] border border-coral/50 bg-coral/10 p-5">
-                    <p className="font-semibold text-white">Format belum sesuai</p>
-                    <p className="mt-1 text-[0.9375rem] text-coral-text">
-                      {subnetResult?.error || 'Contoh yang valid: 192.168.1.0/24 atau 10.0.0.0/26'}
-                    </p>
-                  </div>
-                )}
-              </div>
+              <p className="mt-3 px-1 font-mono text-xs text-mist/80">
+                * Semua perangkat di diagram ini masih rancangan lab, belum berjalan.
+              </p>
             </div>
-          )}
-
-          {activeTab === 'cli' && (
-            <div key="cli" role="tabpanel" className="panel-enter flex h-[26rem] flex-col p-5 sm:p-7">
-              <div
-                ref={terminalBodyRef}
-                className="terminal-scroll kbd-line flex-1 space-y-2 overflow-y-auto pr-2 leading-relaxed"
-                tabIndex={0}
-                aria-label="Output terminal"
-              >
-                {terminalHistory.map((item, idx) => (
-                  <div key={idx}>
-                    {item.type === 'sys' && <p className="text-aqua">{item.text}</p>}
-                    {item.type === 'cmd' && (
-                      <p className="text-foam">
-                        <span className="text-kelp">siraj@fizhtank:~$</span> {item.text}
-                      </p>
-                    )}
-                    {item.type === 'out' && (
-                      <pre className="my-1 border-l border-aqua/25 pl-4 font-[inherit] whitespace-pre-wrap text-mist">
-                        {item.text}
-                      </pre>
-                    )}
-                    {item.type === 'err' && <p className="pl-4 text-coral-text">{item.text}</p>}
-                  </div>
-                ))}
-              </div>
-
-              <form onSubmit={handleRunCommand} className="mt-4 flex items-center gap-2 border-t border-aqua/15 pt-4">
-                <label htmlFor="cli-input" className="kbd-line shrink-0 text-kelp">
-                  siraj@fizhtank:~$
-                </label>
-                <input
-                  id="cli-input"
-                  type="text"
-                  value={cliInput}
-                  onChange={(e) => setCliInput(e.target.value)}
-                  autoComplete="off"
-                  autoCapitalize="none"
-                  autoCorrect="off"
-                  spellCheck={false}
-                  placeholder="ketik help"
-                  className="min-w-0 flex-1 bg-transparent font-mono text-base text-white placeholder:text-mist/60 focus:outline-none sm:text-sm"
-                />
-              </form>
-            </div>
-          )}
+          </div>
         </div>
       </div>
     </section>

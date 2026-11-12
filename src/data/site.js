@@ -34,12 +34,6 @@ export const site = {
   // Endpoint formulir kontak (Formspree)
   formspreeEndpoint: 'https://formspree.io/f/mrpegvge',
 
-  // Angka dekoratif untuk kartu info tank
-  aquarium: {
-    waterTemp: '25,4°C',
-    phLevel: '7,2',
-  },
-
   // Sertifikasi. Kartu hanya tampil jika 'name' terisi; jika kosong, roadmap bawaan dipakai.
   certifications: [
     {
