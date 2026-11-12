@@ -30,10 +30,100 @@ const OUTLINE = 'rgba(3, 22, 30, 0.7)'
 // Ikan selalu digambar tegak (tidak pernah terbalik): arah kiri/kanan lewat cermin horizontal,
 // naik/turun lewat kemiringan hidung.
 const pitchOf = (angle) => clamp(Math.atan2(Math.sin(angle), Math.abs(Math.cos(angle))), -1, 1) * 0.85
-const SURFACE_Y = 15
+const SURFACE_Y = 82
+
+const lerp = (a, b, t) => a + (b - a) * t
 
 // Tinggi permukaan pasir di posisi x (dipakai bersama oleh pasir, batu, tanaman, dan ikan dasar)
 const sandSurface = (x, top) => top + Math.sin(x * 0.006 + 1) * 6 + Math.sin(x * 0.017) * 3
+
+function drawBackdrop(ctx, w, h, ratio) {
+  const topR = Math.round(lerp(15, 2, ratio))
+  const topG = Math.round(lerp(116, 22, ratio))
+  const topB = Math.round(lerp(133, 34, ratio))
+
+  const midR = Math.round(lerp(9, 2, ratio))
+  const midG = Math.round(lerp(76, 17, ratio))
+  const midB = Math.round(lerp(94, 26, ratio))
+
+  const botR = Math.round(lerp(4, 1, ratio))
+  const botG = Math.round(lerp(44, 10, ratio))
+  const botB = Math.round(lerp(56, 16, ratio))
+
+  const bg = ctx.createLinearGradient(0, 0, 0, h)
+  bg.addColorStop(0, `rgb(${topR}, ${topG}, ${topB})`)
+  bg.addColorStop(0.45, `rgb(${midR}, ${midG}, ${midB})`)
+  bg.addColorStop(1, `rgb(${botR}, ${botG}, ${botB})`)
+  ctx.fillStyle = bg
+  ctx.fillRect(0, 0, w, h)
+
+  const glowAlpha = Math.max(0.04, 0.28 * (1 - ratio * 0.85))
+  const glow = ctx.createRadialGradient(w * 0.5, SURFACE_Y - ratio * 180, 10, w * 0.5, SURFACE_Y, w * 0.65)
+  glow.addColorStop(0, `rgba(130, 240, 235, ${glowAlpha.toFixed(3)})`)
+  glow.addColorStop(1, 'rgba(0, 0, 0, 0)')
+  ctx.fillStyle = glow
+  ctx.fillRect(0, 0, w, h)
+}
+
+function drawReefRidge(ctx, w, h, baseY, color, seedOffset, amp) {
+  if (baseY - amp > h + 20 || baseY + 260 < -20) return
+  ctx.beginPath()
+  ctx.moveTo(0, baseY + 260)
+  for (let x = 0; x <= w + 24; x += 24) {
+    const hVal =
+      Math.sin(x * 0.0042 + seedOffset) * amp * 0.6 +
+      Math.cos(x * 0.011 + seedOffset * 1.9) * amp * 0.4 +
+      Math.sin(x * 0.023 + seedOffset * 0.7) * (amp * 0.16)
+    ctx.lineTo(x, baseY + hVal)
+  }
+  ctx.lineTo(w, baseY + 260)
+  ctx.closePath()
+  ctx.fillStyle = color
+  ctx.fill()
+}
+
+function drawJellyfish(ctx, x, y, size, phase, alpha) {
+  const pulse = Math.sin(phase)
+  const w = size * (1 + pulse * 0.12)
+  const h = size * (0.72 - pulse * 0.08)
+
+  ctx.save()
+  ctx.translate(x, y)
+  ctx.globalAlpha = alpha
+
+  // Tentakel lembut
+  for (let i = -2; i <= 2; i++) {
+    const tx = i * (w * 0.16)
+    ctx.beginPath()
+    ctx.moveTo(tx, h * 0.15)
+    for (let s = 1; s <= 4; s++) {
+      const sy = h * 0.15 + s * (size * 0.34)
+      const sx = tx + Math.sin(phase - s * 0.8 + i) * (4 + s * 1.4)
+      ctx.lineTo(sx, sy)
+    }
+    ctx.strokeStyle = 'rgba(94, 234, 212, 0.38)'
+    ctx.lineWidth = Math.abs(i) === 0 ? 1.5 : 1
+    ctx.stroke()
+  }
+
+  // Kubah obor ubur-ubur
+  ctx.beginPath()
+  ctx.moveTo(-w * 0.52, h * 0.14)
+  ctx.bezierCurveTo(-w * 0.56, -h * 0.78, w * 0.56, -h * 0.78, w * 0.52, h * 0.14)
+  ctx.quadraticCurveTo(0, h * 0.28, -w * 0.52, h * 0.14)
+  ctx.closePath()
+  const bell = ctx.createRadialGradient(0, -h * 0.25, 2, 0, -h * 0.15, w * 0.58)
+  bell.addColorStop(0, 'rgba(167, 243, 238, 0.42)')
+  bell.addColorStop(0.65, 'rgba(94, 234, 212, 0.2)')
+  bell.addColorStop(1, 'rgba(20, 120, 130, 0.08)')
+  ctx.fillStyle = bell
+  ctx.strokeStyle = 'rgba(153, 246, 228, 0.45)'
+  ctx.lineWidth = 1.1
+  ctx.fill()
+  ctx.stroke()
+
+  ctx.restore()
+}
 
 // ── Gambar ikan (koordinat lokal, kepala menghadap +x) ─────────────────────
 
@@ -580,6 +670,7 @@ export default function AquariumCanvas() {
     let backPlants = []
     let frontPlants = []
     let motes = []
+    let jellies = []
     const bubbles = []
     const ripples = []
     let airTimer = 0
@@ -810,20 +901,33 @@ export default function AquariumCanvas() {
     }
 
     const buildMotes = () => {
-      const n = env.mobile ? 24 : 56
-      const depths = [0.25, 0.55, 0.92]
+      const n = env.mobile ? 26 : 64
+      const depths = [0.3, 0.65, 1.05]
       motes = Array.from({ length: n }, (_, idx) => {
         const depth = depths[idx % depths.length]
         return {
           x: rand(0, env.w),
           y: rand(0, env.h),
-          r: (0.65 + depth * 1.15) * rand(0.85, 1.25),
+          r: (0.8 + depth * 1.3) * rand(0.85, 1.25),
           vx: rand(-0.07, 0.07),
           vy: rand(-0.04, 0.05),
-          a: rand(0.14, 0.38) * (0.65 + depth * 0.5),
+          a: rand(0.18, 0.44) * (0.65 + depth * 0.45),
           depth,
         }
       })
+    }
+
+    const buildJellies = () => {
+      const count = env.mobile ? 2 : 3
+      jellies = Array.from({ length: count }, (_, idx) => ({
+        x: env.w * (idx === 0 ? 0.14 : idx === 1 ? 0.86 : 0.52),
+        baseY: env.h * (1.02 + idx * 0.26),
+        size: env.mobile ? 20 : 26 + idx * 5,
+        phase: rand(0, Math.PI * 2),
+        speed: rand(0.025, 0.038),
+        driftX: rand(-0.06, 0.06),
+        depth: 0.72 + idx * 0.14,
+      }))
     }
 
     const drawBlades = (list, t, shiftY = 0) => {
@@ -952,12 +1056,12 @@ export default function AquariumCanvas() {
     const drawSurface = (t, surfaceShiftY) => {
       const sy = SURFACE_Y + surfaceShiftY
       if (sy < -60) return
-      const g = ctx.createLinearGradient(0, surfaceShiftY, 0, surfaceShiftY + 52)
-      g.addColorStop(0, 'rgba(235, 255, 255, 0.42)')
-      g.addColorStop(0.35, 'rgba(170, 245, 240, 0.14)')
+      const g = ctx.createLinearGradient(0, sy - 24, 0, sy + 32)
+      g.addColorStop(0, 'rgba(235, 255, 255, 0.36)')
+      g.addColorStop(0.45, 'rgba(170, 245, 240, 0.14)')
       g.addColorStop(1, 'rgba(170, 245, 240, 0)')
       ctx.fillStyle = g
-      ctx.fillRect(0, surfaceShiftY, env.w, 52)
+      ctx.fillRect(0, sy - 24, env.w, 56)
 
       ctx.beginPath()
       for (let x = 0; x <= env.w + 8; x += 8) {
@@ -965,7 +1069,7 @@ export default function AquariumCanvas() {
         if (x === 0) ctx.moveTo(x, y)
         else ctx.lineTo(x, y)
       }
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)'
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.58)'
       ctx.lineWidth = 1.5
       ctx.stroke()
     }
@@ -1022,10 +1126,11 @@ export default function AquariumCanvas() {
       env.sandH = substrate.sandH
       env.airX = substrate.airX
       env.airY = substrate.airY
-      env.seabedTravel = env.sandH + Math.min(170, env.h * 0.22)
+      env.seabedTravel = env.sandH + Math.min(260, env.h * 0.34)
 
       buildPlants()
       buildMotes()
+      buildJellies()
       if (first) buildFish()
       else {
         ;[clown, tang, angel, leader].forEach((f) => {
@@ -1063,15 +1168,44 @@ export default function AquariumCanvas() {
       smoothScrollRatio += (targetScrollRatio - smoothScrollRatio) * follow
 
       const parallaxRatio = reduceMotion ? 0 : smoothScrollRatio
-      const camY = parallaxRatio * Math.min(480, env.h * 0.72)
+      const camY = parallaxRatio * Math.min(820, env.h * 1.15)
       const surfaceShiftY = -camY * 0.85
       const seabedShiftY = reduceMotion ? 0 : (1 - smoothScrollRatio) * env.seabedTravel
 
-      ctx.clearRect(0, 0, env.w, env.h)
+      drawBackdrop(ctx, env.w, env.h, smoothScrollRatio)
+      drawReefRidge(
+        ctx,
+        env.w,
+        env.h,
+        env.h * 0.84 - camY * 0.38,
+        'rgba(4, 38, 50, 0.55)',
+        0.5,
+        env.mobile ? 32 : 52
+      )
+      drawReefRidge(
+        ctx,
+        env.w,
+        env.h,
+        env.h * 0.96 - camY * 0.62,
+        'rgba(3, 28, 38, 0.72)',
+        2.1,
+        env.mobile ? 26 : 42
+      )
 
-      drawRays(now, camY, parallaxRatio)
-      drawMotes(dt, camY, parallaxRatio)
-      drawBlades(backPlants, now, seabedShiftY * 0.9)
+      drawRays(now, camY, smoothScrollRatio)
+      drawMotes(dt, camY, smoothScrollRatio)
+      drawBlades(backPlants, now, seabedShiftY * 0.85)
+
+      jellies.forEach((j) => {
+        j.phase += j.speed * dt
+        j.x += (j.driftX + Math.sin(j.phase * 0.5) * 0.08) * dt
+        if (j.x < 40) j.x = env.w - 40
+        if (j.x > env.w - 40) j.x = 40
+        const sy = j.baseY - camY * j.depth + Math.sin(j.phase * 0.6) * 14
+        if (sy > -80 && sy < env.h + 80) {
+          drawJellyfish(ctx, j.x, sy, j.size, j.phase, 0.35 + smoothScrollRatio * 0.35)
+        }
+      })
 
       if (env.sandTop + seabedShiftY < env.h + 4) {
         ctx.drawImage(substrate.canvas, 0, seabedShiftY, env.w, env.h)
@@ -1082,13 +1216,13 @@ export default function AquariumCanvas() {
       }
 
       angel.update(dt)
-      angel.draw(camY)
+      angel.draw(camY * 0.85)
       tang.update(dt)
-      tang.draw(camY)
+      tang.draw(camY * 0.95)
       clown.update(dt)
-      clown.draw(camY)
+      clown.draw(camY * 0.9)
       updateTetras(dt, now)
-      drawTetras(camY)
+      drawTetras(camY * 0.85)
 
       drawBlades(frontPlants, now, seabedShiftY)
       updateBubbles(dt, seabedShiftY, SURFACE_Y + surfaceShiftY)
@@ -1121,7 +1255,7 @@ export default function AquariumCanvas() {
       const ratio = Math.max(0, Math.min(1, window.scrollY / maxScroll))
       targetScrollRatio = ratio
       if (depthVeilRef.current) {
-        depthVeilRef.current.style.opacity = (ratio * 0.76).toFixed(3)
+        depthVeilRef.current.style.opacity = (ratio * 0.25).toFixed(3)
       }
     }
     const onScrollDepth = () => {
@@ -1157,11 +1291,7 @@ export default function AquariumCanvas() {
     <div
       ref={wrapRef}
       aria-hidden="true"
-      className="pointer-events-none fixed top-0 left-0 z-0 h-lvh w-full select-none overflow-hidden"
-      style={{
-        background:
-          'radial-gradient(ellipse 90% 45% at 50% 0%, rgba(130, 240, 235, 0.3), transparent 70%), linear-gradient(180deg, #0c6274 0%, #0a4c5e 30%, #063a4a 62%, #042a35 100%)',
-      }}
+      className="pointer-events-none fixed top-0 left-0 z-0 h-lvh w-full select-none overflow-hidden bg-deep"
     >
       <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
       {/* Lapisan kedalaman abisal saat user menyelam ke bagian bawah halaman */}
